@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		380EF26A1F96624C00250AB0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 380EF2691F96624C00250AB0 /* main.cpp */; };
+		380EF26A1F96624C00250AB0 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 380EF2691F96624C00250AB0 /* tests.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,10 @@
 
 /* Begin PBXFileReference section */
 		380EF2661F96624C00250AB0 /* kidney */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kidney; sourceTree = BUILT_PRODUCTS_DIR; };
-		380EF2691F96624C00250AB0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		380EF2691F96624C00250AB0 /* tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tests.cpp; sourceTree = "<group>"; };
+		380EF2721F9680A000250AB0 /* environment.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = environment.hpp; sourceTree = "<group>"; };
+		381430DB1F9FD92000A9FCF1 /* mcts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mcts.hpp; sourceTree = "<group>"; };
+		3875191D1F9EC55C00E609B2 /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +60,10 @@
 		380EF2681F96624C00250AB0 /* kidney */ = {
 			isa = PBXGroup;
 			children = (
-				380EF2691F96624C00250AB0 /* main.cpp */,
+				380EF2721F9680A000250AB0 /* environment.hpp */,
+				381430DB1F9FD92000A9FCF1 /* mcts.hpp */,
+				3875191D1F9EC55C00E609B2 /* solver.hpp */,
+				380EF2691F96624C00250AB0 /* tests.cpp */,
 			);
 			path = kidney;
 			sourceTree = "<group>";
@@ -118,7 +124,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				380EF26A1F96624C00250AB0 /* main.cpp in Sources */,
+				380EF26A1F96624C00250AB0 /* tests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +237,29 @@
 		380EF26E1F96624C00250AB0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				GCC_OPTIMIZATION_LEVEL = 1;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/include,
+					"/Users/vitorhadad/anaconda/include/range-v3/include",
+					/Library/gurobi751/mac64/include,
+					/Users/vitorhadad/anaconda/include,
+					/Users/vitorhadad/anaconda/include/python3.5m,
+					/usr/local/Cellar/sundials/2.7.0_2/include,
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					/Users/vitorhadad/anaconda/include/math,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/Library/gurobi751/mac64/lib,
+					/usr/local/Cellar/sundials/2.7.0_2/lib,
+					/Users/vitorhadad/anaconda/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lgurobi_c++",
+					"-lgurobi75",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -238,6 +267,29 @@
 		380EF26F1F96624C00250AB0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				GCC_OPTIMIZATION_LEVEL = 1;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/include,
+					"/Users/vitorhadad/anaconda/include/range-v3/include",
+					/Library/gurobi751/mac64/include,
+					/Users/vitorhadad/anaconda/include,
+					/Users/vitorhadad/anaconda/include/python3.5m,
+					/usr/local/Cellar/sundials/2.7.0_2/include,
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					/Users/vitorhadad/anaconda/include/math,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/Library/gurobi751/mac64/lib,
+					/usr/local/Cellar/sundials/2.7.0_2/lib,
+					/Users/vitorhadad/anaconda/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lgurobi_c++",
+					"-lgurobi75",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
