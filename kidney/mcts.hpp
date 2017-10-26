@@ -273,7 +273,6 @@ Solution MCTS::run(EnvGraph env,
     double reward = 0;
     int t = 0;
     while (t < env.T) {
-        std::cout << "Simulation: " << t << "\n";
         auto mcts = MCTS(env, t, sc, max_depth, num_sims);
         if (mcts.is_fully_expanded(0)) {
             t++; continue;
@@ -283,12 +282,12 @@ Solution MCTS::run(EnvGraph env,
         if (taken != null_token) {
             for (auto&v : taken) {
                 matched.insert(v);
-                std::cout << "Matching " <<  v << "\n";
                 env.match(v);
                 reward += 1;
             }
         } else {
             t++;
+            if (t % 10 == 0) std::cout << "Simulation: " << t << "\n";
         }
     }
     return Solution(reward, matched);

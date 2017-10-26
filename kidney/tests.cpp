@@ -7,9 +7,9 @@
 //////
 ////
 ////
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-//#include "solver.hpp"
+#include "solver.hpp"
 #include <iostream>
 #include "environment.hpp"
 #include "mcts.hpp"
@@ -77,6 +77,20 @@ TEST_CASE("Can donate") {
 
 
 TEST_CASE("Edges and cycles") {
+    EnvGraph g(5, .1, 10);
+    for (auto& v: g.nodes) {
+        std::cout << "Node id" << v.id;
+        std::cout << "  entry: " << v.entry;
+        std::cout << "  death: " << v.death;
+        std::cout << "  pat: " << v.patient;
+        std::cout << "  don: "   << v.donor;
+        std::cout << "  pra: "   << v.pra;
+        std::cout << "  out_edges: ";
+        for (auto &o: v.out_edges) {
+            std::cout << o << " ";
+        }
+        std::cout << "\n";
+    }
 }
 
 
@@ -229,17 +243,17 @@ TEST_CASE("is_fully_expanded", "MCTS") {
 
 
 
-TEST_CASE("run and objs", "MCTS") {
-    EnvGraph env(5, .1, 10);
-    Solution mcts_sol = MCTS::run(env, 0.7071, 100, 100);
-    std::cout << "MCTS obj: " << mcts_sol.obj << "\n";
-    Solution opt_sol = solve_optimally(env);
-    std::cout << "OPT obj: " << opt_sol.obj << "\n";
-    REQUIRE(mcts_sol.obj <= opt_sol.obj);
-    Solution greedy_sol = solve_greedily(env);
-    std::cout << "Greedy obj: " << greedy_sol.obj << "\n";
-    REQUIRE(greedy_sol.obj <= opt_sol.obj);
-}
+//TEST_CASE("run and objs", "MCTS") {
+//    EnvGraph env(5, .1, 100);
+//    Solution mcts_sol = MCTS::run(env, 0.7071, 100, 100);
+//    std::cout << "MCTS obj: " << mcts_sol.obj << "\n";
+//    Solution opt_sol = solve_optimally(env);
+//    std::cout << "OPT obj: " << opt_sol.obj << "\n";
+//    REQUIRE(mcts_sol.obj <= opt_sol.obj);
+//    Solution greedy_sol = solve_greedily(env);
+//    std::cout << "Greedy obj: " << greedy_sol.obj << "\n";
+//    REQUIRE(greedy_sol.obj <= opt_sol.obj);
+//}
 
 
 

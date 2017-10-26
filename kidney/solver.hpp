@@ -10,6 +10,7 @@
 #define solver_h
 
 #include <gurobi_c++.h>
+#include <set>
 #include <memory>
 
 

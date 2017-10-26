@@ -125,10 +125,10 @@ bool EnvGraph::can_donate(EnvNode& from, EnvNode& to) {
     if (!contemporaneous) return false;
     bool hist_compat = from.pra < get_unif();
     if (!hist_compat) return false;
-    bool blood_compat = (from.patient == to.donor) or
+    bool blood_compat = (from.donor == to.patient) or
                         (to.patient == 3) or
                         (from.donor == 0);
-    if (!blood_compat)return false;
+    if (!blood_compat) return false;
     return true;
 };
 
@@ -166,17 +166,13 @@ std::vector<cycle> EnvGraph::get_two_cycles() const{
 
 
 
-
-
-
-
 std::vector<cycle> EnvGraph::get_two_cycles(int t) const {
     std::vector<cycle> two_cycles;
     auto pred = [t](const EnvNode& a, const EnvNode& b){
         return  (!a.matched) and (!b.matched) and
                 (a.id < b.id) and
                 (a.entry <= t and a.death >= t) and
-                (b.entry <= t and b.death > t) and
+                (b.entry <= t and b.death >= t) and
                 (std::find(a.out_edges.begin(), a.out_edges.end(), b.id) != a.out_edges.end()) and
                 (std::find(b.out_edges.begin(), b.out_edges.end(), a.id) != b.out_edges.end()); };
     
