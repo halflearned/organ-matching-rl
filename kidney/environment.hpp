@@ -70,7 +70,8 @@ private:
     std::discrete_distribution<int> dist_pra_type {.7019, 0.2, 0.0981};
     std::uniform_real_distribution<double> dist_unif{0.0, 1.0};
     
-    std::default_random_engine rng;
+    std::default_random_engine rng{std::random_device{}()};
+    //std::default_random_engine rng;
     int get_n_entries() { return dist_n_entries(rng); };
     int get_sojourn() { return dist_sojourn(rng) + 1; };
     int get_blood_type() { return dist_blood_type(rng); };
@@ -196,10 +197,10 @@ Solution solve_optimally(const EnvGraph& g) {
 }
 
 
-Solution solve_greedily(EnvGraph g) { // Must copy graph
+Solution solve_greedily(EnvGraph g, int T) {
     double obj = 0;
     std::set<unsigned long> chosen;
-    for (int t = 0; t < g.T; ++t) {
+    for (int t = 0; t < T; ++t) {
         auto cs = g.get_two_cycles(t);
         auto n = g.nodes.size();
         auto solver = Solver(cs, n);
@@ -213,6 +214,10 @@ Solution solve_greedily(EnvGraph g) { // Must copy graph
     return Solution(obj, chosen);
 }
 
+
+Solution solve_greedily(EnvGraph g) {
+    return solve_greedily(g, g.T);
+}
 
 
 

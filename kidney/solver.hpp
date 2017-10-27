@@ -63,6 +63,8 @@ Solution Solver::solve() {
     GRBEnv grbenv = GRBEnv();
     GRBModel model = GRBModel(grbenv);
     model.set(GRB_IntParam_OutputFlag, false);
+    model.set(GRB_IntParam_LogToConsole, false);
+    model.set(GRB_StringParam_LogFile, "");
     std::vector<GRBVar> cycle_variables(cs.size());
     std::vector<GRBLinExpr> vertex_constraints(num_vertices);
     GRBLinExpr obj;

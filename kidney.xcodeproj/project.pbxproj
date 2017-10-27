@@ -298,6 +298,7 @@
 					/usr/local/Cellar/sundials/2.7.0_2/lib,
 					/Users/vitorhadad/anaconda/lib,
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-lgurobi_c++",
 					"-lgurobi75",
