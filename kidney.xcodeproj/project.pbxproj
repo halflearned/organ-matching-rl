@@ -8,11 +8,26 @@
 
 /* Begin PBXBuildFile section */
 		380EF26A1F96624C00250AB0 /* tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 380EF2691F96624C00250AB0 /* tests.cpp */; };
-		3872CA0B1FA27B8D00218813 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3872CA0A1FA27B8D00218813 /* main.cpp */; };
+		3817FF661FB205930059A8B8 /* make_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF651FB205930059A8B8 /* make_data.cpp */; };
+		3817FF721FB20A460059A8B8 /* make_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF651FB205930059A8B8 /* make_data.cpp */; };
+		3817FF731FB20B760059A8B8 /* nn.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF6A1FB206F60059A8B8 /* nn.hpp */; };
+		3817FF741FB20B760059A8B8 /* solver.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF6C1FB2070F0059A8B8 /* solver.hpp */; };
+		3817FF751FB20B760059A8B8 /* mcts.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF6D1FB2070F0059A8B8 /* mcts.hpp */; };
+		3817FF761FB20B760059A8B8 /* environment.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 3817FF6F1FB207480059A8B8 /* environment.hpp */; };
+		3872CA0B1FA27B8D00218813 /* mcts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3872CA0A1FA27B8D00218813 /* mcts.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		380EF2641F96624C00250AB0 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		3817FF611FB205930059A8B8 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -26,14 +41,24 @@
 /* Begin PBXFileReference section */
 		380EF2661F96624C00250AB0 /* kidney */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kidney; sourceTree = BUILT_PRODUCTS_DIR; };
 		380EF2691F96624C00250AB0 /* tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tests.cpp; sourceTree = "<group>"; };
-		380EF2721F9680A000250AB0 /* environment.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = environment.hpp; sourceTree = "<group>"; };
-		381430DB1F9FD92000A9FCF1 /* mcts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = mcts.hpp; sourceTree = "<group>"; };
-		3872CA0A1FA27B8D00218813 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		3875191D1F9EC55C00E609B2 /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = solver.hpp; sourceTree = "<group>"; };
+		3817FF631FB205930059A8B8 /* policy */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = policy; sourceTree = BUILT_PRODUCTS_DIR; };
+		3817FF651FB205930059A8B8 /* make_data.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = make_data.cpp; sourceTree = "<group>"; };
+		3817FF6A1FB206F60059A8B8 /* nn.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = nn.hpp; path = kidney/nn.hpp; sourceTree = "<group>"; };
+		3817FF6C1FB2070F0059A8B8 /* solver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = solver.hpp; path = kidney/solver.hpp; sourceTree = "<group>"; };
+		3817FF6D1FB2070F0059A8B8 /* mcts.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = mcts.hpp; path = kidney/mcts.hpp; sourceTree = "<group>"; };
+		3817FF6F1FB207480059A8B8 /* environment.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = environment.hpp; path = kidney/environment.hpp; sourceTree = "<group>"; };
+		3872CA0A1FA27B8D00218813 /* mcts.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mcts.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		380EF2631F96624C00250AB0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3817FF601FB205930059A8B8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,7 +71,12 @@
 		380EF25D1F96624C00250AB0 = {
 			isa = PBXGroup;
 			children = (
+				3817FF6A1FB206F60059A8B8 /* nn.hpp */,
+				3817FF6C1FB2070F0059A8B8 /* solver.hpp */,
+				3817FF6D1FB2070F0059A8B8 /* mcts.hpp */,
+				3817FF6F1FB207480059A8B8 /* environment.hpp */,
 				380EF2681F96624C00250AB0 /* kidney */,
+				3817FF641FB205930059A8B8 /* policy */,
 				380EF2671F96624C00250AB0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -55,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				380EF2661F96624C00250AB0 /* kidney */,
+				3817FF631FB205930059A8B8 /* policy */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,12 +94,17 @@
 			isa = PBXGroup;
 			children = (
 				380EF2691F96624C00250AB0 /* tests.cpp */,
-				3875191D1F9EC55C00E609B2 /* solver.hpp */,
-				381430DB1F9FD92000A9FCF1 /* mcts.hpp */,
-				380EF2721F9680A000250AB0 /* environment.hpp */,
-				3872CA0A1FA27B8D00218813 /* main.cpp */,
+				3872CA0A1FA27B8D00218813 /* mcts.cpp */,
 			);
 			path = kidney;
+			sourceTree = "<group>";
+		};
+		3817FF641FB205930059A8B8 /* policy */ = {
+			isa = PBXGroup;
+			children = (
+				3817FF651FB205930059A8B8 /* make_data.cpp */,
+			);
+			path = policy;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -91,6 +127,23 @@
 			productReference = 380EF2661F96624C00250AB0 /* kidney */;
 			productType = "com.apple.product-type.tool";
 		};
+		3817FF621FB205930059A8B8 /* policy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3817FF671FB205930059A8B8 /* Build configuration list for PBXNativeTarget "policy" */;
+			buildPhases = (
+				3817FF5F1FB205930059A8B8 /* Sources */,
+				3817FF601FB205930059A8B8 /* Frameworks */,
+				3817FF611FB205930059A8B8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = policy;
+			productName = policy;
+			productReference = 3817FF631FB205930059A8B8 /* policy */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -101,6 +154,9 @@
 				ORGANIZATIONNAME = halflearned;
 				TargetAttributes = {
 					380EF2651F96624C00250AB0 = {
+						CreatedOnToolsVersion = 9.0;
+					};
+					3817FF621FB205930059A8B8 = {
 						CreatedOnToolsVersion = 9.0;
 					};
 				};
@@ -118,6 +174,7 @@
 			projectRoot = "";
 			targets = (
 				380EF2651F96624C00250AB0 /* kidney */,
+				3817FF621FB205930059A8B8 /* policy */,
 			);
 		};
 /* End PBXProject section */
@@ -127,8 +184,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3872CA0B1FA27B8D00218813 /* main.cpp in Sources */,
+				3872CA0B1FA27B8D00218813 /* mcts.cpp in Sources */,
+				3817FF721FB20A460059A8B8 /* make_data.cpp in Sources */,
 				380EF26A1F96624C00250AB0 /* tests.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3817FF5F1FB205930059A8B8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3817FF731FB20B760059A8B8 /* nn.hpp in Sources */,
+				3817FF741FB20B760059A8B8 /* solver.hpp in Sources */,
+				3817FF751FB20B760059A8B8 /* mcts.hpp in Sources */,
+				3817FF761FB20B760059A8B8 /* environment.hpp in Sources */,
+				3817FF661FB205930059A8B8 /* make_data.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,7 +211,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -169,6 +239,10 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					make_data.cpp,
+					tests.cpp,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -183,9 +257,32 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/include,
+					/Library/gurobi751/mac64/include,
+					/Users/vitorhadad/anaconda/include,
+					/Users/vitorhadad/anaconda/include/python3.5m,
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					"/Users/vitorhadad/anaconda/include/range-v3/include",
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					/Users/vitorhadad/anaconda/include/math,
+					/usr/local/Cellar/armadillo/8.200.2/include/,
+					"/Users/vitorhadad/Documents/Cpp/tiny-dnn",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/Library/gurobi751/mac64/lib,
+					/usr/local/Cellar/sundials/2.7.0_2/lib,
+					/Users/vitorhadad/anaconda/lib,
+					/usr/local/Cellar/armadillo/8.200.2/lib/,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lgurobi_c++",
+					"-lgurobi75",
+				);
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -196,7 +293,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -224,6 +321,10 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					make_data.cpp,
+					tests.cpp,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -232,8 +333,31 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/include,
+					/Library/gurobi751/mac64/include,
+					/Users/vitorhadad/anaconda/include,
+					/Users/vitorhadad/anaconda/include/python3.5m,
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					"/Users/vitorhadad/anaconda/include/range-v3/include",
+					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
+					/Users/vitorhadad/anaconda/include/math,
+					/usr/local/Cellar/armadillo/8.200.2/include/,
+					"/Users/vitorhadad/Documents/Cpp/tiny-dnn",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/Library/gurobi751/mac64/lib,
+					/usr/local/Cellar/sundials/2.7.0_2/lib,
+					/Users/vitorhadad/anaconda/lib,
+					/usr/local/Cellar/armadillo/8.200.2/lib/,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = (
+					"-lgurobi_c++",
+					"-lgurobi75",
+				);
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -244,9 +368,12 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
-				EXCLUDED_SOURCE_FILE_NAMES = tests.cpp;
-				GCC_FAST_MATH = YES;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					tests.cpp,
+					make_data.cpp,
+				);
+				GCC_FAST_MATH = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_THREADSAFE_STATICS = NO;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.64.0_1/include,
@@ -257,12 +384,15 @@
 					/usr/local/Cellar/sundials/2.7.0_2/include,
 					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
 					/Users/vitorhadad/anaconda/include/math,
+					/usr/local/Cellar/armadillo/8.200.2/include/,
+					"/Users/vitorhadad/Documents/Cpp/tiny-dnn",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.64.0_1/lib,
 					/Library/gurobi751/mac64/lib,
 					/usr/local/Cellar/sundials/2.7.0_2/lib,
 					/Users/vitorhadad/anaconda/lib,
+					/usr/local/Cellar/armadillo/8.200.2/lib/,
 				);
 				OTHER_LDFLAGS = (
 					"-lgurobi_c++",
@@ -278,9 +408,12 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_USE_OPTIMIZATION_PROFILE = NO;
-				EXCLUDED_SOURCE_FILE_NAMES = tests.cpp;
-				GCC_FAST_MATH = YES;
-				GCC_OPTIMIZATION_LEVEL = fast;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					tests.cpp,
+					make_data.cpp,
+				);
+				GCC_FAST_MATH = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_THREADSAFE_STATICS = NO;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.64.0_1/include,
@@ -291,18 +424,37 @@
 					/usr/local/Cellar/sundials/2.7.0_2/include,
 					/usr/local/Cellar/eigen/3.3.4/include/eigen3,
 					/Users/vitorhadad/anaconda/include/math,
+					/usr/local/Cellar/armadillo/8.200.2/include/,
+					"/Users/vitorhadad/Documents/Cpp/tiny-dnn",
 				);
 				LIBRARY_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.64.0_1/lib,
 					/Library/gurobi751/mac64/lib,
 					/usr/local/Cellar/sundials/2.7.0_2/lib,
 					/Users/vitorhadad/anaconda/lib,
+					/usr/local/Cellar/armadillo/8.200.2/lib/,
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-lgurobi_c++",
 					"-lgurobi75",
 				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		3817FF681FB205930059A8B8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXCLUDED_SOURCE_FILE_NAMES = tests.cpp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		3817FF691FB205930059A8B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXCLUDED_SOURCE_FILE_NAMES = tests.cpp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -324,6 +476,15 @@
 			buildConfigurations = (
 				380EF26E1F96624C00250AB0 /* Debug */,
 				380EF26F1F96624C00250AB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3817FF671FB205930059A8B8 /* Build configuration list for PBXNativeTarget "policy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3817FF681FB205930059A8B8 /* Debug */,
+				3817FF691FB205930059A8B8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
