@@ -262,7 +262,7 @@ class MCTS:
             raise NotImplementedError("Unknown adversary!")
         
         
-        r = 0#node.latent_reward
+        r = 0
         for t in range(t_init, T):
             actions = get_actions(env, t)
             while len(actions) > 0:
@@ -274,7 +274,7 @@ class MCTS:
                 else:
                     break
                 
-        reward = float(r > adv_obj*0.95)
+        reward = float(r > adv_obj*0.85)
         return reward
     
     
@@ -351,18 +351,13 @@ if __name__ == "__main__":
         time_length = 100
         gcn_size = 5
         num_layers = 5 
-    
-    if len(argv) < 6:
-        gcn_size, num_layers = 10, 1#choice([(100, 10), (10, 10), 
-                               #    (10, 1), (10, 3), 
-                               #    (10, 5), (50, 1), 
-                               #    (50, 5), (5, 1),
-                               #    (5,3), (5,5)])
-    else:
-        gcn_size = argv[6]
-        num_layers = argv[7]
         
-  
+        
+    gcn_size, num_layers = choice([(100, 10), (10, 10), 
+                                   (10, 1), (10, 3), 
+                                   (10, 5), (50, 1), 
+                                   (50, 5), (5, 1),
+                                   (5,3), (5,5)])
                 
     policy_path = "results/policy_{}_{}.pkl".format(gcn_size, num_layers)
     net = pickle.load(file = open(policy_path, "rb"))["net"]
@@ -371,13 +366,13 @@ if __name__ == "__main__":
     opt = None
     g   = None
    
-    while True:
+    for i in range(1):
         
         seed = clock_seed()
         
         for use_priors in [True]:
         
-            name = "66892704" #str(seed)        
+            name = str(seed)        
         
             env = SaidmanKidneyExchange(entry_rate  = er,
                                         death_rate  = dr,
@@ -453,5 +448,5 @@ if __name__ == "__main__":
     
             with open("results/mcts_with_policy_results.txt", "a") as f:
                 s = ",".join([str(s) for s in results])
-                f.write(s + "\n")
+                f.print(s + "\n")
             

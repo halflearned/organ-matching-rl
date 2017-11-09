@@ -96,7 +96,7 @@ while True:
                          "gcn_size": net.gcn_size,
                          "dropout_prob": net.dropout_prob,
                          "horizon": horizon},
-                        file = open("value_function_gcn_{}_{}_{}.pkl"\
+                        file = open("results/value_function_gcn_{}_{}_{}.pkl"\
                                    .format(gcn_size, num_layers, horizon), "wb"))
         
     k += 1

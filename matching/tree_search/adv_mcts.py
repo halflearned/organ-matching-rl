@@ -17,10 +17,24 @@ import numpy as np
 from random import choice, shuffle
 from time import time	
 import multiprocessing as mp
-import pickle
+
+from matching.environment.saidman_environment import SaidmanKidneyExchange
+from matching.solver.kidney_solver import KidneySolver
 
 def clock_seed():
     return int(str(int(time()*1e8))[10:])    
+
+
+# Slightly faster
+def two_cycles(env, t):
+    nodes = list(env.get_living(t))
+    cycles = []
+    for i, u in enumerate(nodes):
+        for w in nodes[i:]:
+            if env.has_edge(u,w) and env.has_edge(w,u):
+                cycles.append((u,w))
+    return cycles
+
 
 
 class Node():
@@ -60,12 +74,11 @@ class Node():
         
         
     def get_actions(self):
-        living = set(self.env.get_living(self.t)) - self.matched
-        cycles = self.env.generate_cycles(self.mcl, living)
-        actions = list(map(tuple, list(cycles)))
+        cycles = two_cycles(self.env, self.t) 
+        actions = list(map(tuple, cycles))
         actions.append(None)
         shuffle(actions)
-        return set(actions)
+        return actions
     
     
     def is_fully_expanded(self):
@@ -99,8 +112,7 @@ class MCTS:
                  iterations = 100,
                  scalar = 1/np.sqrt(2),
                  use_parallel_rollout = True,
-                 n_parallel_rollouts = 10,
-                 value_function = None):
+                 n_parallel_rollouts = 10):
         
         self.env = deepcopy(env)
         self.iterations = iterations
@@ -115,13 +127,10 @@ class MCTS:
         self.scalar = scalar
         self.use_prl = True
         self.n_prl = n_parallel_rollouts 
-        self.value_function = value_function or (lambda env,t: None)
-    
-        
-    def backup(self, node, reward):
-        
+
+
+    def backup(self, node, reward): 
     	while node != None:
-    	
             node.visits += 1
             node.reward += reward
             node = node.parent
@@ -212,9 +221,6 @@ class MCTS:
                 r += len(a)
             
         reward = r - g_obj
-        
-        v = self.value_function(env, t)
-        if v is not None: reward = (reward + v)/2 
 
         return reward
             
@@ -257,12 +263,6 @@ class MCTS:
         
     
         
-    def hallucinate(self, t, horizon = 1):
-        self.env.populate(t_begin = t,
-                          t_end = t + horizon,
-                          seed = clock_seed())
-    
-    
     
 
     
@@ -278,16 +278,11 @@ def two_cycles(env, t):
 
 
 
-#def get_value_function(f):
-#
-#    return vf
     
     
 if __name__ == "__main__":
     
     
-    from saidman_environment import SaidmanKidneyExchange
-    from kidney_solver import KidneySolver
     from collections import defaultdict
     from itertools import chain
     from sys import argv
@@ -307,28 +302,21 @@ if __name__ == "__main__":
     else:
         er =  5
         dr =  .1
-        mxd = 22
-        hor = 22
+        mxd = 6
+        hor = 4
         scl = .2
-        its = 5
-        prl = 10
+        its = 20
+        prl = 1
         
         
-    time_length = 50
+    time_length = 100
     
-    
-    #vf = get_value_function("value_function_gcn_95286116.pkl")
-    f = "value_function_gcn_95286116.pkl"
-    p = pickle.load(open(f, "rb"))
-    net = p["net"]
-    def vf(env, t):
-        return net.forward(env.A(t), env.X(t)).data.numpy()
     
     for _ in range(1):
         
         seed = clock_seed()
         
-        name = str(seed)
+        name = "66892704" #str(seed)
     
         env = SaidmanKidneyExchange(entry_rate  = er,
                                     death_rate  = dr,
@@ -340,12 +328,12 @@ if __name__ == "__main__":
             
         t = 0
         while t < env.time_length:
+            print(t)
             mc = MCTS(env, t,
                       max_depth = mxd, 
                       horizon = hor,
                       scalar = scl,
-                      iterations = its,
-                      value_function = vf)
+                      iterations = its)
             
             a = mc.search()
             if a is not None:
