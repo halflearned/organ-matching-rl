@@ -95,14 +95,18 @@ def get_additional_regressors(env, t):
 def merge_data(*variables,
                path = "data/"):
     files = listdir(path)
-    data = []
+    data = defaultdict(list)
     for f in files:
-        if f.startswith("data_with") and f.endswith(".pkl"):     
+        if f.startswith("data_with") and f.endswith(".pkl"): 
             try:
-                # if d["max_cycle_length"]  == 2])
-                data.append(pickle.load(open(path + f, "rb")))
+                pkl = pickle.load(open(path + f, "rb"))
+                for dt in pkl:
+                    for v in variables:
+                        data[v].append(dt[v])
+                        
             except EOFError:
-                print("Could not open: ", f);
+                    print("Could not open: ", f);
+                
     return data
 
     

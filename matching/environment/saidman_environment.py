@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -54,23 +56,45 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
                         populate=populate)
         
         
-    
+        
+        
     def populate(self, t_begin = None, t_end = None, seed = None):
         
-        t_begin = t_begin or 0
-        t_end = t_end or self.time_length
-        seed = seed or self.seed
+        if t_begin is None:
+            t_begin = 0
+        if t_end is None:
+            t_end = self.time_length
+        np.random.seed(seed)        
         
-        np.random.seed(seed)
-    
         self.erase_from(t_begin)
-        i_cur = self.number_of_nodes()
+        n_cur = self.number_of_nodes()
         
+        nodefts = self.draw_node_features(t_begin, t_end)
+        new_ids = tuple(range(n_cur, n_cur + len(nodefts)))
+        self.add_nodes_from(zip(new_ids, nodefts))
+        #import pdb; pdb.set_trace()
+            
+        old_ids = tuple(range(n_cur))
+        
+        oldnew_edges = self.draw_edges(old_ids, new_ids)
+        self.add_edges_from(oldnew_edges, weight = 1)
+        
+        newold_edges = self.draw_edges(new_ids, old_ids)
+        self.add_edges_from(newold_edges, weight = 1)
+        
+        newnew_edges = self.draw_edges(new_ids, new_ids)
+        self.add_edges_from(newnew_edges, weight = 1)
+        
+        
+        
+    
+    def draw_node_features(self, t_begin, t_end):
         duration = t_end - t_begin
-        n_today = np.random.poisson(self.entry_rate, size = duration)
-        n = np.sum(n_today)
-        
-        entries = np.repeat(np.arange(t_begin, t_end), n_today)
+        n_periods = np.random.poisson(self.entry_rate, size = duration)
+        n = np.sum(n_periods)
+        labels = ["entry", "death", "p_blood",
+                  "d_blood", "is_female", "pra"]
+        entries = np.repeat(np.arange(t_begin, t_end), n_periods)
         sojourns = np.random.geometric(self.death_rate, n)
         deaths = entries + sojourns
         p_blood = draw(self.blood_freq, n)
@@ -79,43 +103,48 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         pra = np.random.choice(list(self.cm_prob.values()),
                                p = list(self.pra_freq.values()),
                                size = n)
+        return [dict(zip(labels, feats)) for feats in zip(entries,
+                                                        deaths,
+                                                        p_blood,
+                                                        d_blood,
+                                                        is_female,
+                                                        pra)]
         
-        for i in range(n):
-            self.add_node(i + i_cur,
-                          entry = entries[i],
-                          death = deaths[i],
-                          p_blood = p_blood[i],
-                          d_blood = d_blood[i],
-                          is_female = is_female[i],
-                          pra = pra[i])
+      
+        
+            
+    def draw_edges(self, source_nodes, target_nodes):
+        edges = []
+        for s in source_nodes:
+            for t in target_nodes:
+                
+                if s == t:
+                    continue
+                
+                s_data = self.node[s]
+                hist_comp = np.random.uniform() > s_data["pra"] 
+                if not hist_comp:
+                    continue
+                
+                t_data = self.node[t]
+                time_comp = s_data["entry"] <= t_data["death"] and \
+                            s_data["death"] >= t_data["entry"]
+                if not time_comp:
+                    continue
+                
+                blood_comp = s_data["d_blood"] == 0 or \
+                             t_data["p_blood"] == 3 or \
+                             s_data["d_blood"] == t_data["p_blood"]
+                if not blood_comp:
+                    continue
+                
+                edges.append((s, t))
+                
+        return edges
             
         
-        pra_compatible = np.random.uniform(size = (n, n)) < pra 
-        pra_compatible[np.arange(n), np.arange(n)] = False
-        contemporaneous = self.is_contemporaneous(entries, deaths)  
-        blood_compatible = self.is_blood_compatible(d_blood, p_blood)
-
-        compatible = np.argwhere(pra_compatible & \
-                                 contemporaneous & \
-                                 blood_compatible)
-        
-        self.add_edges_from(i_cur + compatible, weight = 1)
-        
-        
-    @staticmethod
-    def is_contemporaneous(entries, deaths):
-        return (entries.reshape(-1, 1) <= deaths.flatten()) & \
-                (deaths.reshape(-1, 1) >= entries.flatten())
         
 
-    @staticmethod
-    def is_blood_compatible(d_blood, p_blood):
-        d_blood = np.array(d_blood).reshape(-1, 1)
-        p_blood = np.array(p_blood).reshape(1, -1)
-        return (d_blood == p_blood) | (p_blood == 3) | (d_blood == 0)
-
-        
-        
     def X(self, t, dtype = "numpy"):
         
         nodelist = self.get_living(t, indices_only = False)
@@ -158,21 +187,10 @@ if __name__ == "__main__":
     
     env = SaidmanKidneyExchange(entry_rate  = 5,
                                 death_rate  = 0.1,
-                                time_length = 20)
+                                time_length = 100)
 
     A, X = env.A(3), env.X(3)
-    
-        
-#    g = env.generate_cycles(2)
-#    cycles = list(g)
-#    
-#    
-#    g = env.generate_cycles(3)
-#    cycles = list(g)
-    
-    
-    g = env.generate_cycles(2, env.get_living(0))
-    cycles = list(g)
+
         
         
         

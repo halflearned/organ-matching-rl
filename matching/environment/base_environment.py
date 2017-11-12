@@ -162,25 +162,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         return relabeled_env
             
         
-        
-        
-    #     
-    # def generate_cycles(self, max_cycle_length, nodelist = None):
-    #     g = nx.subgraph(self, nodelist)
-    #     labels_to_trimble = {n:i for i,n in enumerate(g.nodes())}
-    #     labels_from_trimble = {i:n for i,n in enumerate(g.nodes())}
-    #     g_relab = nx.relabel_nodes(g, labels_to_trimble)
-    #     g_trimble = self.to_trimble_digraph(g_relab)
-    #     cycles = g_trimble.generate_cycles(max_cycle_length)
-    #     
-    #     for c in cycles:
-    #         try:
-    #             c_relab = [labels_from_trimble[v.id] for v in c]
-    #             yield c_relab
-    #         except KeyError:
-    #             import pdb; pdb.set_trace()
-    # 
-    # 
+    
     
     def to_trimble_digraph(self, g, weight = "weight"):
         vtx_count = g.number_of_nodes()

@@ -396,7 +396,7 @@ if __name__ == "__main__":
                 while time() < t_end:                  
                     mc.run()
                     iters += 1
-                    a = mc.choose()
+                a = mc.choose()
             else:
                 a = mc.root.actions[0]
             
