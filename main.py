@@ -11,7 +11,6 @@ MCTS with policy function
 import numpy as np
 
 from matching.solver.kidney_solver2 import  optimal, greedy
-from matching.utils.data_utils import clock_seed
 import matching.tree_search.mcts_with_opt_rollout as mcts
 
     
@@ -36,13 +35,13 @@ time_length = 250
     
 for seed in range(1, 1000):
     
-    if platform != "darwin":
-        scl = .5
+    if platform == "darwin":
+        scl = 1
         tpa = 5
         t_horiz = 3
-        r_horiz = 3
+        r_horiz = 10
         n_rolls = 1
-        net = "MLP_None_10_637319.pkl"
+        net_file = None
         burnin = 100
         
     else:
@@ -54,7 +53,7 @@ for seed in range(1, 1000):
         t_horiz = choice([2, 5, 10])
         r_horiz = choice([1, 10, 22, 45])
         n_rolls = np.random.randint(1, 8)
-        net_file = choice(net_files)
+        net_file = None
         burnin = 100
 
     print("USING:")
@@ -68,19 +67,17 @@ for seed in range(1, 1000):
 
     config = (scl, tpa, n_rolls, t_horiz, r_horiz, net_file)
 
-    if net is not None:
+    if net_file is not None:
         net = torch.load("results/" + net_file)
-      
+    else:
+        net= None
     
- 
     opt = None
     g   = None
-
-    seed = clock_seed()
-#%%
+    
     name = str(seed)        
 
-    env = OPTNKidneyExchange(entry_rate  = er,
+    env = SaidmanKidneyExchange(entry_rate  = er,
             death_rate  = dr,
             time_length = time_length,
             seed = seed,
@@ -137,8 +134,8 @@ for seed in range(1, 1000):
         if a is not None:
             
             print("Staying at t.")
-            assert a[0] not in env.removed_container[t]
-            assert a[1] not in env.removed_container[t]
+            assert a[0] not in env.removed(t)
+            assert a[1] not in env.removed(t)
             env.removed_container[t].update(a)
             matched[t].extend(a)
             rewards += len(a)
