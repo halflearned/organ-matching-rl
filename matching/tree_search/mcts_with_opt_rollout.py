@@ -19,7 +19,7 @@ from itertools import chain
 
 from matching.solver.kidney_solver2 import  optimal, greedy
 from matching.utils.data_utils import get_additional_regressors, clock_seed
-from matching.utils.env_utils import get_actions, snapshot
+from matching.utils.env_utils import get_actions, snapshot, remove_taken
 
 
 
@@ -52,7 +52,7 @@ class Node:
         return self.expandable.pop()
     
         
-    def update(self,reward):
+    def update(self, reward):
         self.reward += reward
         self.visits += 1
     
@@ -83,6 +83,8 @@ def run(root,
         n_rollouts,
         net = None):
     
+    if len(root.env.nodes()) == 0:    
+        import pdb; pdb.set_trace()
     node = tree_policy(root,
                        root.t + tree_horizon,
                        net,
@@ -206,26 +208,26 @@ def choose(root):
 
     
 def parallel_rollout(node, horizon, n):   
-    try:
-        prcs = mp.cpu_count() 
-        with mp.Pool(processes = prcs) as pool:             
-            results = [pool.apply_async(rollout,
-                            args = (node.parent.env,
-                                    node.t,
-                                    node.t + horizon, 
-                                    node.taken))
-                        for i in range(n)]
-            res = [r.get() for r in results]
-    
-    except Exception:
-        print("Error during parallel rollout. Fallback on regular loop.")
-        res = []
-        for i in range(n):
-            #env = deepcopy(node.parent.env)
-            res.append(rollout(node.parent.env,
-                               node.t,
-                               node.t + horizon,
-                               node.taken))
+#    try:
+#        prcs = mp.cpu_count() 
+#        with mp.Pool(processes = prcs) as pool:             
+#            results = [pool.apply_async(rollout,
+#                            args = (node.parent.env,
+#                                    node.t,
+#                                    node.t + horizon, 
+#                                    node.taken))
+#                        for i in range(n)]
+#            res = [r.get() for r in results]
+#    
+#    except Exception:
+    #print("Error during parallel rollout. Fallback on regular loop.")
+    res = []
+    for i in range(n):
+        #env = deepcopy(node.parent.env)
+        res.append(rollout(node.parent.env,
+                           node.t,
+                           node.t + horizon,
+                           node.taken))
     return np.mean(res)
     
     
@@ -272,30 +274,25 @@ def get_dead(env, matched, t_begin = None, t_end = None):
 
 #%%
 
-def remove_taken(actions, taken):
-    return [e for e in actions
-            if e is None or 
-                len(set(e).intersection(taken)) == 0]
-
-
-
-def two_cycles(env, t):
-    nodes = list(env.get_living(t))
-    cycles = []
-    for i, u in enumerate(nodes):
-        for w in nodes[i:]:
-            if env.has_edge(u,w) and env.has_edge(w,u):
-                cycles.append((u,w))
-    return cycles
-
 
     
 def evaluate_policy(net, env, t):
-    X = env.X(t)
-    G, N = get_additional_regressors(env, t)
-    Z = np.hstack([X, G, N])
+    try:
+        if "GCN" in str(type(net)):
+            X = env.X(t)[np.newaxis,:]
+            A = env.A(t)[np.newaxis,:]
+            yhat = net.forward(A, X)
+            
+        elif "MLP" in str(type(net)):  
+            X = env.X(t)
+            G, N = get_additional_regressors(env, t)
+            Z = np.hstack([X, G, N])
+            yhat = net.forward(Z)
+    except Exception as e:
+        import pdb; pdb.set_trace()
+        
     return pd.Series(index = env.get_living(t),
-                     data = net.forward(Z)\
+                     data = yhat\
                                 .data\
                                 .numpy()\
                                 .flatten())

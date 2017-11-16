@@ -43,11 +43,11 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         
         
     def removed(self, t):
-        output = []
-        for k, v in self.removed_container.items():
+        output = set()
+        for k, vs in self.removed_container.items():
             if k <= t:
-                output.extend(v)
-        return output
+                output.update(vs)
+        return set(output)
         
     
     

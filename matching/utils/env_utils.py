@@ -1,5 +1,6 @@
 from random import shuffle
 from copy import deepcopy
+from collections import defaultdict
 #from matching.environment.optn_environment import OPTNKidneyExchange
 
 def get_actions(env, t):
@@ -20,6 +21,12 @@ def two_cycles(env, t):
     return cycles
 
 
+def remove_taken(actions, taken):
+    return [e for e in actions
+            if e is None or 
+                len(set(e).intersection(taken)) == 0]
+
+
 
     
 def snapshot(env, t):
@@ -35,8 +42,10 @@ def snapshot(env, t):
     new_env.add_nodes_from(subg.nodes(data = True))
     new_env.add_edges_from(subg.edges(data = True))
     
-    new_env.removed_container = deepcopy(env.removed_container)
-        
+    rem_in_new_env = env.removed(t).intersection(new_env.nodes())
+    new_env.removed_container = defaultdict(set) 
+    new_env.removed_container[t] = rem_in_new_env
+    
     return new_env
 
     

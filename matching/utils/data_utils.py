@@ -122,8 +122,10 @@ def merge_data(*variables,
 
     
 
-def get_n_matched(matched):
-    n_matched = np.zeros(max(matched) + 1)
+def get_n_matched(matched, n = None):
+    if n is None:
+        n = max(matched) + 1
+    n_matched = np.zeros(n)
     for t, m in matched.items():
         n_matched[t] = len(m)
     return n_matched
