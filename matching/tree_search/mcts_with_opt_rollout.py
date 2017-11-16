@@ -7,6 +7,7 @@ MCTS with policy function
 
 """
 
+
 from copy import deepcopy
 import numpy as np
 import pandas as pd
@@ -14,23 +15,13 @@ from random import shuffle
 from time import time    
 import multiprocessing as mp
 
-from matching.environment.saidman_environment import SaidmanKidneyExchange
-from matching.solver.kidney_solver import KidneySolver
-from matching.utils.data_utils import get_additional_regressors
+from itertools import chain
+
+from matching.solver.kidney_solver2 import  optimal, greedy
+from matching.utils.data_utils import get_additional_regressors, clock_seed
+from matching.utils.env_utils import get_actions, snapshot
 
 
-
-
-def clock_seed():
-    return int(str(int(time()*1e8))[10:])    
-
-
-def get_actions(env, t):
-    cycles = two_cycles(env, t) 
-    actions = list(map(tuple, cycles))
-    actions.append(None)
-    shuffle(actions)
-    return actions
 
 
 class Node:
@@ -84,20 +75,19 @@ class Node:
 
 
 
-        
+#@profile        
 def run(root,
         scalar,
         tree_horizon,
         rollout_horizon,
-        use_priors,
-        n_rollouts):
-    
-    #import pdb; pdb.set_trace()
+        n_rollouts,
+        net = None):
     
     node = tree_policy(root,
                        root.t + tree_horizon,
-                       use_priors,
+                       net,
                        scalar)
+    
     
     if node.taken is not None:
         r = parallel_rollout(node,
@@ -110,12 +100,12 @@ def run(root,
     
     
     
-def tree_policy(node, tree_horizon, use_priors, scalar):
+def tree_policy(node, tree_horizon, net, scalar):
     while node.t < tree_horizon:
         if not node.is_fully_expanded():
             return expand(node)
         else:
-            node = best_child(node, use_priors, scalar)
+            node = best_child(node, net, scalar)
     return node
 
         
@@ -132,13 +122,13 @@ def expand(node):
 
 
 
-def best_child(node, use_priors, scalar):        
+def best_child(node, net, scalar):        
         
     rewards = np.array([c.reward for c in node.children])
     visits = np.array([c.visits for c in node.children])
     
-    if use_priors:
-        priors = evaluate_priors(node.env, node.t, node.actions)
+    if net is not None:
+        priors = evaluate_priors(net, node.env, node.t, node.actions)
     else:
         priors = 1
         
@@ -169,7 +159,7 @@ def compute_score(rewards, visits, priors, scalar):
 
 def advance(node):
     """Used when parent node chooses None or its last action"""
-    child_env = deepcopy(node.env)
+    child_env = snapshot(node.env, node.t)
     child_t = node.t + 1
     child_env.populate(child_t, child_t + 1)
     child_acts = get_actions(child_env, child_t)
@@ -185,7 +175,7 @@ def advance(node):
 def stay(node, taken):
     """Used when parent chooses an action that is NOT None"""
     child_t = node.t
-    child_env = deepcopy(node.env)
+    child_env = snapshot(node.env, node.t)
     child_env.removed_container[child_t].update(taken)
     child_acts = remove_taken(node.actions, taken)
     return Node(parent = node,
@@ -231,8 +221,8 @@ def parallel_rollout(node, horizon, n):
         print("Error during parallel rollout. Fallback on regular loop.")
         res = []
         for i in range(n):
-            env = deepcopy(node.parent.env)
-            res.append(rollout(env,
+            #env = deepcopy(node.parent.env)
+            res.append(rollout(node.parent.env,
                                node.t,
                                node.t + horizon,
                                node.taken))
@@ -254,8 +244,7 @@ def simulate_unmatched_dead(env, t_begin, t_end, seed=None, taken=None):
     if taken is not None:
         env.removed_container[t_begin].update(taken)
     env.populate(t_begin + 1, t_end, seed=seed)
-    solver = KidneySolver(2)
-    solution = solver.solve(env, t_begin=t_begin, t_end=t_end)
+    solution = optimal(env, t_begin=t_begin, t_end=t_end)
     matched = flatten_matched(solution["matched"])
     if taken is not None:
         matched.update(taken)
@@ -300,12 +289,24 @@ def two_cycles(env, t):
     return cycles
 
 
-def evaluate_priors(env, t, actions):
+    
+def evaluate_policy(net, env, t):
+    X = env.X(t)
+    G, N = get_additional_regressors(env, t)
+    Z = np.hstack([X, G, N])
+    return pd.Series(index = env.get_living(t),
+                     data = net.forward(Z)\
+                                .data\
+                                .numpy()\
+                                .flatten())
+
+
+def evaluate_priors(net, env, t, actions):
     n = len(actions)
     if n == 1:
         return np.array([1])
     else:
-        p = evaluate_policy(env, t)
+        p = evaluate_policy(net, env, t)
         none_idx = actions.index(None)
         
         priors = np.zeros(n)
@@ -324,170 +325,178 @@ def flatten_matched(m, burnin = 0):
    return set(chain(*[x for t,x in m.items() if t >= burnin]))
 
 
-#%%
-if __name__ == "__main__":
-    
-    from collections import defaultdict
-    from itertools import chain
-    from random import choice
-    import pickle
-    import torch
-    from sys import platform
-    from scipy.stats import geom
-
-    er = 5
-    dr = .1
-    time_length = 150
-    
-    for episode in range(1000):
-        if platform == "darwin":
-            scl = .5
-            tpa = 2
-            t_horiz = 2
-            r_horiz = 30
-            n_rolls = 1
-            gcn = 'test.pkl'
-            use_priors = True
-            burnin = 50
-        else:
-            scl = np.random.uniform(0.1, 3)
-            tpa = choice([2, 5, 10])
-            t_horiz = choice([2, 5, 10])
-            r_horiz = np.random.randint(1, geom(.1).ppf(.95))
-            n_rolls = np.random.randint(1, 5)
-            gcn = choice([(5,1), (50,1)])
-            use_priors = choice([True, False])
-            burnin = 50
-        
-        print("USING:")
-        print("scl", scl)
-        print("tpa", tpa)
-        print("t_horiz", t_horiz)
-        print("r_horiz", r_horiz)
-        print("n_rolls", n_rolls)
-    
-        config = (scl, tpa, n_rolls, t_horiz, r_horiz, gcn, use_priors)
-    
-        if use_priors:
-            net = torch.load(gcn)
-        
-        
-        def evaluate_policy(env, t):
-            #A = env.A(t)    
-            X = env.X(t)
-            G, N = get_additional_regressors(env, t)
-            Z = np.hstack([X, G, N])
-            return pd.Series(index = env.get_living(t),
-                             data = net.forward(Z)\
-                                        .data\
-                                        .numpy()\
-                                        .flatten())
-          
-        
-     
-        opt = None
-        g   = None
-    
-        seed = clock_seed()
-
-        name = str(seed)        
-
-        env = SaidmanKidneyExchange(entry_rate  = er,
-                death_rate  = dr,
-                time_length = time_length,
-                seed = seed)
-
-
-        matched = defaultdict(list)
-        rewards = 0                
-#%%    
-        t = 0
-        while t < env.time_length:
-            
-            print("Now at", t,
-                  file = open(name + ".txt", "w"))
-        
-            print("\nStarting ", t)
-            root = Node(parent = None,
-                        t = t,
-                        reward = 0,
-                        env = env,
-                        taken = None,
-                        actions = get_actions(env, t))
-
-            iters = 0
-        
-            print("Actions: ", root.actions)
-            n_act = len(root.actions)
-    
-            if n_act > 1:    
-                
-                n_iters = int(tpa * n_act)
-                
-                for i_iter in range(n_iters):
-                    
-                    run(root,
-                        scalar = scl,
-                        tree_horizon = t_horiz,
-                        rollout_horizon = r_horiz,
-                        use_priors = use_priors,
-                        n_rollouts = n_rolls)
-                    
-                a = choose(root)
-                print("Ran for", n_iters, "iterations and chose:", a)
-        
-            else:
-                
-                a = root.actions[0]
-                print("Chose the only available action:", a)
-    
-            
-            if a is not None:
-                
-                print("Staying at t.")
-                assert a[0] not in env.removed_container[t]
-                assert a[1] not in env.removed_container[t]
-                env.removed_container[t].update(a)
-                matched[t].extend(a)
-                rewards += len(a)
-            
-            else:
-            
-                print("Done with", t, ". Moving on to next period\n")
-                t += 1
-        
-        
-#%%
-                
-        this_matched = flatten_matched(matched)
-
-        env = SaidmanKidneyExchange(entry_rate  = er,
-                death_rate  = dr,
-                time_length = time_length,
-                seed = seed)
-    
-        solver = KidneySolver(2)
-        opt = solver.optimal(env)#["obj"]
-        greedy = solver.greedy(env)#["obj"]
-    
-        g_matched = flatten_matched(greedy["matched"], burnin)
-        opt_matched = flatten_matched(opt["matched"], burnin)
-        
-        n = len(env.get_living(burnin, env.time_length))
-        
-        g_loss = len(get_dead(env, g_matched, burnin))/n
-        opt_loss = len(get_dead(env, opt_matched, burnin))/n
-        this_loss = len(get_dead(env, this_matched, burnin))/n
-    
-        print("MCTS loss: ", this_loss)
-        print("GREEDY loss:", g_loss)
-        print("OPT loss:", opt_loss)
-        
-        
-        results = [seed,er,dr,time_length,*config,this_loss,g_loss,opt_loss]
-    
-
-        with open("results/mcts_with_opt_rollout_results3.txt", "a") as f:
-            s = ",".join([str(s) for s in results])
-            f.write(s + "\n")
-    
+##%%
+#if __name__ == "__main__":
+#    
+#    from collections import defaultdict
+#    from random import choice
+#    from os import listdir
+#    import torch
+#    from sys import platform
+#    from scipy.stats import geom
+#    
+#    from matching.environment.optn_environment import OPTNKidneyExchange
+#    from matching.policy_function.policy_function_gcn import GCNet
+#    from matching.policy_function.policy_function_mlp import MLPNet
+#
+###%%
+#    er = 5
+#    dr = .1
+#    time_length = 10
+#    
+#    for episode in range(1000):
+#        
+#        if platform == "darwin":
+#            scl = .5
+#            tpa = 5
+#            t_horiz = 4
+#            r_horiz = 10
+#            n_rolls = 1
+#            gcn = "MLP_None_10_637319.pkl"
+#            use_priors = True
+#            burnin = 0
+#            
+#        else:
+#            gcns = [f for f in listdir("results/") if 
+#                    f.startswith("MLP_")]
+#            scl = np.random.uniform(0.1, 3)
+#            tpa = choice([2, 3, 4])
+#            t_horiz = choice([2, 5, 10])
+#            r_horiz = np.random.randint(1, geom(.1).ppf(.95))
+#            n_rolls = np.random.randint(1, 5)
+#            gcn = choice(gcns)
+#            use_priors = choice([True, False])
+#            burnin = 50
+#    
+#        print("USING:")
+#        print("scl", scl)
+#        print("tpa", tpa)
+#        print("t_horiz", t_horiz)
+#        print("r_horiz", r_horiz)
+#        print("n_rolls", n_rolls)
+#    
+#        config = (scl, tpa, n_rolls, t_horiz, r_horiz, gcn, use_priors)
+#    
+#        if use_priors:
+#            net = torch.load("results/" + gcn)
+#        
+#        
+#        def evaluate_policy(env, t):
+#            X = env.X(t)
+#            G, N = get_additional_regressors(env, t)
+#            Z = np.hstack([X, G, N])
+#            return pd.Series(index = env.get_living(t),
+#                             data = net.forward(Z)\
+#                                        .data\
+#                                        .numpy()\
+#                                        .flatten())
+#          
+#        
+#     
+#        opt = None
+#        g   = None
+#    
+#        seed = clock_seed()
+##%%
+#        name = str(seed)        
+#
+#        env = OPTNKidneyExchange(entry_rate  = er,
+#                death_rate  = dr,
+#                time_length = time_length,
+#                seed = seed)
+#        
+#        matched = defaultdict(list)
+#        rewards = 0                
+##%%    
+#        t = 0
+#        while t < env.time_length:
+#            
+#            print("Now at", t,
+#                  file = open(name + ".txt", "w"))
+#        
+#            print("\nStarting ", t)
+#            root = Node(parent = None,
+#                        t = t,
+#                        reward = 0,
+#                        env = env,
+#                        taken = None,
+#                        actions = get_actions(env, t))
+#
+#            iters = 0
+#        
+#            print("Actions: ", root.actions)
+#            n_act = len(root.actions)
+#    
+#            if n_act > 1:    
+#                a = choice(root.actions)
+#                n_iters = int(tpa * n_act)
+#                 
+#                for i_iter in range(n_iters):
+#                    
+#                    run(root,
+#                        scalar = scl,
+#                        tree_horizon = t_horiz,
+#                        rollout_horizon = r_horiz,
+#                        use_priors = use_priors,
+#                        n_rollouts = n_rolls)
+#                    
+#                a = choose(root)
+#                print("Ran for", n_iters, "iterations and chose:", a)
+#        
+#            else:
+#                
+#                a = root.actions[0]
+#                print("Chose the only available action:", a)
+#    
+#            
+#            if a is not None:
+#                
+#                print("Staying at t.")
+#                assert a[0] not in env.removed_container[t]
+#                assert a[1] not in env.removed_container[t]
+#                env.removed_container[t].update(a)
+#                matched[t].extend(a)
+#                rewards += len(a)
+#            
+#            else:
+#            
+#                print("Done with", t, ". Moving on to next period\n")
+#                t += 1
+#        
+#        
+##%%
+#                
+#        this_matched = flatten_matched(matched)
+#
+#        env = env.__class__(entry_rate  = er,
+#                death_rate  = dr,
+#                time_length = time_length,
+#                seed = seed)
+#    
+#        opt = optimal(env)#["obj"]
+#        g = greedy(env)#["obj"]
+#    
+#        g_matched = flatten_matched(g["matched"], burnin)
+#        opt_matched = flatten_matched(opt["matched"], burnin)
+#        
+#        n = len(env.get_living(burnin, env.time_length))
+#        
+#        g_loss = len(get_dead(env, g_matched, burnin))/n
+#        opt_loss = len(get_dead(env, opt_matched, burnin))/n
+#        this_loss = len(get_dead(env, this_matched, burnin))/n
+#    
+#        print("MCTS loss: ", this_loss)
+#        print("GREEDY loss:", g_loss)
+#        print("OPT loss:", opt_loss)
+#        
+#        
+#        results = [seed,er,dr,time_length,*config,this_loss,g_loss,opt_loss]
+#    
+#
+#        with open("results/mcts_with_opt_rollout_results5.txt", "a") as f:
+#            s = ",".join([str(s) for s in results])
+#            f.write(s + "\n")
+#    
+#    
+#        if platform == "darwin":
+#            break

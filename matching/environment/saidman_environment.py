@@ -48,43 +48,14 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
                  seed = None,
                  populate=True):
         
-        super(SaidmanKidneyExchange, self)\
+        super(self.__class__, self)\
               .__init__(entry_rate=entry_rate,
                         death_rate=death_rate,
                         time_length=time_length,
                         seed=seed,
                         populate=populate)
         
-        
-        
-        
-    def populate(self, t_begin = None, t_end = None, seed = None):
-        
-        if t_begin is None:
-            t_begin = 0
-        if t_end is None:
-            t_end = self.time_length
-        np.random.seed(seed)        
-        
-        self.erase_from(t_begin)
-        n_cur = self.number_of_nodes()
-        
-        nodefts = self.draw_node_features(t_begin, t_end)
-        new_ids = tuple(range(n_cur, n_cur + len(nodefts)))
-        self.add_nodes_from(zip(new_ids, nodefts))
-        #import pdb; pdb.set_trace()
-            
-        old_ids = tuple(range(n_cur))
-        
-        oldnew_edges = self.draw_edges(old_ids, new_ids)
-        self.add_edges_from(oldnew_edges, weight = 1)
-        
-        newold_edges = self.draw_edges(new_ids, old_ids)
-        self.add_edges_from(newold_edges, weight = 1)
-        
-        newnew_edges = self.draw_edges(new_ids, new_ids)
-        self.add_edges_from(newnew_edges, weight = 1)
-        
+
         
         
     
@@ -167,12 +138,12 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         if dtype == "pandas":
             return pd.DataFrame(index = indices,
                          data= Xs,
-                         columns = ["pO","pA","pAB",
-                                       "dO","dA","dB",
-                                       "waiting_time",
-                                       "time_to_death",
-                                       "is_female",
-                                       "pra"])
+                         columns = ["pO","pA","pB",
+                                   "dO","dA","dB",
+                                   "waiting_time",
+                                   "time_to_death",
+                                   "is_female",
+                                   "pra"])
         elif dtype == "numpy":
             return Xs
         else:

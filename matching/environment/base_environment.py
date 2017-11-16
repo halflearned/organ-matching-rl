@@ -68,13 +68,48 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
     def X(self, t):
         pass
     
-
-
     @abc.abstractmethod
-    def populate(self):
+    def draw_node_features(self, t_begin, t_end):
         pass
     
+    @abc.abstractmethod
+    def draw_edges(self, source_nodes, target_nodes):
+        pass
+    
+
+
+    def populate(self, t_begin = None, t_end = None, seed = None):
         
+        if t_begin is None:
+            t_begin = 0
+        if t_end is None:
+            t_end = self.time_length
+        np.random.seed(seed)        
+        
+        self.erase_from(t_begin)
+        max_cur_id = max(self.nodes(), default = 0)
+        
+        nodefts = self.draw_node_features(t_begin, t_end)
+        new_ids = tuple(range(max_cur_id, max_cur_id + len(nodefts)))
+        self.add_nodes_from(zip(new_ids, nodefts))
+        #import pdb; pdb.set_trace()
+        try:
+            old_ids = list(self.nodes())
+            
+            oldnew_edges = self.draw_edges(old_ids, new_ids)
+            self.add_edges_from(oldnew_edges, weight = 1)
+            
+            newold_edges = self.draw_edges(new_ids, old_ids)
+            self.add_edges_from(newold_edges, weight = 1)
+            
+            newnew_edges = self.draw_edges(new_ids, new_ids)
+            self.add_edges_from(newnew_edges, weight = 1)
+        except:
+            import pdb; pdb.set_trace()
+        
+        
+    
+    
     
     def validate_cycle(self, cycle):
         n = len(cycle)
@@ -172,7 +207,3 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         
         return digraph
     
-
-    
-    
-        

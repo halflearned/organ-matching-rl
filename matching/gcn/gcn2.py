@@ -25,7 +25,7 @@ def to_var(x, requires_grad = True):
                     requires_grad = requires_grad)
 
 
-class MLPNet(nn.Module):
+class GCNet(nn.Module):
     
     def __init__(self, 
                  feature_size,
@@ -42,7 +42,7 @@ class MLPNet(nn.Module):
         
         if seed : torch.manual_seed(seed)
         
-        super(MLPNet, self).__init__()
+        super(GCNet, self).__init__()
         
         self.feature_size  = feature_size
         self.hidden_sizes = hidden_sizes or []
@@ -59,10 +59,27 @@ class MLPNet(nn.Module):
         
   
         
-    def forward(self, XX):
-        XX = to_var(XX, requires_grad=False)
-        return self.model(XX)
+    def forward(self, A, X):
+        A, X = self.make_variables(A, X)
+        h = X
+        for layer in self.model:
+            h = layer(A @ X)
+        return h
     
+
+    def make_variables(self, A, X):
+
+        with np.errstate(divide='ignore'):        
+            outdegree = A.sum(1).flatten()
+            Dinvroot = np.sqrt(np.diag(np.where(outdegree > 0, 1 / outdegree, 0)))
+
+        n = A.shape[0]        
+        I = np.eye(n)
+        Atilde = to_var(Dinvroot @ (I + A) @ Dinvroot)
+        X = to_var(X)
+        
+        return Atilde, X
+            
 
 
     def build_model(self):
@@ -73,12 +90,12 @@ class MLPNet(nn.Module):
                     self.activation_fn(),
                     nn.AlphaDropout(self.dropout_prob))
         
-        sizes = [self.feature_size,
+        sizes = [ self.feature_size,
                  *self.hidden_sizes,
-                 self.output_size]
+                  self.output_size ]
         
-        mlp = [layer(h0,h1) for h0,h1 in zip(sizes[:-1], sizes[1:])]
-            
+        mlp = [layer(h0,h1) for h0, h1 in zip(sizes[:-1], sizes[1:])]
+        
         return nn.Sequential(*mlp, self.output_fn)
             
     
@@ -95,37 +112,20 @@ class MLPNet(nn.Module):
         loss.backward()
         self.opt.step()
         
-        if self.output_fn == F.log_softmax:
-            out = torch.exp(out)
-        
         return loss.data.numpy()[0], out.data.numpy()
     
     
     def __str__(self):
         
         if self.hidden_sizes:
-            hs = "-".join([str(x) for x in self.hidden_sizes])
+            hs = "-".join([str(x) for x in self.hidden])
         else: 
             hs = "None"
         
-        return "MLP_" + hs + \
+        return "GCN_" + hs + \
             "_{:1d}".format(int(100*self.dropout_prob))
     
-    
-    
-    
-    
-def balancing_weights(XX, y):
-    yy = y.flatten()
-    n1 = np.sum(yy)
-    n0 = len(yy) - n1
-    p = np.zeros(int(n0 + n1))
-    p[yy == 0] = 1/n0
-    p[yy == 1] = 1/n1
-    p /= p.sum()
-    return p
-    
-    
+
 
 #%%    
     
@@ -136,6 +136,10 @@ if __name__ == "__main__":
     from random import choice
     from collections import deque
     
+    from matching.utils.data_utils import balancing_weights
+    
+    #%%
+    
     
     #%%
 
@@ -143,20 +147,19 @@ if __name__ == "__main__":
         hidden = None
         dp = .2
     else:
-        hidden = choice([None,
+        hidden = choice(None,
                         [10], [50], [100],
                         [10, 10], [50,50], [100, 100],
-                        [50, 50, 50]])
-        dp = choice([0, .1, .2, .5])
+                        [50, 50, 50])
+        dp = [0, .1, .2, .5]
         
     
-    mlp = MLPNet(24, hidden,
+    gcn = GCNet(10, hidden,
                  activation_fn = nn.SELU,
                  dropout_prob = dp,
                  loss_fn = nn.MSELoss,
                  opt_params = dict(lr = 0.005))
-    print(mlp)
-    
+
     #%%
     
     minibatch = 100
@@ -165,15 +168,14 @@ if __name__ == "__main__":
     training_accs = [] 
     recent_losses = deque(maxlen = 250)
     recent_accs = deque(maxlen = 250)
-    name = str(mlp) + \
-            "_{}".format(str(np.random.randint(1000000)))
+    name = str(gcn) + "_{}".format(str(np.random.randint(1000000)))
     
     #%%
     
-    for k in cycle(range(10)):
+    for i in cycle(range(10)):
         
-        XX = np.load("data/policy_data_X_%d.npy" % k)
-        y = np.load("data/policy_data_y_%d.npy" % k)
+        XX = np.load("data/policy_data_X_%d.npy" % i)
+        y = np.load("data/policy_data_y_%d.npy" % i)
         n = XX.shape[0]
         ws = balancing_weights(XX, y)
         
@@ -191,8 +193,8 @@ if __name__ == "__main__":
                 print(i, out[0], training_losses[-1], training_accs[-1])
     
 #%%
-        filename = "results/{}.pkl".format(name)
-        torch.save(mlp, filename)
+    filename = "results/{}.pkl".format(name)
+    torch.save(mlp, filename)
 
 
 

@@ -12,7 +12,6 @@ import numpy as np
 from tqdm import trange
 import pickle
 from time import time
-from scipy.stats import geom
 import networkx as nx
 import pandas as pd
 from os import listdir
@@ -26,6 +25,18 @@ def clock_seed():
     return int(str(int(time()*1e8))[10:])  
 
 
+    
+def balancing_weights(XX, y):
+    yy = y.flatten()
+    n1 = np.sum(yy)
+    n0 = len(yy) - n1
+    p = np.zeros(int(n0 + n1))
+    p[yy == 0] = 1/n0
+    p[yy == 1] = 1/n1
+    p /= p.sum()
+    return p
+    
+    
 
 def get_rewards(solution, t, h):
     return sum([len(match) for period, match in solution["matched"].items()
@@ -111,9 +122,9 @@ def merge_data(*variables,
 
     
 
-def get_n_matched(algo):
-    n_matched = np.zeros(max(algo["matched"]) + 1)
-    for t, m in algo["matched"].items():
+def get_n_matched(matched):
+    n_matched = np.zeros(max(matched) + 1)
+    for t, m in matched.items():
         n_matched[t] = len(m)
     return n_matched
 
@@ -206,6 +217,25 @@ def undersample(X, y, frac_ones = 0.5):
     y_resampled = np.hstack([np.ones(n_ones), np.zeros(n_ones)])
     sh = np.random.permutation(len(y_resampled))
     return X_resampled[sh], y_resampled[sh]
+
+#%%
+def stata_to_csv(filepath, outfile, chunksize = 10000):
+    
+    file = pd.read_stata(filepath, 
+                         iterator = True,
+                         chunksize = chunksize)
+    
+    for k, b in enumerate(file):
+        if k % 10 == 0:
+            print(k)
+        b.to_csv(outfile,
+                   mode = "a",
+                   header = k == 0)
+    
+    
+    
+    
+
 
 #%%
 if __name__ == "__main__":

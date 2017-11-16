@@ -45,19 +45,21 @@ class KidneySolver:
     
     
     
-
-    def solve_subset(self, env, nodelist, formulation = "cf"):
-        subg = nx.subgraph(env, nodelist)
-        labels_to_trimble = {n:i for i,n in enumerate(subg.nodes())}
-        labels_from_trimble = {i:n for i,n in enumerate(subg.nodes())}
-        subg = nx.relabel_nodes(subg, labels_to_trimble)
-        trimble_digraph = self.to_trimble_digraph(subg)
-        cfg = OptConfig(trimble_digraph, [], self.max_cycle_length, 0)
-        sol = solve_kep(cfg, formulation)
-        return self.parse_solution(sol, env, labels_from_trimble)
     
-
     
+#    DEPRECATIED
+#    def solve_subset(self, env, nodelist, formulation = "cf"):
+#        subg = nx.subgraph(env, nodelist)
+#        labels_to_trimble = {n:i for i,n in enumerate(subg.nodes())}
+#        labels_from_trimble = {i:n for i,n in enumerate(subg.nodes())}
+#        subg = nx.relabel_nodes(subg, labels_to_trimble)
+#        trimble_digraph = self.to_trimble_digraph(subg)
+#        cfg = OptConfig(trimble_digraph, [], self.max_cycle_length, 0)
+#        sol = solve_kep(cfg, formulation)
+#        return self.parse_solution(sol, env, labels_from_trimble)
+#    
+#
+#    
     def optimal(self, env):
         s =  self.solve(env, 0, env.time_length)  
         s["obj"] = sum(len(c) for t,c in s["matched"].items() \
@@ -121,15 +123,19 @@ class KidneySolver:
 
    
 
+
+    
+    
+
+
+    
+        
+
 #%%
 if __name__ == "__main__":
     
-    import environment.saidman_environment.SaidmanKidneyExchange
-    import numpy as np
-    import networkx as nx
-    from itertools import chain
-    #%%
-
+    from matching.environment.saidman_environment import SaidmanKidneyExchange
+    
     env = SaidmanKidneyExchange(entry_rate  = 5,
                                 death_rate  = 0.1,
                                 time_length = 100,

@@ -350,8 +350,6 @@ if __name__ == "__main__":
               n_parallel_rollouts = prl,
               use_priors = use_priors,
               deflator = defl)
-            
-            dadasda
 
     
             iters = 0
