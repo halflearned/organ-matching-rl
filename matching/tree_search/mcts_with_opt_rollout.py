@@ -38,7 +38,7 @@ class Node:
         
         self.reward = reward
         self.env = env
-        self.visits = 1
+        self.visits = 0
         self.children = []
         self.parent = parent
         self.t = t
@@ -82,14 +82,18 @@ def run(root,
         rollout_horizon,
         n_rollouts,
         net = None):
+
     
-    if len(root.env.nodes()) == 0:    
-        import pdb; pdb.set_trace()
+    
+    
+    #import pdb; pdb.set_trace()
+    
     node = tree_policy(root,
                        root.t + tree_horizon,
                        net,
                        scalar)
     
+    #import pdb; pdb.set_trace()
     
     if node.taken is not None:
         r = parallel_rollout(node,
@@ -224,7 +228,7 @@ def parallel_rollout(node, horizon, n):
     res = []
     for i in range(n):
         #env = deepcopy(node.parent.env)
-        res.append(rollout(node.parent.env,
+        res.append(rollout(snapshot(node.parent.env, node.t),
                            node.t,
                            node.t + horizon,
                            node.taken))

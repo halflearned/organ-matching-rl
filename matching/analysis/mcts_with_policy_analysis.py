@@ -11,18 +11,17 @@ import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("results/mcts_with_opt_rollout_results4.txt",
+df = pd.read_csv("results/mcts_with_opt_rollout_results7.txt",
                  header = None,
                  names = ["seed", "er","dr","time_length",
                           "scl","tpa","n_rolls","t_horiz",
-                          "r_horiz","gcn", "use_priors", 
+                          "r_horiz","net_file", 
                           "this","greedy","opt"])
 
 
 
 
-params = ["scl","tpa","t_horiz",
-      "r_horiz"]
+params = ["scl","tpa","n_rolls", "t_horiz","r_horiz"]
 
 df["this_g_ratio"] = df["this"] - df["greedy"]
 df["this_opt_ratio"] = df["this"] - df["opt"]
@@ -39,7 +38,8 @@ for p in params:
     
     
 #%%
-s = sm.OLS(exog = sm.add_constant(df[["scl","tpa", "t_horiz","r_horiz", "greedy_opt_ratio"]]),
+s = sm.OLS(exog = sm.add_constant(
+        df[["scl","tpa", "t_horiz","r_horiz", "n_rolls", "greedy_opt_ratio"]]),
            endog = df["this_g_ratio"])
 
 print(s.fit().summary())

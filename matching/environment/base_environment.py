@@ -39,7 +39,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         self.seed = seed
         self.removed_container = defaultdict(set)
         
-        if populate: self.populate()
+        if populate: self.populate(seed = seed)
         
         
     def removed(self, t):
@@ -84,13 +84,17 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
             t_begin = 0
         if t_end is None:
             t_end = self.time_length
+        
         np.random.seed(seed)        
         
         self.erase_from(t_begin)
-        max_cur_id = max(self.nodes(), default = 0)
+        if len(self.nodes()) > 0:
+            next_id = max(self.nodes()) + 1
+        else:
+            next_id = 0
         
         nodefts = self.draw_node_features(t_begin, t_end)
-        new_ids = tuple(range(max_cur_id, max_cur_id + len(nodefts)))
+        new_ids = tuple(range(next_id, next_id+ len(nodefts)))
         self.add_nodes_from(zip(new_ids, nodefts))
         #import pdb; pdb.set_trace()
         try:

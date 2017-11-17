@@ -29,14 +29,14 @@ from matching.utils.env_utils import snapshot
 #%%
 er = 5
 dr = .1
-time_length = 250
+time_length = 300
     
     
     
 for seed in range(1, 1000):
     
     if platform == "darwin":
-        scl = 1
+        scl = .1
         tpa = 5
         t_horiz = 3
         r_horiz = 10
@@ -147,7 +147,8 @@ for seed in range(1, 1000):
     
     
 #%%
-            
+          
+    burnin = 20
     this_matched = mcts.flatten_matched(matched)
 
     env = env.__class__(entry_rate  = er,
