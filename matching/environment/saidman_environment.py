@@ -11,7 +11,6 @@ Created on Sat Oct  7 15:05:52 2017
 import numpy as np
 from matching.environment.base_environment import BaseKidneyExchange, draw
 import pandas as pd
-import networkx as nx
 from collections import OrderedDict
 
 
@@ -83,35 +82,66 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         
       
         
-            
     def draw_edges(self, source_nodes, target_nodes):
-        edges = []
-        for s in source_nodes:
-            for t in target_nodes:
-                
-                if s == t:
-                    continue
-                
-                s_data = self.node[s]
-                hist_comp = np.random.uniform() > s_data["pra"] 
-                if not hist_comp:
-                    continue
-                
-                t_data = self.node[t]
-                time_comp = s_data["entry"] <= t_data["death"] and \
-                            s_data["death"] >= t_data["entry"]
-                if not time_comp:
-                    continue
-                
-                blood_comp = s_data["d_blood"] == 0 or \
-                             t_data["p_blood"] == 3 or \
-                             s_data["d_blood"] == t_data["p_blood"]
-                if not blood_comp:
-                    continue
-                
-                edges.append((s, t))
-                
-        return edges
+        
+        source_nodes = np.array(source_nodes)
+        target_nodes = np.array(target_nodes)
+        
+        ns = len(source_nodes)
+        nt = len(target_nodes)
+        
+        source_entry = self.attr_to_numpy("entry", source_nodes)
+        source_death = self.attr_to_numpy("death", source_nodes)
+        source_don = self.attr_to_numpy("d_blood", source_nodes)
+        source_pra = self.attr_to_numpy("pra", source_nodes)
+        
+        target_entry = self.attr_to_numpy("entry", target_nodes)
+        target_death = self.attr_to_numpy("death", target_nodes)
+        target_pat = self.attr_to_numpy("p_blood", target_nodes)
+        
+        hist_comp = np.random.uniform(size = (ns, nt)) > source_pra
+        time_comp = (source_entry <= target_death.T) & (source_death >= target_entry.T)
+        blood_comp = (source_don == target_pat.T) | (source_don == 0) | (target_pat.T == 3)
+        not_same = source_nodes != target_nodes.reshape(-1,1)
+        
+        comp = hist_comp & time_comp & blood_comp & not_same
+        
+        s_idx, t_idx = np.argwhere(comp).T 
+        
+        return zip(source_nodes[s_idx], target_nodes[t_idx])
+        
+        
+        
+        
+#     Use this for testing later    
+#    def draw_edges2(self, source_nodes, target_nodes):
+#        edges = []
+#        for s in source_nodes:
+#            for t in target_nodes:
+#                
+#                if s == t:
+#                    continue
+#                
+#                s_data = self.node[s]
+#                hist_comp = np.random.uniform() > s_data["pra"] 
+#                if not hist_comp:
+#                    continue
+#                
+#                t_data = self.node[t]
+#                time_comp = s_data["entry"] <= t_data["death"] and \
+#                            s_data["death"] >= t_data["entry"]
+#                if not time_comp:
+#                    continue
+#                
+#                blood_comp = s_data["d_blood"] == 0 or \
+#                             t_data["p_blood"] == 3 or \
+#                             s_data["d_blood"] == t_data["p_blood"]
+#                if not blood_comp:
+#                    continue
+#                
+#                edges.append((s, t))
+#                
+#        return edges
             
         
         

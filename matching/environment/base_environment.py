@@ -97,22 +97,26 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         new_ids = tuple(range(next_id, next_id+ len(nodefts)))
         self.add_nodes_from(zip(new_ids, nodefts))
         #import pdb; pdb.set_trace()
-        try:
-            old_ids = list(self.nodes())
-            
-            oldnew_edges = self.draw_edges(old_ids, new_ids)
-            self.add_edges_from(oldnew_edges, weight = 1)
-            
-            newold_edges = self.draw_edges(new_ids, old_ids)
-            self.add_edges_from(newold_edges, weight = 1)
-            
-            newnew_edges = self.draw_edges(new_ids, new_ids)
-            self.add_edges_from(newnew_edges, weight = 1)
-        except:
-            import pdb; pdb.set_trace()
+        old_ids = list(self.nodes())
+        
+        oldnew_edges = self.draw_edges(old_ids, new_ids)
+        self.add_edges_from(oldnew_edges, weight = 1)
+        
+        newold_edges = self.draw_edges(new_ids, old_ids)
+        self.add_edges_from(newold_edges, weight = 1)
+        
+        newnew_edges = self.draw_edges(new_ids, new_ids)
+        self.add_edges_from(newnew_edges, weight = 1)
+
         
         
-    
+    def attr_to_numpy(self, attr, nodelist = None):
+        if nodelist is None:
+            nodelist = self.nodes()
+            
+        return np.array([self.node[n][attr] for n in nodelist]).reshape(-1, 1)
+        
+        
     
     
     def validate_cycle(self, cycle):
