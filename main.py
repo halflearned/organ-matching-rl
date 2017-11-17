@@ -24,23 +24,22 @@ from matching.policy_function.policy_function_gcn import GCNet
 from matching.policy_function.policy_function_mlp import MLPNet
 from matching.environment.optn_environment import OPTNKidneyExchange
 from matching.environment.saidman_environment import SaidmanKidneyExchange
-from matching.utils.env_utils import snapshot
+from matching.utils.env_utils import snapshot, get_environment_name
 
 #%%
 er = 5
 dr = .1
-time_length = 10
+time_length = 250
     
     
-    
-for seed in range(1, 1000):
+for seed in range(20, 1000):
     
     if platform == "darwin":
-        scl = .1
-        tpa = 5
-        t_horiz = 3
-        r_horiz = 10
-        n_rolls = 1
+        scl = .01
+        tpa = 100
+        t_horiz = 2
+        r_horiz = 45
+        n_rolls = 7
         net_file = None
         burnin = 0
         
@@ -48,7 +47,7 @@ for seed in range(1, 1000):
         net_files = [f for f in listdir("results/") if 
                 f.startswith("MLP_") or 
                 f.startswith("GCN_")] + [None]
-        scl = np.random.uniform(0.1, 3)
+        scl = np.random.uniform(0.001, 1)
         tpa = np.random.randint(1, 11)
         t_horiz = choice([2, 5, 10])
         r_horiz = choice([1, 10, 22, 45])
@@ -77,7 +76,7 @@ for seed in range(1, 1000):
     
     name = str(seed)        
 
-    env = SaidmanKidneyExchange(entry_rate  = er,
+    env = OPTNKidneyExchange(entry_rate  = er,
             death_rate  = dr,
             time_length = time_length,
             seed = seed,
@@ -88,6 +87,8 @@ for seed in range(1, 1000):
     matched = defaultdict(list)
     rewards = 0                
 #%%    
+    
+    sadad
     t = 0
     while t < env.time_length:
         
@@ -148,8 +149,7 @@ for seed in range(1, 1000):
     
 #%%
           
-    burnin = 20
-    this_matched = mcts.flatten_matched(matched)
+    
 
     env = env.__class__(entry_rate  = er,
             death_rate  = dr,
@@ -159,6 +159,10 @@ for seed in range(1, 1000):
     opt = optimal(env)#["obj"]
     g = greedy(env)#["obj"]
 
+
+#%%
+    
+    this_matched = mcts.flatten_matched(matched, burnin)
     g_matched = mcts.flatten_matched(g["matched"], burnin)
     opt_matched = mcts.flatten_matched(opt["matched"], burnin)
     
@@ -172,11 +176,12 @@ for seed in range(1, 1000):
     print("GREEDY loss:", g_loss)
     print("OPT loss:", opt_loss)
     
+    envname = get_environment_name(env)
     
-    results = [seed,er,dr,time_length,*config,this_loss,g_loss,opt_loss]
+    results = [envname,seed,er,dr,time_length,*config,this_loss,g_loss,opt_loss]
 
 
-    with open("results/mcts_with_opt_rollout_results6.txt", "a") as f:
+    with open("results/mcts_results.txt", "a") as f:
         s = ",".join([str(s) for s in results])
         f.write(s + "\n")
 
@@ -184,3 +189,23 @@ for seed in range(1, 1000):
     if platform == "darwin":
         break
     
+    
+#%%
+import matplotlib.pyplot as plt
+
+gc = get_n_matched(g["matched"]).cumsum()
+tc = get_n_matched(matched).cumsum()
+oc = get_n_matched(opt["matched"]).cumsum()
+ts = np.arange(1, len(gc)+1)
+
+plt.plot(ts, gc/ts, label = "greedy", color = "orange")
+plt.plot(ts, oc/ts, label = "opt", color = "blue")
+plt.plot(ts, tc/ts, label = "this", color = "green")
+
+
+
+
+
+
+
+

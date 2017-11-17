@@ -22,7 +22,6 @@ class OPTNKidneyExchange(BaseKidneyExchange):
              entry_rate,
              death_rate,
              time_length,
-             tst = None,
              seed=None,
              populate=True):
     
@@ -35,7 +34,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
           
         self.patient = pat
         self.donor = don
-        if populate: self.populate()
+        if populate: self.populate(seed)
         
 
     def __class___(self):
@@ -47,6 +46,8 @@ class OPTNKidneyExchange(BaseKidneyExchange):
 
 
     def draw_node_features(self, t_begin, t_end):
+        np.random.seed(self.seed)
+        
         duration = t_end - t_begin
         n_periods = np.random.poisson(self.entry_rate, size = duration)
         n_periods[0] = self.entry_rate # Make sure someone exists at t=0

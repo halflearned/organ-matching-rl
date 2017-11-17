@@ -1,5 +1,5 @@
 from random import shuffle
-from copy import deepcopy
+from re import findall
 from collections import defaultdict
 #from matching.environment.optn_environment import OPTNKidneyExchange
 
@@ -19,6 +19,11 @@ def two_cycles(env, t):
             if env.has_edge(u,w) and env.has_edge(w,u):
                 cycles.append((u,w))
     return cycles
+
+
+def get_environment_name(env):
+    return findall("[A-Za-z]+KidneyExchange", str(env.__class__))[0]
+    
 
 
 def remove_taken(actions, taken):

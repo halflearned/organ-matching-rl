@@ -19,7 +19,7 @@ df = pd.read_csv("results/mcts_with_opt_rollout_results7.txt",
                           "this","greedy","opt"])
 
 
-
+df = df[df["time_length"] == 300]
 
 params = ["scl","tpa","n_rolls", "t_horiz","r_horiz"]
 
@@ -29,6 +29,7 @@ df["greedy_opt_ratio"] = df["greedy"] - df["opt"]
 
 
 tab = df.groupby(params)["this_g_ratio"].agg(["mean", "size"])
+
 print(tab.sort_values("mean", ascending = False))
 #%%
 for p in params:

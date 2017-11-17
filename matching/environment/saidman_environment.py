@@ -59,6 +59,7 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         
     
     def draw_node_features(self, t_begin, t_end):
+        np.random.seed(self.seed)
         duration = t_end - t_begin
         n_periods = np.random.poisson(self.entry_rate, size = duration)
         n = np.sum(n_periods)
@@ -83,7 +84,7 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
       
         
     def draw_edges(self, source_nodes, target_nodes):
-        
+        np.random.seed(self.seed)
         source_nodes = np.array(source_nodes)
         target_nodes = np.array(target_nodes)
         
