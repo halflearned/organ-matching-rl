@@ -29,7 +29,7 @@ from matching.utils.env_utils import snapshot
 #%%
 er = 5
 dr = .1
-time_length = 300
+time_length = 10
     
     
     
@@ -42,7 +42,7 @@ for seed in range(1, 1000):
         r_horiz = 10
         n_rolls = 1
         net_file = None
-        burnin = 100
+        burnin = 0
         
     else:
         net_files = [f for f in listdir("results/") if 

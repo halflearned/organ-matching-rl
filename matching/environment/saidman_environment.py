@@ -102,13 +102,13 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         hist_comp = np.random.uniform(size = (ns, nt)) > source_pra
         time_comp = (source_entry <= target_death.T) & (source_death >= target_entry.T)
         blood_comp = (source_don == target_pat.T) | (source_don == 0) | (target_pat.T == 3)
-        not_same = source_nodes != target_nodes.reshape(-1,1)
+        not_same = source_nodes.reshape(-1,1) != target_nodes.reshape(1,-1)
         
         comp = hist_comp & time_comp & blood_comp & not_same
         
         s_idx, t_idx = np.argwhere(comp).T 
         
-        return zip(source_nodes[s_idx], target_nodes[t_idx])
+        return list(zip(source_nodes[s_idx], target_nodes[t_idx]))
         
         
         
