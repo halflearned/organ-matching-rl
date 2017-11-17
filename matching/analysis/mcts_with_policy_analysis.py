@@ -11,15 +11,14 @@ import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("results/mcts_with_opt_rollout_results7.txt",
+df = pd.read_csv("results/mcts_results.txt",
                  header = None,
-                 names = ["seed", "er","dr","time_length",
+                 names = ["environment", "seed", "er","dr","time_length",
                           "scl","tpa","n_rolls","t_horiz",
                           "r_horiz","net_file", 
                           "this","greedy","opt"])
 
 
-df = df[df["time_length"] == 300]
 
 params = ["scl","tpa","n_rolls", "t_horiz","r_horiz"]
 

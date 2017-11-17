@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 7th 17:44:35 2017
+Created on Fri Nov 17 11:32:56 2017
 
-MCTS with policy function
-
+@author: vitorhadad
 """
 
 
@@ -35,7 +34,6 @@ time_length = 200
 for seed in range(100, 1000):
     
     if platform == "darwin":
-        scl, criterion = None, "rewards"
         tpa = 10
         t_horiz = 4
         r_horiz = 10
@@ -47,7 +45,6 @@ for seed in range(100, 1000):
         net_files = [f for f in listdir("results/") if 
                 f.startswith("MLP_") or 
                 f.startswith("GCN_")] + [None]
-        scl, criterion = None, "rewards"
         tpa = choice([1, 5, 10])
         t_horiz = choice([2, 5, 10])
         r_horiz = choice([1, 10, 22, 45])
@@ -118,7 +115,7 @@ for seed in range(100, 1000):
                     n_rollouts = n_rolls)
                 
                 
-            a = mcts.choose(root, criterion)
+            a = mcts.choose(root)
             print("Ran for", n_iters, "iterations and chose:", a)
     
         else:
@@ -173,9 +170,7 @@ for seed in range(100, 1000):
     
     envname = get_environment_name(env)
     
-    results = [envname,seed,er,dr,time_length,
-               *config,this_loss,
-               g_loss,opt_loss,]
+    results = [envname,seed,er,dr,time_length,*config,this_loss,g_loss,opt_loss]
 
 
     with open("results/mcts_results2.txt", "a") as f:
