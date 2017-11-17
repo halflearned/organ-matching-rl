@@ -29,12 +29,12 @@ from matching.utils.env_utils import snapshot, get_environment_name
 #%%
 er = 5
 dr = .1
-time_length = 250
+time_length = 200
     
     
-for seed in range(20, 1000):
+for seed in range(17, 1000):
     
-    if platform == "darwin":
+    if platform != "darwin":
         scl = .01
         tpa = 100
         t_horiz = 2
@@ -47,11 +47,11 @@ for seed in range(20, 1000):
         net_files = [f for f in listdir("results/") if 
                 f.startswith("MLP_") or 
                 f.startswith("GCN_")] + [None]
-        scl = np.random.uniform(0.001, 1)
-        tpa = np.random.randint(1, 11)
+        scl = choice([0.001, 0.1, 0.5, 1])
+        tpa = choice([1,5,10,20,50])
         t_horiz = choice([2, 5, 10])
         r_horiz = choice([1, 10, 22, 45])
-        n_rolls = np.random.randint(1, 8)
+        n_rolls = choice([1, 5])
         net_file = None
         burnin = 100
 
@@ -87,14 +87,8 @@ for seed in range(20, 1000):
     matched = defaultdict(list)
     rewards = 0                
 #%%    
-    
-    sadad
     t = 0
     while t < env.time_length:
-        
-        print("Now at", t,
-              file = open(name + ".txt", "w"))
-    
         
         print("\nStarting ", t)
         root = mcts.Node(parent = None,

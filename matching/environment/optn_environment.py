@@ -34,23 +34,20 @@ class OPTNKidneyExchange(BaseKidneyExchange):
           
         self.patient = pat
         self.donor = don
-        if populate: self.populate(seed)
+        if populate: self.populate(seed = seed)
         
 
     def __class___(self):
         return OPTNKidneyExchange
     
-    
-    def sdadasdad(self):
-        pass
 
 
     def draw_node_features(self, t_begin, t_end):
-        np.random.seed(self.seed)
+        if t_begin == 0:
+            np.random.seed(self.seed)
         
         duration = t_end - t_begin
         n_periods = np.random.poisson(self.entry_rate, size = duration)
-        n_periods[0] = self.entry_rate # Make sure someone exists at t=0
         
         n = np.sum(n_periods)
         entries = np.repeat(np.arange(t_begin, t_end), n_periods)
