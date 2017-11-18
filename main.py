@@ -11,7 +11,7 @@ MCTS with policy function
 import numpy as np
 
 from matching.solver.kidney_solver2 import  optimal, greedy
-import matching.tree_search.mcts_with_opt_rollout as mcts
+import matching.tree_search.mcts as mcts
 
     
 from collections import defaultdict
@@ -29,25 +29,35 @@ from matching.utils.env_utils import snapshot, get_environment_name
 #%%
 er = 5
 dr = .1
-time_length = 200
+time_length = 300
     
-    
+outfile = str(np.random.randint(1e10))
+
 for seed in range(100, 1000):
     
     if platform == "darwin":
         scl, criterion = None, "rewards"
-        tpa = 10
-        t_horiz = 4
-        r_horiz = 10
+        tpa = choice()
+        t_horiz = 1
+        r_horiz = 100
         n_rolls = 1
         net_file = None
         burnin = 0
         
     else:
+        
         net_files = [f for f in listdir("results/") if 
                 f.startswith("MLP_") or 
                 f.startswith("GCN_")] + [None]
-        scl, criterion = None, "rewards"
+    
+        scl, criterion = choice([(.01, "visits"),
+                                 (.025, "visits"),
+                                 (.05, "visits"),
+                                 (.075, "visits"),
+                                 (.1, "visits"),
+                                 (.5, "visits"),
+                                 (None, "rewards")])
+    
         tpa = choice([1, 5, 10])
         t_horiz = choice([2, 5, 10])
         r_horiz = choice([1, 10, 22, 45])
@@ -86,10 +96,13 @@ for seed in range(100, 1000):
 
     matched = defaultdict(list)
     rewards = 0   
-             
-#%%    
     t = 0
+#%%    
+
     while t < env.time_length:
+        
+        print("")
+        
         
         print("\nStarting ", t)
         root = mcts.Node(parent = None,
@@ -98,7 +111,6 @@ for seed in range(100, 1000):
                     env = snapshot(env, t),
                     taken = None,
                     actions = mcts.get_actions(env, t))
-
         iters = 0
     
         print("Actions: ", root.actions)
@@ -119,6 +131,7 @@ for seed in range(100, 1000):
                 
                 
             a = mcts.choose(root, criterion)
+
             print("Ran for", n_iters, "iterations and chose:", a)
     
         else:
@@ -156,7 +169,7 @@ for seed in range(100, 1000):
 
 
 #%%
-    burnin = 100
+    burnin = 0
     this_matched = mcts.flatten_matched(matched, burnin)
     g_matched = mcts.flatten_matched(g["matched"], burnin)
     opt_matched = mcts.flatten_matched(opt["matched"], burnin)
@@ -191,14 +204,15 @@ for seed in range(100, 1000):
 import matplotlib.pyplot as plt
 from matching.utils.data_utils import get_n_matched
 
-gc = get_n_matched(g["matched"]).cumsum()
-tc = get_n_matched(matched).cumsum()
-oc = get_n_matched(opt["matched"]).cumsum()
-ts = np.arange(1, len(gc)+1)
+gc = get_n_matched(g["matched"], env.time_length).cumsum()
+tc = get_n_matched(matched, env.time_length).cumsum()
+oc = get_n_matched(opt["matched"], env.time_length).cumsum()
+ts = np.arange(1,  env.time_length+1)
 
 plt.plot(ts, gc/ts, label = "greedy", color = "orange")
 plt.plot(ts, oc/ts, label = "opt", color = "blue")
 plt.plot(ts, tc/ts, label = "this", color = "green")
+plt.legend()
 
 
 

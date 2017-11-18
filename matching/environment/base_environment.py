@@ -173,6 +173,8 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
                     and n not in self.removed(t_begin)]
     
     
+    
+    
     def reindex_to_absolute(self, vs, t):
         living = self.get_living(t, indices_only = True)
         reindexed = [living[i] for i in vs]

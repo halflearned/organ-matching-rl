@@ -18,7 +18,7 @@ import multiprocessing as mp
 from itertools import chain
 
 from matching.solver.kidney_solver2 import  optimal, greedy
-from matching.utils.data_utils import get_additional_regressors, clock_seed
+from matching.utils.data_utils import get_additional_regressors, clock_seed, get_dead
 from matching.utils.env_utils import get_actions, snapshot, remove_taken
 
 
@@ -261,23 +261,6 @@ def simulate_unmatched_dead(env, t_begin, t_end, seed=None, taken=None):
     dead = get_dead(env, matched, t_begin, t_end)
     return len(dead)
 
-
-
-def get_dead(env, matched, t_begin = None, t_end = None):
-    
-    if t_begin is None:
-        t_begin = 0
-
-    if t_end is None:
-        t_end = env.time_length-1
-        
-    would_be_dead = {n for n, d in env.nodes.data() 
-                    if d["death"] >= t_begin and \
-                       d["death"] <= t_end}
-    
-    dead = would_be_dead.difference(matched)
-    
-    return dead
 
 
     

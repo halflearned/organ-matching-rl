@@ -12,15 +12,12 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 from random import shuffle, choice
-from time import time    
 import multiprocessing as mp
 
-from itertools import chain
-
-from matching.solver.kidney_solver2 import  optimal, greedy
+from matching.solver.kidney_solver2 import  optimal
 from matching.utils.data_utils import get_additional_regressors, clock_seed
 from matching.utils.env_utils import get_actions, snapshot, remove_taken
-
+from matching.utils.data_utils import flatten_matched
 
 
 
@@ -81,6 +78,8 @@ def run(root,
         rollout_horizon,
         n_rollouts,
         net = None):
+    
+    #import pdb; pdb.set_trace()
     
     node = tree_policy(root,
                        root.t + tree_horizon,
@@ -193,6 +192,7 @@ def stay(node, taken):
 def choose(root, criterion):
     
     shuffle(root.children)
+    
     print("Choosing")
     for c in root.children:
         print("Option:", c.taken,
@@ -201,7 +201,7 @@ def choose(root, criterion):
               " Expl: %1.3f" % np.log(root.visits/c.visits))
     
     if criterion == "visits":
-        most_visits = max([c.reward for c in root.children])
+        most_visits = max([c.visits for c in root.children])
         most_visited_children = [c for c in root.children if c.visits == most_visits]
         # Break ties with avg rewards
         best = max(most_visited_children,
@@ -293,6 +293,7 @@ def evaluate_policy(net, env, t):
             G, N = get_additional_regressors(env, t)
             Z = np.hstack([X, G, N])
             yhat = net.forward(Z)
+            
     except Exception as e:
         import pdb; pdb.set_trace()
         
@@ -322,6 +323,3 @@ def evaluate_priors(net, env, t, actions):
    
         return priors  
 
-
-def flatten_matched(m, burnin = 0):
-   return set(chain(*[x for t,x in m.items() if t >= burnin]))

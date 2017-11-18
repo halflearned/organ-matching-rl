@@ -16,6 +16,7 @@ import networkx as nx
 import pandas as pd
 from os import listdir
 from collections import defaultdict
+from itertools import chain
 
 from matching.environment.saidman_environment import SaidmanKidneyExchange
 from matching.solver.kidney_solver import KidneySolver
@@ -42,6 +43,16 @@ def get_rewards(solution, t, h):
     return sum([len(match) for period, match in solution["matched"].items()
                 if period >= t and period < t + h])
 
+    
+
+def flatten_matched(m, t_begin = 0, t_end = None):
+    if t_end is None:
+        t_end = np.inf
+    matched = []
+    for t,x in m.items():
+        if t >= t_begin and t <= t_end:
+            matched.extend(x)
+    return set(matched)
     
 
 def get_additional_regressors(env, t):
@@ -102,6 +113,25 @@ def get_additional_regressors(env, t):
 
 
 
+
+
+def get_dead(env, matched, t_begin = None, t_end = None):
+    
+    if t_begin is None:
+        t_begin = 0
+
+    if t_end is None:
+        t_end = env.time_length-1
+        
+    would_be_dead = {n for n, d in env.nodes.data() 
+                    if d["death"] >= t_begin and \
+                       d["death"] <= t_end}
+    
+    dead = would_be_dead.difference(matched)
+    
+    return dead
+
+
     
 def merge_data(*variables,
                path = "data/"):
@@ -121,6 +151,8 @@ def merge_data(*variables,
     return data
 
     
+
+
 
 def get_n_matched(matched, n = None):
     if n is None:
@@ -239,15 +271,15 @@ def stata_to_csv(filepath, outfile, chunksize = 10000):
     
 
 
-#%%
-if __name__ == "__main__":
-    
-    while True:
-        #path = "/Users/vitorhadad/Documents/kidney/matching/data/"
-        try:
-            path = "data/"
-            name = str(np.random.randint(1e8))
-            data = prepare_mdp(1, time_length = 200)
-            pickle.dump(data, open(path + "data_with_value_{}.pkl".format(name), "wb"))
-        except:
-            pass
+##%%
+#if __name__ == "__main__":
+#    
+#    while True:
+#        #path = "/Users/vitorhadad/Documents/kidney/matching/data/"
+#        try:
+#            path = "data/"
+#            name = str(np.random.randint(1e8))
+#            data = prepare_mdp(1, time_length = 200)
+#            pickle.dump(data, open(path + "data_with_value_{}.pkl".format(name), "wb"))
+#        except:
+#            pass
