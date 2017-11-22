@@ -6,6 +6,7 @@ Created on Tue Nov 14 21:51:19 2017
 @author: vitorhadad
 """
 from collections import defaultdict
+from itertools import chain
 import gurobipy as gb
 
 
@@ -25,6 +26,8 @@ def get_two_cycles(env, nodes = None):
     return output
     
     
+
+
 def get_three_cycles(env, nodes = None):
     if nodes is not None:
         subgraph = env.subgraph(nodes)
@@ -66,6 +69,7 @@ def get_cycles(env, nodes, max_cycle_length = 2):
 
 def find_matching_date(env, nodes):
     return max(env.node[v]["entry"] for v in nodes)
+
 
 
 def parse_solution(env, cycles, model, t_begin = None):
@@ -120,20 +124,34 @@ def solve(weights, cycles):
 
 
 
-def optimal(env, t_begin = None, t_end = None, max_cycle_length = 2):
+def optimal(env, 
+            t_begin = None, t_end = None, 
+            restrict = None,
+            max_cycle_length = 2):
     
     if t_begin is None:
         t_begin = 0
     if t_end is None:
         t_end = env.time_length
     
-    nodes = env.get_living(t_begin, t_end) 
+    nodes = set(env.get_living(t_begin, t_end))
+#    if contains is not None:
+#        nbrs = set(chain.from_iterable(env.neighbors(n) 
+#                                        for n in contains))
+#        nodes = nodes.intersection(nbrs)
+    if restrict is not None:
+        nodes = nodes.intersection(restrict)
+    
     ws, cs = get_cycles(env, nodes, max_cycle_length)
     m =  solve(ws, cs)
     return parse_solution(env, cs, m, t_begin)
     
 
+
+
+
     
+
 
 def greedy(env, t_begin = None, t_end = None, max_cycle_length = 2):
     

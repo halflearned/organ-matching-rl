@@ -1,6 +1,7 @@
 from random import shuffle
 from re import findall
 from collections import defaultdict
+import networkx as nx
 #from matching.environment.optn_environment import OPTNKidneyExchange
 
 def get_actions(env, t):
@@ -11,14 +12,26 @@ def get_actions(env, t):
     return actions
 
 
-def two_cycles(env, t):
-    nodes = list(env.get_living(t))
+def two_cycles(env, t, nodes = None):
+    if nodes is None and t is not None:
+        nodes = list(env.get_living(t))
     cycles = []
     for i, u in enumerate(nodes):
         for w in nodes[i:]:
             if env.has_edge(u,w) and env.has_edge(w,u):
                 cycles.append((u,w))
     return cycles
+
+
+
+def two_cycles_from_nodes(env, nodes = None):
+    cycles = []
+    for i, u in enumerate(nodes):
+        for w in env.neighbors(u):
+            if env.has_edge(u,w) and env.has_edge(w,u):
+                cycles.append((u,w))
+    return cycles
+
 
 
 def get_environment_name(env):

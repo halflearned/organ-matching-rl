@@ -1,0 +1,22 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Terminology}{section.1}% 2
+\BOOKMARK [3][-]{subsubsection.1.1.1}{Static matching}{subsection.1.1}% 3
+\BOOKMARK [3][-]{subsubsection.1.1.2}{Dynamic matching}{subsection.1.1}% 4
+\BOOKMARK [1][-]{section.2}{Literature Review}{}% 5
+\BOOKMARK [2][-]{subsection.2.1}{Organ Matching}{section.2}% 6
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Medicine}{subsection.2.1}% 7
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Economics}{subsection.2.1}% 8
+\BOOKMARK [3][-]{subsubsection.2.1.3}{Computer Science and Operations Research}{subsection.2.1}% 9
+\BOOKMARK [2][-]{subsection.2.2}{Artificial Intelligence}{section.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.2.1}{}{subsection.2.2}% 11
+\BOOKMARK [1][-]{section.3}{Model}{}% 12
+\BOOKMARK [2][-]{subsubsection.3.0.1}{Extracting heuristics}{section.3}% 13
+\BOOKMARK [1][-]{section.4}{Results}{}% 14
+\BOOKMARK [2][-]{subsubsection.4.0.1}{Matching uniformly at random}{section.4}% 15
+\BOOKMARK [3][-]{subsubsection.4.0.2}{Greedy matchings}{subsubsection.4.0.1}% 16
+\BOOKMARK [3][-]{subsubsection.4.0.3}{Optimal matchings}{subsubsection.4.0.1}% 17
+\BOOKMARK [1][-]{section.5}{Discussions}{}% 18
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 19
+\BOOKMARK [1][-]{section*.1}{Tables}{}% 20
+\BOOKMARK [1][-]{section*.2}{Figures}{}% 21
+\BOOKMARK [1][-]{section*.3}{Appendix A}{}% 22

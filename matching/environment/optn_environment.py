@@ -109,7 +109,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
     def X(self, t, dtype = "numpy"):
         nodelist = self.get_living(t, indices_only = False)
         n = len(nodelist)
-        Xs = np.zeros((n, 10))
+        Xs = np.zeros((n, 12))
         indices = []
         for i, (n, d) in enumerate(nodelist):
             Xs[i, 0] =  d["patient_blood"] == "O"
@@ -120,6 +120,10 @@ class OPTNKidneyExchange(BaseKidneyExchange):
             Xs[i, 5] =  d["donor_blood"] == "B"
             Xs[i, 6] = t - d["entry"] 
             Xs[i, 7] = d["death"] - t
+            Xs[i, 8] = len(d["notA"])
+            Xs[i, 9] = len(d["notB"])
+            Xs[i, 10] = len(d["notC"])
+            Xs[i, 11] = len(d["notDR"])
             indices.append(n)
             
         if dtype == "pandas":
@@ -128,7 +132,9 @@ class OPTNKidneyExchange(BaseKidneyExchange):
                          columns = ["pO","pA","pB",
                                     "dO","dA","dB",
                                     "waiting_time",
-                                    "time_to_death"])
+                                    "time_to_death",
+                                    "#notA", "#notB",
+                                    "#notC", "#notDR"])
         elif dtype == "numpy":
             return Xs
         else:

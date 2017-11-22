@@ -7,10 +7,10 @@ Created on Sat Oct  7 15:05:52 2017
 """
 
 import numpy as np
+from base_environment import BaseKidneyExchange, draw
 import pandas as pd
+import networkx as nx
 from collections import OrderedDict
-
-from matching.environment.base_environment import BaseKidneyExchange, draw
 
 
 class ABOKidneyExchange(BaseKidneyExchange):
@@ -38,51 +38,39 @@ class ABOKidneyExchange(BaseKidneyExchange):
         
         
     
-    def draw_node_features(self, t_begin, t_end):
-            
-        duration = t_end - t_begin
-        n_periods = np.random.poisson(self.entry_rate, size = duration)
-        n = np.sum(n_periods)
-        labels = ["entry", "death", "p_blood", "d_blood"]
-        entries = np.repeat(np.arange(t_begin, t_end), n_periods)
+    def populate(self):
+        
+        
+        n_today = np.random.poisson(self.entry_rate, size=self.time_length)
+        n = np.sum(n_today)
+        entries = np.repeat(np.arange(self.time_length), n_today)
         sojourns = np.random.geometric(self.death_rate, n)
         deaths = entries + sojourns
         p_blood = draw(self.blood_freq, n)
         d_blood = draw(self.blood_freq, n)
-        return [dict(zip(labels, feats)) for feats in zip(entries,
-                                                        deaths,
-                                                        p_blood,
-                                                        d_blood)]
         
-      
         
-    def draw_edges(self, source_nodes, target_nodes):
+        for i in range(n):
+            self.add_node(i, 
+                       entry = entries[i],
+                       death = deaths[i],
+                       p_blood = p_blood[i],
+                       d_blood = d_blood[i])
+                      
             
-        np.random.seed(self.seed)
-        source_nodes = np.array(source_nodes)
-        target_nodes = np.array(target_nodes)
+        contemporaneous = (entries.reshape(-1, 1) <= deaths) & \
+                          (deaths.reshape(-1, 1) >= entries)
+
+        blood_compatible = (p_blood.reshape(-1,1) == d_blood) | \
+                           (p_blood.reshape(-1,1) == 3) | \
+                           (d_blood.reshape(-1,1) == 0)
+                           
+        compatible = np.argwhere(contemporaneous & \
+                                 blood_compatible)
         
-        source_entry = self.attr_to_numpy("entry", source_nodes)
-        source_death = self.attr_to_numpy("death", source_nodes)
-        source_don = self.attr_to_numpy("d_blood", source_nodes)
+        self.add_edges_from(compatible, weight = 1)
         
-        target_entry = self.attr_to_numpy("entry", target_nodes)
-        target_death = self.attr_to_numpy("death", target_nodes)
-        target_pat = self.attr_to_numpy("p_blood", target_nodes)
-        
-        time_comp = (source_entry <= target_death.T) & (source_death >= target_entry.T)
-        blood_comp = (source_don == target_pat.T) | (source_don == 0) | (target_pat.T == 3)
-        not_same = source_nodes.reshape(-1,1) != target_nodes.reshape(1,-1)
-        
-        comp = time_comp & blood_comp & not_same
-        
-        s_idx, t_idx = np.argwhere(comp).T 
-        
-        return list(zip(source_nodes[s_idx], target_nodes[t_idx]))
-        
-        
-        
-        
+
         
         
     def X(self, t):

@@ -323,3 +323,57 @@ def evaluate_priors(net, env, t, actions):
    
         return priors  
 
+
+
+def mcts(env, 
+         t, 
+         net = None,
+         criterion = "visits",
+         scl = 1,
+         tpa = 5,
+         tree_horizon = None,
+         rollout_horizon = None,
+         n_rolls = 1):
+    
+    
+    if tree_horizon is None:
+        tree_horizon = int(1/env.death_rate)
+    if rollout_horizon is None:
+        rollout_horizon = int(1/env.death_rate)
+    
+    
+    root = Node(parent = None,
+                    t = t,
+                    reward = 0,
+                    env = snapshot(env, t),
+                    taken = None,
+                    actions = get_actions(env, t))
+    
+    print("Actions: ", root.actions)
+    n_act = len(root.actions)
+    if n_act > 1:    
+        a = choice(root.actions)
+        n_iters = int(tpa * n_act)
+         
+        for i_iter in range(n_iters):
+            
+            run(root,
+                scalar = scl,
+                tree_horizon = tree_horizon,
+                rollout_horizon = rollout_horizon,
+                net = net,
+                n_rollouts = n_rolls)
+            
+            
+        a = choose(root, criterion)
+
+        print("Ran for", n_iters, "iterations and chose:", a)
+
+    else:
+        
+        a = root.actions[0]
+        print("Chose the only available action:", a)
+
+    return a
+
+
