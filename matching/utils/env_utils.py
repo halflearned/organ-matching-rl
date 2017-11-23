@@ -1,7 +1,7 @@
 from random import shuffle
 from re import findall
+import numpy as np
 from collections import defaultdict
-import networkx as nx
 #from matching.environment.optn_environment import OPTNKidneyExchange
 
 def get_actions(env, t):
@@ -37,6 +37,7 @@ def two_cycles_from_nodes(env, nodes = None):
 def get_environment_name(env):
     return findall("[A-Za-z]+KidneyExchange", str(env.__class__))[0]
     
+
 
 
 def remove_taken(actions, taken):

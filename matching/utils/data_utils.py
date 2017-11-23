@@ -26,7 +26,10 @@ def clock_seed():
     return int(str(int(time()*1e8))[10:])  
 
 
-    
+def disc_mean(xs, gamma = 0.97):
+    return np.mean([gamma**i * r for i,r in enumerate(xs)])
+
+
 def balancing_weights(XX, y):
     yy = y.flatten()
     n1 = np.sum(yy)
@@ -154,12 +157,19 @@ def merge_data(*variables,
 
 
 
-def get_n_matched(matched, n = None):
-    if n is None:
-        n = max(matched) + 1
-    n_matched = np.zeros(n)
+def get_n_matched(matched, t_begin = None, t_end = None):
+
+    if t_begin is None:
+        t_begin = min(matched)
+    
+    if t_end is None:
+        t_end = max(matched) 
+
+    n_matched = np.zeros(t_end - t_begin + 1)
+    
     for t, m in matched.items():
-        n_matched[t] = len(m)
+        n_matched[t - t_begin] = len(m)
+        
     return n_matched
 
 

@@ -31,19 +31,24 @@ from matching.utils.data_utils import get_n_matched
 #%%
 
 
-scl, criterion = choice([(.0001,   "visits"),
-                         (.1,  "visits"),
+scl, criterion = choice([(.1,  "visits"),
                          (.5,   "visits"),
                          (1,    "visits"),
-                         (2,    "visits"),
-                         (5,    "visits"),
-                         (None, "rewards")])
+                         (2,    "visits")])
 
-tpa = choice([1, 3, 5])
-t_horiz = choice([1, 5])
-r_horiz = choice([10, 22, 45])
-n_rolls = choice([1])
-net_file = "RL_12282732" #choice(net_files)
+tpa = choice([5, 10])
+t_horiz = choice([5, 22])
+r_horiz = choice([10, 45])
+n_rolls = choice([1, 5])
+net_file = choice(["RL_18951235",
+                   "RL_23101647",
+                   "RL_26213785",
+                   "RL_28123910",
+                   "RL_73162545",
+                   "RL_74678542",
+                   "RL_80663654",
+                   "RL_81274922"])
+
 burnin = 0    
 
 print("USING:")
@@ -72,9 +77,9 @@ logfile = "MCTS_"+ name + ".txt"
 
 data  = pickle.load(open("results/" + file, "rb"))
 env = data["env"]
-env.removed_container = data["opt_matched"]
-o = get_n_matched(data["opt_matched"], env.time_length)
-g = get_n_matched(data["greedy_matched"], env.time_length)
+
+o = get_n_matched(data["opt_matched"], 0, env.time_length)
+g = get_n_matched(data["greedy_matched"], 0, env.time_length)
 
 if burnin > env.time_length:
     raise ValueError("Burnin > T")
@@ -95,9 +100,9 @@ while t < env.time_length:
                   n_rolls = n_rolls)
     
     
-    print(" File", file.split("_")[1],
-          " Time:",t,
-          " Total:", sum(rewards[:t]),
+    print(" Time:", t,
+          " Action:",a,
+          " R:", sum(rewards),
           " G:", g[:t].sum(),
           " O:", o[:t].sum(),
           file = open(logfile, "a"))
@@ -114,6 +119,14 @@ while t < env.time_length:
     else:
         print("\nDone with", t, ". Moving on to next period\n")
         t += 1
+        
+
+    if t > 200 and np.sum(rewards) < (0.85*o[:t].sum()):
+        from os import system
+        system("qsub job_mcts.pbs")
+        system("rm -rf MCTS_{}*".format(name))
+        exit()
+        
 
 
     if platform == "linux" and t % 100 == 0:
@@ -121,35 +134,37 @@ while t < env.time_length:
         with open("results/" + name + ".pkl", "wb") as f:
             pickle.dump(file = f, 
                         obj = {"file": file,
-                           "environment": envname,
-                           "this_rewards": rewards,
-                           "this_matched": matched,
-                           "opt": o,
-                           "greedy": g,
-                           "scl": scl,
-                           "criterion": criterion,
-                           "tpa": tpa,
-                           "r_horiz": r_horiz,
-                           "t_horiz": t_horiz,
-                           "n_rolls": n_rolls,
-                           "net_file": net_file,
-                           "config": config})
+                               "environment": envname,
+                               "this_rewards": rewards,
+                               "this_matched": matched,
+                               "net": net,
+                               "opt": o,
+                               "greedy": g,
+                               "scl": scl,
+                               "criterion": criterion,
+                               "tpa": tpa,
+                               "r_horiz": r_horiz,
+                               "t_horiz": t_horiz,
+                               "n_rolls": n_rolls,
+                               "net_file": net_file,
+                               "config": config})
 
 
 
 #%%
-print("MCTS loss: ", rewards)
-print("GREEDY loss:",  g[:t].sum())
-print("OPT loss:", o[:t].sum())
+print("MCTS loss: ", sum(rewards))
+print("GREEDY loss:",  g.sum())
+print("OPT loss:", o.sum())
 
 
 
 results = [file,
+           net_file,
            envname,
            *config,
-           rewards,
-           g[:t].sum(),
-           o[:t].sum()]
+           sum(rewards),
+           g.sum(),
+           o.sum()]
 
 
 with open("results/mcts_results9.txt", "a") as f:

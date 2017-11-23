@@ -98,8 +98,6 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         nodefts = self.draw_node_features(t_begin, t_end)
         new_ids = tuple(range(next_id, next_id+ len(nodefts)))
         self.add_nodes_from(zip(new_ids, nodefts))
-        #import pdb; pdb.set_trace()
-        
         
         oldnew_edges = self.draw_edges(old_ids, new_ids)
         self.add_edges_from(oldnew_edges, weight = 1)

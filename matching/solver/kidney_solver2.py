@@ -22,7 +22,7 @@ def get_two_cycles(env, nodes = None):
     output = []
     for u, v, attr in edges:
         if u < v and subgraph.has_edge(v, u):
-            output.append((u, v))
+            output.append({u, v})
     return output
     
     
@@ -42,11 +42,24 @@ def get_three_cycles(env, nodes = None):
             if w >= u or w >= v:
                 break
             if subgraph.has_edge(v, w) and subgraph.has_edge(w, u):
-                output.append((u, w, v))
+                output.append({u, w, v})
     
     return output
 
     
+
+
+
+
+def restrict_cycles(ws_full, cs_full, restrict):
+    restrict = set(restrict)
+    ws_restr, cs_restr = [], []
+    for w,c in zip(ws_full, cs_full):
+        if len(c.intersection(restrict)) == 0:
+            ws_restr.append(w)
+            cs_restr.append(c)
+    return ws_restr, cs_restr
+
 
 
 def get_cycles(env, nodes, max_cycle_length = 2):
@@ -126,7 +139,7 @@ def solve(weights, cycles):
 
 def optimal(env, 
             t_begin = None, t_end = None, 
-            restrict = None,
+            subset = None,
             max_cycle_length = 2):
     
     if t_begin is None:
@@ -139,8 +152,8 @@ def optimal(env,
 #        nbrs = set(chain.from_iterable(env.neighbors(n) 
 #                                        for n in contains))
 #        nodes = nodes.intersection(nbrs)
-    if restrict is not None:
-        nodes = nodes.intersection(restrict)
+    if subset is not None:
+        nodes = nodes.intersection(subset)
     
     ws, cs = get_cycles(env, nodes, max_cycle_length)
     m =  solve(ws, cs)
@@ -148,8 +161,34 @@ def optimal(env,
     
 
 
-
-
+def compare_optimal(env, 
+                    t_begin,
+                    t_end,
+                    perturb,
+                    max_cycle_length = 2):
+    
+    if t_begin is None:
+        t_begin = 0
+    if t_end is None:
+        t_end = env.time_length
+        
+    nodes = set(env.get_living(t_begin, t_end))
+    
+    ws_full, cs_full = get_cycles(env, nodes, max_cycle_length)
+    
+    ws_restr, cs_restr = restrict_cycles(ws_full, cs_full, perturb)
+    
+    m_full  = solve(ws_full, cs_full)
+    m_restr = solve(ws_restr, cs_restr)
+    
+    sol_full = parse_solution(env, cs_full,  m_full,  t_begin)
+    sol_restr = parse_solution(env, cs_restr, m_restr, t_begin)
+    
+    sol_restr["obj"] += len(perturb)
+    sol_restr["matched"][t_begin].update(perturb)
+    
+    return sol_full, sol_restr
+    
     
 
 

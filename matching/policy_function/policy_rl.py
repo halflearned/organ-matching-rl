@@ -24,11 +24,8 @@ from matching.environment.saidman_environment import SaidmanKidneyExchange
 from matching.utils.data_utils import get_additional_regressors
 from matching.tree_search.mcts import mcts
 from matching.utils.data_utils import get_n_matched, clock_seed
-    
+from matching.utils.env_utils import disc_mean    
 
-
-def disc_mean(xs, gamma = 0.97):
-    return np.mean([gamma**i * r for i,r in enumerate(xs)])
 
 
 def evaluate_policy(net, env, t):
@@ -56,7 +53,7 @@ if __name__ == "__main__":
     from sys import platform
     from os import system
     
-    net_file = "RL_46579219"
+    net_file = "RL_86995045"
     burnin = 150
     entry_rate = 5
     death_rate = .1
@@ -64,28 +61,35 @@ if __name__ == "__main__":
     horizon = 50
     newseed = str(np.random.randint(1e8))
     train = True
-    disc = 0.97
+    disc = 0.99
 
     if net_file is not None:
+        
         print("Using file: ", net_file)
+        
         net = torch.load("results/" + net_file)
+        
         net.gamma = 0.97
+        
     else:
+        
         print("New algo: ")
+        
         net = choice([
                GCNet(12, None, dropout_prob = 0.2),
                GCNet(12, [100], dropout_prob = 0.2),
                GCNet(12, [50, 50], dropout_prob = 0.2),
                GCNet(12, [20, 20, 20], dropout_prob = 0.2),
                GCNet(12, [100, 100], dropout_prob = 0.2),
-               GCNet(12, [100, 100, 100], dropout_prob = 0.5),
+               GCNet(12, [100, 100, 100], dropout_prob = 0.2),
                MLPNet(26, None, dropout_prob = 0.2),
                MLPNet(26, [100], dropout_prob = 0.2),
                MLPNet(26, [50, 50], dropout_prob = 0.2),
                MLPNet(26, [100, 100], dropout_prob = 0.2),
                MLPNet(26, [20, 20, 20], dropout_prob = 0.2),
-               MLPNet(26, [100, 100, 100], dropout_prob = 0.5)
+               MLPNet(26, [100, 100, 100], dropout_prob = 0.2)
                ])
+    
         net.gamma = choice([1, 0.99, 0.95, 0.9, 0.8])
         
         print(net)
@@ -109,8 +113,8 @@ if __name__ == "__main__":
         print("Opening data", f)
         data  = pickle.load(open("results/" + f, "rb"))
         env = deepcopy(data["env"])
-        o = get_n_matched(data["opt_matched"], env.time_length)
-        g = get_n_matched(data["greedy_matched"], env.time_length)
+        o = get_n_matched(data["opt_matched"], 0, env.time_length)
+        g = get_n_matched(data["greedy_matched"], 0, env.time_length)
         
 
         rewards = []
@@ -185,7 +189,7 @@ if __name__ == "__main__":
                     
                     opt_m = optimal(env_opt, t_begin=s, t_end = s+2*horizon)
                     
-                    baseline = disc_mean(get_n_matched(opt_m["matched"]))
+                    baseline = disc_mean(get_n_matched(opt_m["matched"], s, s+2*horizon))
                     
                     rs = disc_mean(rewards[s:s+horizon], net.gamma)
                     
@@ -204,15 +208,16 @@ if __name__ == "__main__":
                 
                 torch.save(net, "results/RL_" + newseed)
                 
-
+                
+            if platform == "linux" and t > 500 and np.sum(rewards) < (g[:t].sum()*.8):
+                system("qsub job_policy.pbs")
+                exit()
+        
         
         
         print(newseed, k, np.sum(rewards), data["greedy_obj"], data["opt_obj"],
               file = open("results/policy_rl_results.txt", "a"))
 
-        if np.sum(rewards) < 500:
-            system("qsub job_policy.pbs")
-            exit()
         
         
 

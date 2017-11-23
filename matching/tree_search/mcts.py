@@ -12,13 +12,11 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 from random import shuffle, choice
-import multiprocessing as mp
 
-from matching.solver.kidney_solver2 import  optimal
+from matching.solver.kidney_solver2 import  optimal, compare_optimal
 from matching.utils.data_utils import get_additional_regressors, clock_seed
 from matching.utils.env_utils import get_actions, snapshot, remove_taken
-from matching.utils.data_utils import flatten_matched
-
+from matching.utils.data_utils import flatten_matched, disc_mean , get_n_matched
 
 
 class Node:
@@ -78,8 +76,6 @@ def run(root,
         rollout_horizon,
         n_rollouts,
         net = None):
-    
-    #import pdb; pdb.set_trace()
     
     node = tree_policy(root,
                        root.t + tree_horizon,
@@ -217,49 +213,52 @@ def choose(root, criterion):
 
     
 def parallel_rollout(node, horizon, n):   
-    try:
-        prcs = mp.cpu_count() 
-        with mp.Pool(processes = prcs) as pool:             
-            results = [pool.apply_async(rollout,
-                            args = (node.parent.env,
-                                    node.t,
-                                    node.t + horizon, 
-                                    node.taken))
-                        for i in range(n)]
-            res = [r.get() for r in results]
-    
-    except Exception:
-        print("Error during parallel rollout. Fallback on regular loop.")
-        res = []
-        for i in range(n):
-            #env = deepcopy(node.parent.env)
-            res.append(rollout(snapshot(node.parent.env, node.t),
-                               node.t,
-                               node.t + horizon,
-                               node.taken))
+    res = []
+    for i in range(n):
+        res.append(rollout(snapshot(node.parent.env, node.t),
+                           node.t,
+                           node.t + horizon,
+                           node.taken))
     return np.mean(res)
     
     
-def rollout(env, t_begin, t_end, taken):
-    seed = clock_seed()
-    rem = deepcopy(env.removed_container)
-    loss_leave = simulate_unmatched_dead(env, t_begin, t_end, seed)
-    loss_take = simulate_unmatched_dead(env, t_begin, t_end, seed, taken)
-    env.removed_container = rem
-    return (1 + loss_leave)/(1 + loss_take)
+#def rollout(env, t_begin, t_end, taken):
+#    seed = clock_seed()
+#    rem = deepcopy(env.removed_container)
+#    loss_leave = simulate_unmatched_dead(env, t_begin, t_end, seed)
+#    loss_take = simulate_unmatched_dead(env, t_begin, t_end, seed, taken)
+#    env.removed_container = rem
+#    return (1 + loss_leave)/(1 + loss_take)
+#    
     
+#
+#def simulate_unmatched_dead(env, t_begin, t_end, seed=None, taken=None):
+#    if taken is not None:
+#        env.removed_container[t_begin].update(taken)
+#    env.populate(t_begin+1, t_end, seed=seed)
+#    solution = optimal(env, t_begin=t_begin, t_end=t_end)
+#    matched = flatten_matched(solution["matched"])
+#    if taken is not None:
+#        matched.update(taken)
+#    dead = get_dead(env, matched, t_begin, t_end)
+#    return len(dead)
 
+
+
+def rollout(env, t_begin, t_end, taken, gamma = 0.97):
+
+    snap = snapshot(env, t_begin)
+    snap.populate(t_begin+1, t_end, seed = clock_seed())
     
-def simulate_unmatched_dead(env, t_begin, t_end, seed=None, taken=None):
-    if taken is not None:
-        env.removed_container[t_begin].update(taken)
-    env.populate(t_begin + 1, t_end, seed=seed)
-    solution = optimal(env, t_begin=t_begin, t_end=t_end)
-    matched = flatten_matched(solution["matched"])
-    if taken is not None:
-        matched.update(taken)
-    dead = get_dead(env, matched, t_begin, t_end)
-    return len(dead)
+    opt_take, opt_leave = compare_optimal(snap, t_begin, t_end, taken)
+    
+    m_take = get_n_matched(opt_take["matched"])
+    m_leave = get_n_matched(opt_leave["matched"])
+    
+    value_leave = disc_mean(m_leave, gamma)
+    value_take  = disc_mean(m_take, gamma)
+    return (1 + value_take) / (1 + value_leave)
+
 
 
 
@@ -271,7 +270,7 @@ def get_dead(env, matched, t_begin = None, t_end = None):
     if t_end is None:
         t_end = env.time_length-1
         
-    would_be_dead = {n for n, d in env.nodes.data() 
+    would_be_dead = {n for n,d in env.nodes.data() 
                     if d["death"] >= t_begin and \
                        d["death"] <= t_end}
     

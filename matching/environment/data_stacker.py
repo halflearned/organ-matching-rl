@@ -32,7 +32,7 @@ env.removed_container.clear()
 
 As, Xs, ms, ys = [], [], [], []
 horizon = 200
-
+#%%
 for t in trange(env.time_length):
     
     liv = np.array(list(env.get_living(t)))
@@ -52,6 +52,10 @@ for t in trange(env.time_length):
     ys.append(y)
     
     
+AAs = np.stack(As, 0)
+XXs = np.stack(Xs, 0)
+mms = np.stack(ms, 0)
+yys = np.vstack(ys)
     
     
     
