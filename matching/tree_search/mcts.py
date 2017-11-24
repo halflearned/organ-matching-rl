@@ -75,7 +75,8 @@ def run(root,
         tree_horizon,
         rollout_horizon,
         n_rollouts,
-        net = None):
+        net = None,
+        gamma = 0.97):
     
     node = tree_policy(root,
                        root.t + tree_horizon,
@@ -84,13 +85,20 @@ def run(root,
     
     
     if node.taken is not None:
-        r = parallel_rollout(node,
-                             rollout_horizon,
-                             n_rollouts)    
+        r = []
+        for i in range(n_rollouts):
+            r.append(rollout(node.parent.env,
+                             node.t,
+                             node.t + rollout_horizon,
+                             node.taken,
+                             gamma))
+        r = np.mean(r)
     else:
         r = 1
     
     backup(node, r)
+    
+    
     
     
     
@@ -211,37 +219,18 @@ def choose(root, criterion):
     
 
 
+def count_matched_today(env, t_begin, t_end, taken, n_times = 10):
+    snap = snapshot(env, t_begin)
+    matched_today = 0
     
-def parallel_rollout(node, horizon, n):   
-    res = []
-    for i in range(n):
-        res.append(rollout(snapshot(node.parent.env, node.t),
-                           node.t,
-                           node.t + horizon,
-                           node.taken))
-    return np.mean(res)
+    for i in range(n_times):
+        if t_begin + 1 < t_end:
+            snap.populate(t_begin + 1, t_end)
+        opt_mt = optimal(snap, t_begin, t_end)["matched_cycles"][t_begin]
+        matched_today += taken in opt_mt
+        
+    return matched_today / n_times
     
-    
-#def rollout(env, t_begin, t_end, taken):
-#    seed = clock_seed()
-#    rem = deepcopy(env.removed_container)
-#    loss_leave = simulate_unmatched_dead(env, t_begin, t_end, seed)
-#    loss_take = simulate_unmatched_dead(env, t_begin, t_end, seed, taken)
-#    env.removed_container = rem
-#    return (1 + loss_leave)/(1 + loss_take)
-#    
-    
-#
-#def simulate_unmatched_dead(env, t_begin, t_end, seed=None, taken=None):
-#    if taken is not None:
-#        env.removed_container[t_begin].update(taken)
-#    env.populate(t_begin+1, t_end, seed=seed)
-#    solution = optimal(env, t_begin=t_begin, t_end=t_end)
-#    matched = flatten_matched(solution["matched"])
-#    if taken is not None:
-#        matched.update(taken)
-#    dead = get_dead(env, matched, t_begin, t_end)
-#    return len(dead)
 
 
 
@@ -250,33 +239,17 @@ def rollout(env, t_begin, t_end, taken, gamma = 0.97):
     snap = snapshot(env, t_begin)
     snap.populate(t_begin+1, t_end, seed = clock_seed())
     
-    opt_take, opt_leave = compare_optimal(snap, t_begin, t_end, taken)
+    opt_take, opt_leave = compare_optimal(snap, t_begin, t_end, set(taken))
     
-    m_take = get_n_matched(opt_take["matched"])
+    m_take  = get_n_matched(opt_take["matched"])
     m_leave = get_n_matched(opt_leave["matched"])
     
     value_leave = disc_mean(m_leave, gamma)
-    value_take  = disc_mean(m_take, gamma)
-    return (1 + value_take) / (1 + value_leave)
-
-
-
-
-def get_dead(env, matched, t_begin = None, t_end = None):
+    value_take  = disc_mean(m_take,  gamma)
     
-    if t_begin is None:
-        t_begin = 0
+    return value_take / value_leave
 
-    if t_end is None:
-        t_end = env.time_length-1
-        
-    would_be_dead = {n for n,d in env.nodes.data() 
-                    if d["death"] >= t_begin and \
-                       d["death"] <= t_end}
-    
-    dead = would_be_dead.difference(matched)
-    
-    return dead
+
 
 
     
@@ -332,7 +305,8 @@ def mcts(env,
          tpa = 5,
          tree_horizon = None,
          rollout_horizon = None,
-         n_rolls = 1):
+         n_rolls = 1,
+         gamma = 0.97):
     
     
     if tree_horizon is None:
@@ -342,11 +316,12 @@ def mcts(env,
     
     
     root = Node(parent = None,
-                    t = t,
-                    reward = 0,
-                    env = snapshot(env, t),
-                    taken = None,
-                    actions = get_actions(env, t))
+                t = t,
+                reward = 0,
+                env = snapshot(env, t),
+                taken = None,
+                actions = get_actions(env, t))
+    
     
     print("Actions: ", root.actions)
     n_act = len(root.actions)
@@ -361,7 +336,8 @@ def mcts(env,
                 tree_horizon = tree_horizon,
                 rollout_horizon = rollout_horizon,
                 net = net,
-                n_rollouts = n_rolls)
+                n_rollouts = n_rolls,
+                gamma = gamma)
             
             
         a = choose(root, criterion)

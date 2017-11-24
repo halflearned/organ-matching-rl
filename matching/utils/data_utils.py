@@ -39,7 +39,8 @@ def balancing_weights(XX, y):
     p[yy == 1] = 1/n1
     p /= p.sum()
     return p
-    
+
+
     
 
 def get_rewards(solution, t, h):

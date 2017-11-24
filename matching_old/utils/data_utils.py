@@ -29,6 +29,9 @@ def clock_seed():
 
 
 
+
+
+
 def get_rewards(solution, t, h):
     return sum([len(match) for period, match in solution["matched"].items()
                 if period >= t and period < t + h])

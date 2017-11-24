@@ -31,81 +31,88 @@ from matching.utils.data_utils import get_n_matched
 #%%
 
 
-scl, criterion = choice([(.1,  "visits"),
-                         (.5,   "visits"),
-                         (1,    "visits"),
-                         (2,    "visits")])
+if platform == "linux":
+    scl, criterion = choice([(.1,  "visits"),
+                             (.5,   "visits"),
+                             (1,    "visits"),
+                             (2,    "visits")])
+    
+    tpa = choice([1,5,10])
+    t_horiz = choice([1,2,3,4,5])
+    r_horiz = choice([2,5,10,20])
+    n_rolls = choice([1,5,10])
+    net_file = choice(["RL_23101647",
+                       "RL_26213785",
+                       "RL_73162545",
+                       "RL_74678542",
+                       "RL_81274922",
+                       None])
+else:
+    scl = .1
+    criterion = "visits"
+    tpa = 3
+    t_horiz = 3
+    r_horiz = 5
+    net_file = None
+    n_rolls = 1
+    
 
-tpa = choice([5, 10])
-t_horiz = choice([5, 22])
-r_horiz = choice([10, 45])
-n_rolls = choice([1, 5])
-net_file = choice(["RL_18951235",
-                   "RL_23101647",
-                   "RL_26213785",
-                   "RL_28123910",
-                   "RL_73162545",
-                   "RL_74678542",
-                   "RL_80663654",
-                   "RL_81274922"])
-
-burnin = 0    
-
-print("USING:")
-print("scl", scl)
-print("tpa", tpa)
-print("t_horiz", t_horiz)
-print("r_horiz", r_horiz)
-print("n_rolls", n_rolls)
-print("net", net_file)
-
-
-config = (scl, criterion, tpa, n_rolls, t_horiz, r_horiz, net_file)
 
 if net_file is not None:
     net = torch.load("results/" + net_file)
     net.eval()
+    gamma = net.gamma
 else:
-    net= None
+    net = None
+    gamma = 0.95
+
+
+config = (scl, criterion, tpa, n_rolls, 
+          t_horiz, r_horiz, net_file, gamma)
+
 
 
 name = str(np.random.randint(1e8))      
 
 file = choice([f for f in listdir("results/")
                 if f.startswith("optn_")])
+    
 logfile = "MCTS_"+ name + ".txt"
 
 data  = pickle.load(open("results/" + file, "rb"))
 env = data["env"]
-
+envname = get_environment_name(env)
 o = get_n_matched(data["opt_matched"], 0, env.time_length)
 g = get_n_matched(data["greedy_matched"], 0, env.time_length)
 
-if burnin > env.time_length:
-    raise ValueError("Burnin > T")
-
 matched = defaultdict(list)
-rewards = []   
+rewards = np.zeros(env.time_length)
 t = 0
 
+print("scl " + str(scl) + \
+      "tpa " + str(tpa) + \
+      "t_horiz " + str(t_horiz) + \
+      "r_horiz " + str(r_horiz) + \
+      "n_rolls " + str(n_rolls) + \
+      "net " + str(net_file) + \
+      "gamma " + str(gamma),
+      file = open(logfile, "a"))
+
+target_g = g[1000:2000].mean()
+target_o = o[1000:2000].mean()
 #%%    
 
-while t < env.time_length:
+while t < 2001: #env.time_length:
     
     a = mcts.mcts(env, t, net,
                   scl = scl,
+                  criterion = criterion,
                   tpa = tpa,
                   tree_horizon = t_horiz,
                   rollout_horizon = r_horiz,
-                  n_rolls = n_rolls)
-    
-    
-    print(" Time:", t,
-          " Action:",a,
-          " R:", sum(rewards),
-          " G:", g[:t].sum(),
-          " O:", o[:t].sum(),
-          file = open(logfile, "a"))
+                  n_rolls = n_rolls,
+                  gamma = gamma)
+
     
     if a is not None:
         
@@ -114,24 +121,26 @@ while t < env.time_length:
         assert a[1] not in env.removed(t)
         env.removed_container[t].update(a)
         matched[t].extend(a)
-        rewards.append(len(a))
+        rewards[t] += len(a)
     
     else:
         print("\nDone with", t, ". Moving on to next period\n")
         t += 1
         
-
-    if t > 200 and np.sum(rewards) < (0.85*o[:t].sum()):
-        from os import system
-        system("qsub job_mcts.pbs")
-        system("rm -rf MCTS_{}*".format(name))
-        exit()
+        t_run_start = max(0, t-100)
+        t_target_stop = min(t, 2000)
+        
+        print(" t:", t,
+              " Run: {:1.3f}".format(np.mean(rewards[t_run_start:t])),
+              " Target: {:1.3f}".format(np.mean(rewards[1000:t_target_stop])),
+              " G: {:1.3f}".format(target_g),
+              " O: {:1.3f}".format(target_o),
+              file = open(logfile, "a"))
         
 
 
     if platform == "linux" and t % 100 == 0:
-        envname = get_environment_name(env)
-        with open("results/" + name + ".pkl", "wb") as f:
+        with open("results/MCTS_" + name + ".pkl", "wb") as f:
             pickle.dump(file = f, 
                         obj = {"file": file,
                                "environment": envname,
@@ -150,13 +159,7 @@ while t < env.time_length:
                                "config": config})
 
 
-
 #%%
-print("MCTS loss: ", sum(rewards))
-print("GREEDY loss:",  g.sum())
-print("OPT loss:", o.sum())
-
-
 
 results = [file,
            net_file,
@@ -172,6 +175,10 @@ with open("results/mcts_results9.txt", "a") as f:
     f.write(s + "\n")
 
 
-
+if platform == "linux":
+    from os import system
+    system("qsub job_mcts.pbs")
+    system("rm -rf MCTS_{}*".format(name))
+    exit()
 
 

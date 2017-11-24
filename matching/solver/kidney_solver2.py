@@ -6,8 +6,8 @@ Created on Tue Nov 14 21:51:19 2017
 @author: vitorhadad
 """
 from collections import defaultdict
-from itertools import chain
 import gurobipy as gb
+import numpy as np
 
 
 
@@ -51,7 +51,7 @@ def get_three_cycles(env, nodes = None):
 
 
 
-def restrict_cycles(ws_full, cs_full, restrict):
+def remove_from_cycles(ws_full, cs_full, restrict):
     restrict = set(restrict)
     ws_restr, cs_restr = [], []
     for w,c in zip(ws_full, cs_full):
@@ -76,6 +76,10 @@ def get_cycles(env, nodes, max_cycle_length = 2):
         cycles.extend(c3s)
         weights.extend([3]*len(c3s))
         
+    idx = np.random.permutation(len(cycles)) 
+    weights = [weights[i] for i in idx]
+    cycles  = [cycles[i] for i in idx]
+    
     return weights, cycles
 
 
@@ -85,18 +89,22 @@ def find_matching_date(env, nodes):
 
 
 
+
 def parse_solution(env, cycles, model, t_begin = None):
-    chosen_cycles = []
+    matched_cycles = defaultdict(list)
     matched = defaultdict(set)
     matched_pairs = set()
     obj = 0
     for xs,cyc in zip(model.getVars(), cycles):
         if xs.x > 0:
-            chosen_cycles.append(cyc)
+            
             t = find_matching_date(env, cyc)
             if t_begin is not None:
                 t = max(t, t_begin)
+                
             matched[t].update(cyc)
+            matched_cycles[t].append(cyc)
+            
             for v in cyc:
                 matched_pairs.add(v)
                 obj += 1
@@ -104,6 +112,7 @@ def parse_solution(env, cycles, model, t_begin = None):
     assert obj == len(matched_pairs)
     return {"matched":matched,
             "matched_pairs":matched_pairs,
+            "matched_cycles":matched_cycles,
             "obj":obj}
 
 
@@ -176,18 +185,23 @@ def compare_optimal(env,
     
     ws_full, cs_full = get_cycles(env, nodes, max_cycle_length)
     
-    ws_restr, cs_restr = restrict_cycles(ws_full, cs_full, perturb)
+    ws_take, cs_take = remove_from_cycles(ws_full, cs_full, perturb)
     
-    m_full  = solve(ws_full, cs_full)
-    m_restr = solve(ws_restr, cs_restr)
+    i = cs_full.index(perturb)
+    ws_leave = ws_full[:i] + ws_full[i+1:]
+    cs_leave = cs_full[:i] + cs_full[i+1:]
     
-    sol_full = parse_solution(env, cs_full,  m_full,  t_begin)
-    sol_restr = parse_solution(env, cs_restr, m_restr, t_begin)
+    m_take  = solve(ws_take, cs_take)
+    m_leave = solve(ws_leave, cs_leave)
     
-    sol_restr["obj"] += len(perturb)
-    sol_restr["matched"][t_begin].update(perturb)
+    sol_take = parse_solution(env, cs_take,  m_take,  t_begin)
+    sol_leave = parse_solution(env, cs_leave, m_leave, t_begin)
     
-    return sol_full, sol_restr
+    sol_take["obj"] += len(perturb)
+    sol_take["matched"][t_begin].update(perturb)
+    sol_take["matched_cycles"][t_begin].append(perturb)
+    
+    return sol_take, sol_leave
     
     
 

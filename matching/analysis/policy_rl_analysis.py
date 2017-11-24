@@ -22,3 +22,4 @@ num = df.groupby("seed")["rg"].transform("size")
 df = df.loc[(good) & (num > 2)]
 
 df.groupby("seed")["rg"].plot()
+

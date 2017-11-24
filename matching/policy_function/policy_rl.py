@@ -14,6 +14,7 @@ import torch
 from os import listdir
 from torch import autograd
 import pickle
+from itertools import cycle
 from random import choice, shuffle
 from copy import deepcopy
     
@@ -24,7 +25,7 @@ from matching.environment.saidman_environment import SaidmanKidneyExchange
 from matching.utils.data_utils import get_additional_regressors
 from matching.tree_search.mcts import mcts
 from matching.utils.data_utils import get_n_matched, clock_seed
-from matching.utils.env_utils import disc_mean    
+from matching.utils.data_utils import disc_mean    
 
 
 
@@ -53,15 +54,21 @@ if __name__ == "__main__":
     from sys import platform
     from os import system
     
-    net_file = "RL_86995045"
-    burnin = 150
+    if np.random.uniform() < .7:
+        net_file = "RL_" + str(choice([74678542,81274922,
+                           34171755,73907163,
+                           90844154,58967136]))
+    else:
+        net_file = None
+        
+        
+    
+    burnin = 200
     entry_rate = 5
     death_rate = .1
-    time_length = 2000
-    horizon = 50
+    horizon = 10
     newseed = str(np.random.randint(1e8))
     train = True
-    disc = 0.99
 
     if net_file is not None:
         
@@ -69,7 +76,7 @@ if __name__ == "__main__":
         
         net = torch.load("results/" + net_file)
         
-        net.gamma = 0.97
+        net.gamma = 0.8
         
     else:
         
@@ -79,18 +86,15 @@ if __name__ == "__main__":
                GCNet(12, None, dropout_prob = 0.2),
                GCNet(12, [100], dropout_prob = 0.2),
                GCNet(12, [50, 50], dropout_prob = 0.2),
-               GCNet(12, [20, 20, 20], dropout_prob = 0.2),
                GCNet(12, [100, 100], dropout_prob = 0.2),
                GCNet(12, [100, 100, 100], dropout_prob = 0.2),
-               MLPNet(26, None, dropout_prob = 0.2),
-               MLPNet(26, [100], dropout_prob = 0.2),
-               MLPNet(26, [50, 50], dropout_prob = 0.2),
-               MLPNet(26, [100, 100], dropout_prob = 0.2),
-               MLPNet(26, [20, 20, 20], dropout_prob = 0.2),
-               MLPNet(26, [100, 100, 100], dropout_prob = 0.2)
+               GCNet(12, [100, 100, 100, 100], dropout_prob = 0.5),
+               GCNet(12, [200, 200, 200], dropout_prob = 0.5),
+               GCNet(12, [200, 200, 200, 200], dropout_prob = 0.5),
+               GCNet(12, [200, 200, 200, 200, 200], dropout_prob = 0.5),
                ])
     
-        net.gamma = choice([1, 0.99, 0.95, 0.9, 0.8])
+        net.gamma = choice([1, 0.99, 0.95, 0.9, 0.8, .5, .25, .1])
         
         print(net)
         
@@ -98,6 +102,8 @@ if __name__ == "__main__":
         net.train()
     else:
         net.eval()
+    
+    net.horizon = horizon
     
     files = [f for f in listdir("results/")
                 if f.startswith("optn_")]
@@ -108,7 +114,7 @@ if __name__ == "__main__":
 
 #%%   
     
-    for k, f in enumerate(files):
+    for k, f in enumerate(cycle(files)):
 
         print("Opening data", f)
         data  = pickle.load(open("results/" + f, "rb"))
@@ -124,9 +130,7 @@ if __name__ == "__main__":
         #%%
         while t < env.time_length:
             
-            #import pdb; pdb.set_trace()
             t += 1
-            #import pdb; pdb.set_trace()
             print("Getting living")
             living = np.array(env.get_living(t))
             if len(living) > 1:
@@ -146,7 +150,7 @@ if __name__ == "__main__":
             s = optimal(env, 
                       t_begin = t,
                       t_end = t,
-                      restrict = living[selected])
+                      subset = living[selected])
                
             
             mat = s["matched"][t]
@@ -203,6 +207,7 @@ if __name__ == "__main__":
                 autograd.backward([actions[s] for s in train_times])
                 
                 net.opt.step()
+                
                 
             if t % 250 == 0 and t > 500:
                 
