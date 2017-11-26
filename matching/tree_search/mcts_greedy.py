@@ -13,10 +13,26 @@ import numpy as np
 import pandas as pd
 from random import shuffle, choice
 
-from matching.solver.kidney_solver2 import  optimal, compare_optimal
+from matching.solver.kidney_solver2 import  optimal, greedy
 from matching.utils.data_utils import get_additional_regressors, clock_seed
-from matching.utils.env_utils import get_actions, snapshot, remove_taken
+from matching.utils.env_utils import snapshot, remove_taken
 from matching.utils.data_utils import flatten_matched, disc_mean , get_n_matched
+
+
+def get_actions(env, t, n_times = 100):
+    
+    sols = []
+    
+    for _ in range(n_times):
+        
+        opt_m = optimal(env, t, t)["matched_pairs"]
+        if len(opt_m) == 0:
+            break
+        sols.append(tuple(sorted(opt_m)))
+        
+    return list(set(sols)) + [()]
+    
+    
 
 
 class Node:
@@ -94,10 +110,11 @@ def run(root,
                              gamma))
         r = np.mean(r)
     else:
-        r = 1
+        r = 0
     
     backup(node, r)
     
+
     
     
     
@@ -193,7 +210,7 @@ def stay(node, taken):
 
 
 
-def choose(root, criterion):
+def choose(root, criterion = "visits"):
     
     shuffle(root.children)
     
@@ -219,36 +236,18 @@ def choose(root, criterion):
     
 
 
-def count_matched_today(env, t_begin, t_end, taken, n_times = 10):
-    snap = snapshot(env, t_begin)
-    matched_today = 0
-    
-    for i in range(n_times):
-        if t_begin + 1 < t_end:
-            snap.populate(t_begin + 1, t_end)
-        opt_mt = optimal(snap, t_begin, t_end)["matched_cycles"][t_begin]
-        matched_today += taken in opt_mt
-        
-    return matched_today / n_times
-    
-
-
-
 def rollout(env, t_begin, t_end, taken, gamma = 0.97):
 
     snap = snapshot(env, t_begin)
     snap.populate(t_begin+1, t_end, seed = clock_seed())
+    snap.removed_container[t_begin].update(taken)
     
-    opt_take, opt_leave = compare_optimal(snap, t_begin+1, t_end, set(taken))
+    value = greedy(snap, t_begin+1, t_end)
+    matched = get_n_matched(value["matched"], t_begin, t_end)
+    matched[0] = len(taken)
     
-    m_take  = get_n_matched(opt_take["matched"], t_begin, t_end)
-    m_leave = get_n_matched(opt_leave["matched"], t_begin, t_end)
-    m_take[0] = len(taken)
+    return disc_mean(matched,  gamma)
     
-    value_leave = disc_mean(m_leave, gamma)
-    value_take  = disc_mean(m_take,  gamma)
-    
-    return value_take / value_leave
 
 
 
@@ -324,10 +323,11 @@ def mcts(env,
                 actions = get_actions(env, t))
     
     
-    #print("Actions: ", root.actions)
+    
+    print("Actions: ", root.actions)
     n_act = len(root.actions)
     if n_act > 1:    
-        a = choice(root.actions)
+
         n_iters = int(tpa * n_act)
          
         for i_iter in range(n_iters):
@@ -342,13 +342,14 @@ def mcts(env,
             
             
         a = choose(root, criterion)
-
-        print("Ran for", n_iters, "iterations and chose:", a)
+        #import pdb; pdb.set_trace()
+        
+        print("Ran for", n_iters, "iterations and chose:", a ,"\n\n\n")
 
     else:
         
         a = root.actions[0]
-        print("Chose the only available action:", a)
+        print("Chose the only available action:", a,"\n\n\n")
 
     return a
 

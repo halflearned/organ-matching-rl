@@ -7,6 +7,7 @@ Created on Tue Nov 14 21:51:19 2017
 """
 from collections import defaultdict
 import gurobipy as gb
+from itertools import permutations
 import numpy as np
 
 
@@ -50,15 +51,6 @@ def get_three_cycles(env, nodes = None):
 
 
 
-
-def remove_from_cycles(ws_full, cs_full, restrict):
-    restrict = set(restrict)
-    ws_restr, cs_restr = [], []
-    for w,c in zip(ws_full, cs_full):
-        if len(c.intersection(restrict)) == 0:
-            ws_restr.append(w)
-            cs_restr.append(c)
-    return ws_restr, cs_restr
 
 
 
@@ -170,6 +162,8 @@ def optimal(env,
     
 
 
+
+
 def compare_optimal(env, 
                     t_begin,
                     t_end,
@@ -206,6 +200,17 @@ def compare_optimal(env,
     
 
 
+def remove_from_cycles(ws_full, cs_full, restrict):
+    restrict = set(restrict)
+    ws_restr, cs_restr = [], []
+    for w,c in zip(ws_full, cs_full):
+        if len(c.intersection(restrict)) == 0:
+            ws_restr.append(w)
+            cs_restr.append(c)
+    return ws_restr, cs_restr
+
+
+
 def greedy(env, t_begin = None, t_end = None, max_cycle_length = 2):
     
     if t_begin is None:
@@ -236,6 +241,10 @@ def greedy(env, t_begin = None, t_end = None, max_cycle_length = 2):
     
 #%% 
 if __name__ == "__main__":
+    
+    from matching.environment.optn_environment import OPTNKidneyExchange
+    
+    env = OPTNKidneyExchange(5, .1, 100)
     
     s = optimal(env, 10, 20)
     for t,m in s["matched"].items():
