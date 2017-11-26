@@ -19,14 +19,17 @@ from sys import platform
 import pickle
 
 
-import matching.tree_search.mcts_greedy as mcts
+from matching.solver.kidney_solver2 import  optimal, greedy
+import matching.tree_search.mcts_increasing as mcts
 from matching.policy_function.policy_function_gcn import GCNet
 from matching.policy_function.policy_function_mlp import MLPNet
 from matching.environment.optn_environment import OPTNKidneyExchange
-from matching.utils.env_utils import  get_environment_name
+from matching.environment.saidman_environment import SaidmanKidneyExchange
+from matching.utils.env_utils import snapshot, get_environment_name
 from matching.utils.data_utils import get_n_matched
 
 #%%
+
 
 
 if platform == "linux":
@@ -35,16 +38,16 @@ if platform == "linux":
                              (1,    "visits"),
                              (2,    "visits")])
     
-    tpa = choice([1, 5, 10])
-    t_horiz = choice([1, 5])
-    r_horiz = choice([2,5,10,20,50])
+    tpa = choice([1,5,10])
+    t_horiz = choice([1,2,3,4,5])
+    r_horiz = choice([2,5,10,20])
     n_rolls = choice([1,5,10])
     net_file = choice(["RL_23101647",
                        "RL_26213785",
                        "RL_73162545",
                        "RL_74678542",
-                       "RL_81274922",
-                       None])
+                       "RL_81274922"])
+    
     gamma = choice([1, .95, .9, .75, .5, .1])
     
 else: 
@@ -53,10 +56,9 @@ else:
     tpa = 1
     t_horiz = 1
     r_horiz = 20
-    net_file = None
     n_rolls = 20
+    net_file = "RL_23101647" 
     gamma = 0.9
-    
 
 
 if net_file is not None:
@@ -74,9 +76,9 @@ config = (scl, criterion, tpa, n_rolls,
 name = str(np.random.randint(1e8))      
 
 file = choice([f for f in listdir("results/")
-                 if f.startswith("optn_")])
+                if f.startswith("optn_")])
     
-logfile = "MCTSG_"+ name + ".txt"
+logfile = "MCTSI_"+ name + ".txt"
 
 data  = pickle.load(open("results/" + file, "rb"))
 env = data["env"]
@@ -100,12 +102,11 @@ print("scl " + str(scl) + \
 target_g = g[500:2000].mean()
 target_o = o[500:2000].mean()
 t = 0
-
 #%%    
 
 while t < env.time_length:
     
-    a = mcts.mcts(env, t, net,
+    a = mcts.mcts(env, t, net = net,
                   scl = scl,
                   criterion = criterion,
                   tpa = tpa,
@@ -132,7 +133,7 @@ while t < env.time_length:
 
 
     if platform == "linux" and t % 100 == 0:
-        with open("results/MCTS_" + name + ".pkl", "wb") as f:
+        with open("results/MCTSI_" + name + ".pkl", "wb") as f:
             pickle.dump(file = f, 
                         obj = {"file": file,
                                "environment": envname,
@@ -162,7 +163,7 @@ results = [file,
            o.sum()]
 
 
-with open("results/mcts_results_greedy.txt", "a") as f:
+with open("results/mcts_results_increasing.txt", "a") as f:
     s = ",".join([str(s) for s in results])
     f.write(s + "\n")
 
@@ -172,5 +173,6 @@ if platform == "linux":
     system("qsub job_mcts.pbs")
     system("rm -rf MCTS_{}*".format(name))
     exit()
+
 
 
