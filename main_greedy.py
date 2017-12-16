@@ -13,7 +13,7 @@ import numpy as np
     
 from collections import defaultdict
 from random import choice
-from os import listdir
+from os import listdir, system
 import torch
 from sys import platform
 import pickle
@@ -35,10 +35,10 @@ if platform == "linux":
                              (1,    "visits"),
                              (2,    "visits")])
     
-    tpa = choice([1, 5, 10])
+    tpa = choice([1, 5])
     t_horiz = choice([1, 5])
-    r_horiz = choice([2,5,10,20,50])
-    n_rolls = choice([1,5,10])
+    r_horiz = choice([5, 20, 100])
+    n_rolls = choice([1, 10])
     net_file = choice(["RL_23101647",
                        "RL_26213785",
                        "RL_73162545",
@@ -46,16 +46,19 @@ if platform == "linux":
                        "RL_81274922",
                        None])
     gamma = choice([1, .95, .9, .75, .5, .1])
+    file = 'optn_51332267_.pkl'#choice([f for f in listdir("results/")
+                # if f.startswith("optn_")])
     
 else: 
-    scl = 1
+    scl = .1
     criterion = "visits"
     tpa = 1
     t_horiz = 1
-    r_horiz = 20
+    r_horiz = 100
     net_file = None
-    n_rolls = 20
-    gamma = 0.9
+    n_rolls = 5
+    gamma = .9 
+    file = 'optn_51332267_.pkl'
     
 
 
@@ -73,10 +76,9 @@ config = (scl, criterion, tpa, n_rolls,
 
 name = str(np.random.randint(1e8))      
 
-file = choice([f for f in listdir("results/")
-                 if f.startswith("optn_")])
-    
-logfile = "MCTSG_"+ name + ".txt"
+prefix = "MCTSG2_"    
+
+logfile = prefix + name + ".txt"
 
 data  = pickle.load(open("results/" + file, "rb"))
 env = data["env"]
@@ -89,21 +91,27 @@ rewards = np.zeros(env.time_length)
 
 
 print("scl " + str(scl) + \
-      "tpa " + str(tpa) + \
-      "t_horiz " + str(t_horiz) + \
-      "r_horiz " + str(r_horiz) + \
-      "n_rolls " + str(n_rolls) + \
-      "net " + str(net_file) + \
-      "gamma " + str(gamma),
+      " tpa " + str(tpa) + \
+      " t_horiz " + str(t_horiz) + \
+      " r_horiz " + str(r_horiz) + \
+      " n_rolls " + str(n_rolls) + \
+      " net " + str(net_file) + \
+      " gamma " + str(gamma),
       file = open(logfile, "a"))
 
-target_g = g[500:2000].mean()
-target_o = o[500:2000].mean()
+target_g = g[500:].mean()
+target_o = o[500:].mean()
 t = 0
 
 #%%    
-
-while t < env.time_length:
+if platform == "linux":
+    time_limit = env.time_length
+else:
+    time_limit = 200
+    
+while t < time_limit:
+    
+    print("TIME: ", t)
     
     a = mcts.mcts(env, t, net,
                   scl = scl,
@@ -123,16 +131,20 @@ while t < env.time_length:
     t_target_stop = min(t, 2000)
 
     print(" t:", t,
-          " Run: {:1.3f}".format(np.mean(rewards[t_run_start:t])),
-          " Target: {:1.3f}".format(np.mean(rewards[500:t_target_stop])),
-          " G: {:1.3f}".format(target_g),
-          " O: {:1.3f}".format(target_o),
+          " Perf: {:1.3f}".format(np.mean(rewards[:t])),
+          " G: {:1.3f}".format(np.mean(g[:t])),
+          " O: {:1.3f}".format(np.mean(o[:t])),
           file = open(logfile, "a"))
         
 
+    if t > 200 and np.mean(rewards[100:t]) < 3.0:
+        system("qsub job_mcts.pbs")
+        system("rm -rf MCTSG_{}*".format(name))
+        exit()
+
 
     if platform == "linux" and t % 100 == 0:
-        with open("results/MCTS_" + name + ".pkl", "wb") as f:
+        with open("results/" + prefix + name + ".pkl", "wb") as f:
             pickle.dump(file = f, 
                         obj = {"file": file,
                                "environment": envname,
