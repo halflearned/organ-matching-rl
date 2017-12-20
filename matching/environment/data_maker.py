@@ -1,56 +1,69 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov 21 10:50:33 2017
+Created on Sat Dec 16 11:46:23 2017
 
 @author: vitorhadad
 """
 
-from sys import argv
-import numpy as np
 import pickle
+import numpy as np
+from sys import argv
+import re
+from tqdm import trange
 
-from matching.environment.abo_environment import ABOKidneyExchange
-from matching.environment.optn_environment import OPTNKidneyExchange
-from matching.environment.saidman_environment import SaidmanKidneyExchange
-from matching.solver.kidney_solver2 import optimal, greedy
+import matching.utils.data_utils as utils
 
-if len(argv) == 1:
-    env_name = "optn"
-    entry_rate = 5
-    death_rate = 0.1
-    time_length = 2000
-else:
-    env_name = argv[1]
-    entry_rate = int(argv[2])
-    death_rate = float(argv[3])
-    time_length = int(argv[4])
     
+def get_regressors(file, times):
+    As = []
+    Xs = []
+    GNs = []
+    Ys = []
+    file["env"].removed_container.clear()
+    for t in trange(file["env"].time_length):        
+        if t in times:
+            liv = file["env"].get_living(t)
+            A = file["env"].A(t, "sparse")
+            X = file["env"].X(t, graph_attributes = True)
+            G, N = utils.get_additional_regressors(file["env"], t)
+            
+            Y = np.zeros_like(liv).reshape(-1, 1)
+            Y[np.isin(liv, list(file["opt"]["matched"][t]))] = 1
+            
+            As.append(A)
+            Xs.append(X)
+            GNs.append(np.hstack([G,N]))
+            Ys.append(Y)
+            
+        file["env"].removed_container[t].update(file["opt"]["matched"][t])
     
-seed = np.random.randint(1e8)
- 
-envclass = {"optn": OPTNKidneyExchange,
-            "saidman": SaidmanKidneyExchange,
-            "abo": ABOKidneyExchange}
+    file["env"].removed_container.clear()
+    return As, Xs, GNs, Ys
+    
+
+path = "results/"
+
+
+filename = argv[1]
+envtype = re.search("^[a-z]+", filename).group()
+
+try:
+    file = pickle.load(open(path + filename, "rb"))
+except Exception as e:
+    print("Exception:", e)
+    
+
+random_times = np.sort(np.random.randint(file["env"].time_length, size = 200))
    
-env = envclass[env_name](entry_rate, 
-                         death_rate,
-                         time_length,
-                         seed = seed)
+As, Xs, GNs, Ys = get_regressors(file, random_times)  
 
-o = optimal(env)
-g = greedy(env)
-#%%
-pickle.dump(obj= {"env": env,
-                  "entry_rate": entry_rate,
-                  "death_rate": death_rate,
-                 "opt_matched": o["matched"],
-                 "greedy_matched": g["matched"],
-                 "opt_obj": o["obj"],
-                 "greedy_obj": g["obj"],
-                 "seed": seed},
-            file= open("results/" + "_".join((env_name,str(seed),".pkl")), "wb"))
+pickle.dump(obj = {"A": As, "G": GNs, "X": Xs, "Y": Ys},
+            file = open("data/data_{}_{}.pkl"\
+                        .format(envtype), "wb"))
 
-
-
+        
+        
+        
+        
 

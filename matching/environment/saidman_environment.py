@@ -9,34 +9,50 @@ Created on Sat Oct  7 15:05:52 2017
 """
 
 import numpy as np
-from matching.environment.base_environment import BaseKidneyExchange, draw
+from matching.environment.base_environment import BaseKidneyExchange
 import pandas as pd
 from collections import OrderedDict
-
+from itertools import product
 
 class SaidmanKidneyExchange(BaseKidneyExchange):
     
    
-    pra_freq = OrderedDict([("low", 0.7019), 
-                            ("med", 0.2),
-                            ("high", 0.0981)])
+    blood_types = np.vstack([(0, 0), (0, 1), (0, 2), (0, 3),
+                             (1, 0), (1, 1), (1, 2), (1, 3),
+                             (2, 0), (2, 1), (2, 2), (2, 3),
+                             (3, 0), (3, 1), (3, 2), (3, 3)])
     
-    cm_prob = OrderedDict([("low", 0.05),
-                             ("med", 0.45),
-                             ("high", 0.9)])
+    usa_blood_freq = OrderedDict([(0,0.44),  # O
+                                  (1,0.42),  # A
+                                  (2,0.1),   # B
+                                  (3,0.04)]) # AB
     
-    blood_freq = OrderedDict([("o", 0.4814),
-                  ("a", 0.3373),
-                  ("b", 0.1428),
-                  ("ab", 0.0385)])
+    # Blood type frequencies
+    pc = 0.11
+    pc_spouse = 0.33
+    blood_prob = OrderedDict()
+    blood_prob_spouse = OrderedDict()
+    for (x,px),(y,py) in product(*[usa_blood_freq.items()]*2):
+        if x == 'ab' or y == 'o' or x == y:
+            blood_prob[(x,y)] = pc*px*py
+            blood_prob_spouse[(x,y)] = pc_spouse*px*py
+        else:
+            blood_prob[(x,y)] = px*py
+            blood_prob_spouse[(x,y)] = px*py
+    s = sum(blood_prob.values())
+    s_sp = sum(blood_prob_spouse.values())
+    for (x,y) in blood_types:
+        blood_prob[(x,y)] /= s
+        blood_prob_spouse[(x,y)] /= s_sp
     
-    gender_freq = OrderedDict([("male", 0.5910),
-                   ("female", 0.4090)])
+            
+    # PRA: Low, Medium, High and their crossmatch probs
+    pra_freq = np.array([0.7019, 0.2, 0.0981])
+    crossmatch_prob = np.array([0.05, 0.45, 0.9])
     
-    spouse_freq = OrderedDict([("yes", 0.4897),
-                                 ("no", 0.5103)])
-    
-    spouse_cm_prob_scaling = 0.75
+    # Gender and spouse
+    patient_is_female_freq =  0.4090
+    donor_is_spouse_freq = 0.4897
     
     
 
@@ -54,34 +70,61 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
                         seed=seed,
                         populate=populate)
         
+        
+        
+    def draw_blood_type(self, n):
+        pat_is_female = np.random.uniform(size=n) < self.patient_is_female_freq
+        don_is_husband = np.random.uniform(size=n) < self.donor_is_spouse_freq
+        n_spouses = np.sum(pat_is_female & don_is_husband)
 
+        idx = np.random.choice(len(self.blood_types),
+                               p = list(self.blood_prob.values()),
+                               size = n - n_spouses)
         
+      
+        idx_spouse = np.random.choice(len(self.blood_types),
+                               p = list(self.blood_prob_spouse.values()),
+                               size = n_spouses)
         
+        blood = np.vstack([self.blood_types[idx],
+                           self.blood_types[idx_spouse]])
     
+        np.random.shuffle(blood)
+        return blood
+        
+        
+
     def draw_node_features(self, t_begin, t_end):
-            
+        
+        if t_begin == 0:
+            np.random.seed(self.seed)
+        
         duration = t_end - t_begin
         n_periods = np.random.poisson(self.entry_rate, size = duration)
         n = np.sum(n_periods)
-        labels = ["entry", "death", "p_blood",
-                  "d_blood", "is_female", "pra"]
-        entries = np.repeat(np.arange(t_begin, t_end), n_periods)
-        sojourns = np.random.geometric(self.death_rate, n)
-        deaths = entries + sojourns
-        p_blood = draw(self.blood_freq, n)
-        d_blood = draw(self.blood_freq, n)
-        is_female = draw(self.gender_freq, n)
-        pra = np.random.choice(list(self.cm_prob.values()),
-                               p = list(self.pra_freq.values()),
-                               size = n)
-        return [dict(zip(labels, feats)) for feats in zip(entries,
-                                                        deaths,
-                                                        p_blood,
-                                                        d_blood,
-                                                        is_female,
-                                                        pra)]
         
-      
+        entries = np.repeat(np.arange(t_begin, t_end), n_periods).reshape(-1,1)
+        sojourns = np.random.geometric(self.death_rate, (n,1)) - 1
+        deaths = entries + sojourns
+        
+        blood = self.draw_blood_type(n)
+        
+        pra = np.random.choice(self.crossmatch_prob,
+                               p = self.pra_freq,
+                               size = (n,1))
+        
+        data = np.hstack([entries, deaths, blood, pra])
+        
+        colnames = ["entry", "death",
+                    "p_blood", "d_blood",
+                    "pra"]
+        
+        results = []
+        for row in data:
+            results.append(dict(zip(colnames, row)))
+        
+        return results
+
         
     def draw_edges(self, source_nodes, target_nodes):
             
@@ -92,14 +135,14 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         ns = len(source_nodes)
         nt = len(target_nodes)
         
-        source_entry = self.attr_to_numpy("entry", source_nodes)
-        source_death = self.attr_to_numpy("death", source_nodes)
-        source_don = self.attr_to_numpy("d_blood", source_nodes)
-        source_pra = self.attr_to_numpy("pra", source_nodes)
+        source_entry = self.attr("entry", nodes = source_nodes)
+        source_death = self.attr("death", nodes = source_nodes)
+        source_don = self.attr("d_blood", nodes = source_nodes)
+        source_pra = self.attr("pra", nodes = source_nodes)
         
-        target_entry = self.attr_to_numpy("entry", target_nodes)
-        target_death = self.attr_to_numpy("death", target_nodes)
-        target_pat = self.attr_to_numpy("p_blood", target_nodes)
+        target_entry = self.attr("entry", nodes = target_nodes)
+        target_death = self.attr("death", nodes = target_nodes)
+        target_pat = self.attr("p_blood", nodes = target_nodes)
         
         hist_comp = np.random.uniform(size = (ns, nt)) > source_pra
         time_comp = (source_entry <= target_death.T) & (source_death >= target_entry.T)
@@ -113,40 +156,7 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         return list(zip(source_nodes[s_idx], target_nodes[t_idx]))
         
         
-        
-        
-#     Use this for testing later    
-#    def draw_edges2(self, source_nodes, target_nodes):
-#        edges = []
-#        for s in source_nodes:
-#            for t in target_nodes:
-#                
-#                if s == t:
-#                    continue
-#                
-#                s_data = self.node[s]
-#                hist_comp = np.random.uniform() > s_data["pra"] 
-#                if not hist_comp:
-#                    continue
-#                
-#                t_data = self.node[t]
-#                time_comp = s_data["entry"] <= t_data["death"] and \
-#                            s_data["death"] >= t_data["entry"]
-#                if not time_comp:
-#                    continue
-#                
-#                blood_comp = s_data["d_blood"] == 0 or \
-#                             t_data["p_blood"] == 3 or \
-#                             s_data["d_blood"] == t_data["p_blood"]
-#                if not blood_comp:
-#                    continue
-#                
-#                edges.append((s, t))
-#                
-#        return edges
-            
-        
-        
+    
 
     def X(self, t, dtype = "numpy"):
         
@@ -155,15 +165,14 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         Xs = np.zeros((n, 10))
         indices = []
         for i, (n, d) in enumerate(nodelist):
-            Xs[i, 0] =  d["p_blood"] == 0
-            Xs[i, 1] =  d["p_blood"] == 1
-            Xs[i, 2] =  d["p_blood"] == 2
-            Xs[i, 3] =  d["d_blood"] == 0
-            Xs[i, 4] =  d["d_blood"] == 1
-            Xs[i, 5] =  d["d_blood"] == 2
+            Xs[i, 0] = d["p_blood"] == 0
+            Xs[i, 1] = d["p_blood"] == 1
+            Xs[i, 2] = d["p_blood"] == 2
+            Xs[i, 3] = d["d_blood"] == 0
+            Xs[i, 4] = d["d_blood"] == 1
+            Xs[i, 5] = d["d_blood"] == 2
             Xs[i, 6] = t - d["entry"] 
             Xs[i, 7] = d["death"] - t
-            Xs[i, 8] = d["is_female"]
             Xs[i, 9] = d["pra"]
             indices.append(n)
             
@@ -174,7 +183,6 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
                                    "dO","dA","dB",
                                    "waiting_time",
                                    "time_to_death",
-                                   "is_female",
                                    "pra"])
         elif dtype == "numpy":
             return Xs

@@ -38,6 +38,9 @@ def get_environment_name(env):
     return findall("[A-Za-z]+KidneyExchange", str(env.__class__))[0]
     
 
+def cumavg(x):
+    time = np.arange(1, len(x) + 1)
+    return np.cumsum(x)/time
 
 
 def remove_taken(actions, taken):
@@ -45,6 +48,19 @@ def remove_taken(actions, taken):
             if e is None or 
                 len(set(e).intersection(taken)) == 0]
 
+
+
+def get_atrisk(env, t_begin = None, t_end = None):
+    return [n for n,d in env.nodes(data = True) 
+            if d["death"] >= t_begin and d["death"] < t_end]
+  
+    
+def get_loss(env, t_begin, t_end, matched):
+    n_living = len(env.get_living(t_begin, t_end))
+    atrisk = get_atrisk(env, t_begin, t_end)
+    nonsaved = set(atrisk).difference(matched)
+    return len(nonsaved) / n_living
+    
 
 
     
@@ -64,6 +80,11 @@ def snapshot(env, t):
     rem_in_new_env = env.removed(t).intersection(new_env.nodes())
     new_env.removed_container = defaultdict(set) 
     new_env.removed_container[t] = rem_in_new_env
+    
+    # Forget death times
+    for node in new_env.nodes:
+        new_env.node[node]["death"] = t + \
+                            np.random.geometric(new_env.death_rate) - 1
     
     return new_env
 

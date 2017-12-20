@@ -84,18 +84,13 @@ def get_cycles(env, nodes, max_cycle_length = 2):
 
 
 
-def find_matching_date(env, nodes):
-    return max(env.node[v]["entry"] for v in nodes)
 
-
-
-
-def parse_solution(env, cycles, model, t_begin = None):
+def parse_solution(env, cycles, model, t_begin = None, weights = None):
     matched_cycles = defaultdict(list)
     matched = defaultdict(set)
     matched_pairs = set()
     obj = 0
-    for xs,cyc in zip(model.getVars(), cycles):
+    for k,(xs,cyc) in enumerate(zip(model.getVars(), cycles)):
         if xs.x > 0:
             
             t = find_matching_date(env, cyc)
@@ -104,12 +99,14 @@ def parse_solution(env, cycles, model, t_begin = None):
                 
             matched[t].update(cyc)
             matched_cycles[t].append(cyc)
-            
             for v in cyc:
                 matched_pairs.add(v)
-                obj += 1
+            if weights is None:
+                obj += len(cyc)
+            else:
+                obj += weights[k]
                 
-    assert obj == len(matched_pairs)
+                
     return {"matched":matched,
             "matched_pairs":matched_pairs,
             "matched_cycles":matched_cycles,
@@ -142,6 +139,39 @@ def solve(weights, cycles):
                    gb.GRB.MAXIMIZE)
     m.optimize()
     return m
+    
+
+
+def find_matching_date(env, nodes):
+    try:
+        return max(env.node[v]["entry"] for v in nodes)
+    except TypeError:
+        import pdb; pdb.set_trace()
+
+
+
+
+
+
+
+def optimal_with_discount(env, 
+            t_begin = None, t_end = None, 
+            max_cycle_length = 2,
+            gamma = .99):
+    
+    if t_begin is None:
+        t_begin = 0
+    if t_end is None:
+        t_end = env.time_length
+    
+    nodes = set(env.get_living(t_begin, t_end))
+    ws, cs = get_cycles(env, nodes, max_cycle_length)
+    for k,(w,c) in enumerate(zip(ws, cs)):
+        t = find_matching_date(env, c)
+        ws[k] = gamma**(t - t_begin)
+        
+    m =  solve(ws, cs)
+    return parse_solution(env, cs, m, t_begin, weights = ws)
     
 
 

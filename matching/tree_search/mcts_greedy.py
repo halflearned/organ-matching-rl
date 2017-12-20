@@ -35,6 +35,47 @@ def get_actions(env, t, n_times = 100):
     
 
 
+def evaluate_policy(net, env, t):
+    if net is None:
+        yhat = np.ones_like(env.get_living(t))
+    
+    elif "GCN" in str(type(net)):
+        X = env.X(t)[np.newaxis,:]
+        A = env.A(t)[np.newaxis,:]
+        yhat = net.forward(A, X).data.numpy().flatten()
+        
+    elif "MLP" in str(type(net)):  
+        X = env.X(t)
+        G, N = get_additional_regressors(env, t)
+        Z = np.hstack([X, G, N])
+        yhat = net.forward(Z).data.numpy().flatten()
+    
+    return pd.Series(index = env.get_living(t),
+                     data = yhat)
+
+
+
+
+def evaluate_priors(net, env, t, actions):
+    
+    action_priors = np.zeros(len(actions))
+    
+    node_priors = evaluate_policy(net, env, t)
+    
+    for k, a in enumerate(actions):
+ 
+        if len(a) == 0:
+            action_priors[k] = max(np.mean(node_priors) - 0.1*len(actions), 0)
+        
+        else:
+            action_priors[k] = np.mean(node_priors.loc[list(a)])
+        
+    return action_priors
+
+
+
+
+
 class Node:
     
     def __init__(self, 
@@ -44,7 +85,7 @@ class Node:
                  env,
                  taken,
                  actions,
-                 priors = None):
+                 priors = 1):
         
         
         self.reward = reward
@@ -99,20 +140,14 @@ def run(root,
                        net,
                        scalar)
     
+
+    rollout_reward = np.mean([rollout(node.parent.env,
+                         node.t,
+                         node.t + rollout_horizon,
+                         node.taken,
+                         gamma) for _ in range(n_rollouts)])
     
-    if node.taken is not None:
-        r = []
-        for i in range(n_rollouts):
-            r.append(rollout(node.parent.env,
-                             node.t,
-                             node.t + rollout_horizon,
-                             node.taken,
-                             gamma))
-        r = np.mean(r)
-    else:
-        r = 0
-    
-    backup(node, r)
+    backup(node, rollout_reward)
     
 
     
@@ -141,23 +176,24 @@ def expand(node):
 
 
 
-def best_child(node, net, scalar):   
+def best_child(node, net, scalar): 
+    
     if scalar is None:     
         return choice(node.children)
+
+    if len(node.children) == 1:
+        return node.children[0]
 
     else:
         rewards = np.array([c.reward for c in node.children])
         visits = np.array([c.visits for c in node.children])
+        node_actions = [c.taken for c in node.children]
+        priors = evaluate_priors(net, node.env, node.t, node_actions)
         
-        if net is not None:
-            priors = evaluate_priors(net, node.env, node.t, node.actions)
-        else:
-            priors = 1
-            
         scores = compute_score(rewards, visits, priors, scalar)
-        argmaxs = np.argwhere(scores == np.max(scores)).flatten()
+        argmaxs = np.argwhere(np.isclose(scores, np.max(scores), 1e-3)).flatten()
         chosen = np.random.choice(argmaxs)
-                
+            
         return node.children[chosen]
 
 
@@ -236,64 +272,31 @@ def choose(root, criterion = "visits"):
     
 
 
-def rollout(env, t_begin, t_end, taken, gamma = 0.97):
+
+def rollout(env, t_begin, t_end, taken, gamma):
 
     snap = snapshot(env, t_begin)
     snap.populate(t_begin+1, t_end, seed = clock_seed())
     snap.removed_container[t_begin].update(taken)
     
-    value = greedy(snap, t_begin+1, t_end)
-    matched = get_n_matched(value["matched"], t_begin, t_end)
-    matched[0] = len(taken)
+    opt = optimal(snap, t_begin+1, t_end)
+    opt_matched = get_n_matched(opt["matched"], t_begin, t_end)
+    opt_matched[0] = len(taken)
+    opt_value = disc_mean(opt_matched,  gamma)
     
-    return disc_mean(matched,  gamma)
+#    g = greedy(snap, t_begin+1, t_end)
+#    g_matched = get_n_matched(g["matched"], t_begin, t_end)
+#    g_matched[0] = len(taken)
+#    g_value = disc_mean(g_matched,  gamma)
     
-
-
-
-
+    r = opt_value #- g_value
     
-def evaluate_policy(net, env, t):
-    try:
-        if "GCN" in str(type(net)):
-            X = env.X(t)[np.newaxis,:]
-            A = env.A(t)[np.newaxis,:]
-            yhat = net.forward(A, X)
-            
-        elif "MLP" in str(type(net)):  
-            X = env.X(t)
-            G, N = get_additional_regressors(env, t)
-            Z = np.hstack([X, G, N])
-            yhat = net.forward(Z)
-            
-    except Exception as e:
-        import pdb; pdb.set_trace()
-        
-    return pd.Series(index = env.get_living(t),
-                     data = yhat\
-                                .data\
-                                .numpy()\
-                                .flatten())
+    return r
 
 
-def evaluate_priors(net, env, t, actions):
-    n = len(actions)
-    if n == 1:
-        return np.array([1])
-    else:
-        p = evaluate_policy(net, env, t)
-        none_idx = actions.index(None)
-        
-        priors = np.zeros(n)
-        for k, cyc in enumerate(actions):
-            if cyc is not None:
-                i, j = cyc
-                priors[k] = p.loc[i] * p.loc[j] + 1e-5
-    
-        priors[none_idx] = 1/n     
-        priors /= (priors.sum() * n/(n-1))    
-   
-        return priors  
+
+
+
 
 
 

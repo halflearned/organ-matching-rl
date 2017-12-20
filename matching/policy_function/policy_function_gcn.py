@@ -30,13 +30,13 @@ class GCNet(nn.Module):
     def __init__(self, 
                  feature_size,
                  hidden_sizes = None,
-                 output_size = 1,
+                 output_size = 2,
                  dropout_prob = 0.2,
-                 activation_fn = nn.SELU,
+                 activation_fn = nn.ReLU,
                  output_fn = nn.Sigmoid,
                  opt = optim.Adam,
                  opt_params = dict(lr = 0.001),
-                 loss_fn = nn.MSELoss,
+                 loss_fn = None,
                  seed = None):
     
         
@@ -51,7 +51,10 @@ class GCNet(nn.Module):
         self.activation_fn = activation_fn
         self.dropout_prob = dropout_prob
         self.output_fn = output_fn()
-        self.loss_fn = loss_fn()
+        if loss_fn is None:
+            self.loss_fn = nn.MSELoss()
+        else:
+            self.loss_fn = loss_fn
         
         self.model = self.build_model()
     
@@ -101,21 +104,26 @@ class GCNet(nn.Module):
         
         mlp = [layer(h0,h1) for h0, h1 in zip(sizes[:-1], sizes[1:])]
         
-        return nn.Sequential(*mlp, self.output_fn)
+        if self.output_fn is not None:
+            return nn.Sequential(*mlp, self.output_fn)
+        else:
+            return nn.Sequential(*mlp)
             
     
     
-    def run(self, A, X, y):
+    def run(self, A, X, y, lengths = None):
         
-        lengths = X.any(2).sum(1)
+        if lengths is None:
+            lengths = X.any(2).sum(1)
+            
         batch_size = X.shape[0]
         yhat = self.forward(A, X)
-        ytruth = to_var(y, False)
-
+        ytruth = to_var(y, False).long()
+        
         # Compute loss, leaving out padded bits      
         loss = 0
         for s,yh,yt in zip(lengths, yhat, ytruth):
-            loss += self.loss_fn(yh[:s], yt[:s])
+            loss += self.loss_fn(yh[:s], yt[:s].view(-1)).mean()
         loss /= batch_size
         
         self.opt.zero_grad()
@@ -157,89 +165,80 @@ def pad(A, X, y, size):
 
 safe_invert = lambda x: np.where(x > 0, 1/x, 0)
 
+
+
 #%%    
     
 if __name__ == "__main__":
-    
-    from sys import platform
-    from random import choice
-    from collections import deque
-    import pickle
-    
-    #%%
-    As = pickle.load(open("data/gcn_policy_data_A.npy", "rb"))
-    Xs = pickle.load(open("data/gcn_policy_data_X.npy", "rb"))
-    ys = pickle.load(open("data/gcn_policy_data_y.npy", "rb"))
-    n = len(Xs)
-    
-    #%%
 
-    if platform == "darwin":
-        hidden = [50, 50]
-        dp = .2
+    from sys import argv
+    from matching.utils.data_utils import open_file, confusion
+
+    batch_size = 32
+    open_every = 100
+    log_every = 10
+    save_every = 500
+ 
+    
+    if len(argv) > 1:
+        use_gn = bool(argv[1])
+        hidden = [int(x) for x in argv[2:]]
     else:
-        hidden = choice([None,
-                        [10], [50], [100],
-                        [10, 10], [50,50], [100, 100],
-                        [50, 50, 50]])
-        dp = choice([0, .1, .2, .5])
-        
+        use_gn = False
+        hidden = [100, 100]
     
-    gcn = GCNet(10, hidden,
-                 activation_fn = nn.SELU,
-                 dropout_prob = dp,
-                 loss_fn = nn.MSELoss,
-                 opt_params = dict(lr = 0.005))
-
+        
+    net = GCNet(280 + 14*use_gn, 
+                hidden,
+                dropout_prob = .2,
+                loss_fn = loss_fn) 
     #%%
-    iters = 50000
-    maxsize = 100
-    training_losses = [] 
-    training_accs = [] 
-    recent_losses = deque(maxlen = 250)
-    recent_accs = deque(maxlen = 250)
-    name = str(gcn) + "_{}".format(str(np.random.randint(1000000)))
-    minibatch = 128
-    
-    #%%
-    ws = np.array([np.mean(y) for y in ys])
-    ws /= np.sum(ws)
-    
-    #%%
-    
-    for k in range(iters):
-        
-        idx = np.random.choice(n, size = minibatch,  p = ws) 
-        AA = []
-        XX = []
-        yy = []
 
-        for i in idx:
-            A,X,y = pad(As[i], Xs[i], ys[i], size = maxsize)
-            AA.append(A)
-            XX.append(X)
-            yy.append(y)
-        
-        AA = np.stack(AA, 0)
-        XX = np.stack(XX, 0)
-        yy = np.stack(yy, 0)
-        
-        loss, out = gcn.run(AA, XX, yy)
-        recent_losses.append(loss)
-        acc = np.equal(out > .5, yy > .5).mean()
-        recent_accs.append(acc)
-        
-        if k % 100 == 0:
-            training_losses.append(np.mean(recent_losses))
-            training_accs.append(np.mean(recent_accs))
-            print(i, training_losses[-1], training_accs[-1])
+    for i in range(int(1e8)):
+        if i % open_every == 0:
+            if use_gn:
+                A, X, GN, Y = open_file(open_A = True,
+                                        open_GN = True)
+                Z = np.concatenate([X, GN], 2)
+            else:
+                A, X, Y = open_file(open_A = True,
+                                    open_GN = False)
+                Z = X
+            
+        n = A.shape[0]
+        b_idx = np.random.choice(n, size = batch_size)   
+        inputs = (A[b_idx], Z[b_idx])
+        ytrue = Y[b_idx]
+        lens = inputs[1].any(2).sum(1)
 
-        if k %  5000 == 0:
-            filename = "results/{}.pkl".format(name)
-            torch.save(gcn, filename)
-            pickle.dump(training_accs, open("results/acc_{}.pkl".format(name), "wb"))
-            pickle.dump(training_losses, open("results/losses_{}.pkl".format(name), "wb"))
-
+        loss, yhat = net.run(*inputs, ytrue)
+        tp, tn, fp, fn = confusion(yhat, ytrue, lens)
+        tpr=tp/(tp+fn)
+        tnr=tn/(tn+fp)
+        
+        if i % log_every == 0:
+            msg = "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+                .format(loss,
+                        tpr, # True positive rate
+                        tnr, # True negative rate
+                        (tp + tn)/(tp+fp+tn+fn)) # Accuracy
+            print(msg)
+            with open("results/" + str(net) + ".txt", "a") as f:
+                print(msg, file = f)
+                
+            if tpr > .8 and tnr < .5:
+                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+                            weight = torch.FloatTensor([1, 1]))
+            elif tpr < .5 and tnr > .8:
+                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+                            weight = torch.FloatTensor([1, 10]))
+            else:
+                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+                            weight = torch.FloatTensor([1, 5]))
+        
+    if i % save_every == 0:
+        torch.save(net, "results/" + str(net))
+ 
 
 
     

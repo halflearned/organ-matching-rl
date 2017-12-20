@@ -42,6 +42,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         if populate: self.populate(seed = seed)
         
         
+        
     def removed(self, t):
         output = set()
         for k, vs in self.removed_container.items():
@@ -96,26 +97,32 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         old_ids = list(self.nodes())
         
         nodefts = self.draw_node_features(t_begin, t_end)
-        new_ids = tuple(range(next_id, next_id+ len(nodefts)))
+        new_ids = tuple(range(next_id, next_id+len(nodefts)))
+        
         self.add_nodes_from(zip(new_ids, nodefts))
         
-        oldnew_edges = self.draw_edges(old_ids, new_ids)
-        self.add_edges_from(oldnew_edges, weight = 1)
-        
-        newold_edges = self.draw_edges(new_ids, old_ids)
-        self.add_edges_from(newold_edges, weight = 1)
-        
         newnew_edges = self.draw_edges(new_ids, new_ids)
+        
         self.add_edges_from(newnew_edges, weight = 1)
-
+        
+        if len(old_ids):
+            oldnew_edges = self.draw_edges(old_ids, new_ids)
+            self.add_edges_from(oldnew_edges, weight = 1)
+        
+            newold_edges = self.draw_edges(new_ids, old_ids)
+            self.add_edges_from(newold_edges, weight = 1)
+        
+    
         
         
-    def attr_to_numpy(self, attr, nodelist = None):
-        if nodelist is None:
-            nodelist = self.nodes()
+    def attr(self, *attrs, nodes = None):
+        if nodes is None:
+            nodes = self.nodes()
             
-        return np.array([self.node[n][attr] for n in nodelist]).reshape(-1, 1)
-        
+        np_attrs = []
+        for at in attrs:
+            np_attrs.append(np.array([self.node[n][at] for n in nodes]).reshape(-1, 1))
+        return np.hstack(np_attrs)
         
     
     
@@ -133,17 +140,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         return self.has_edge(i, j)
     
     
-    
-    def get_dying(self, t, indices_only = True):
-        if indices_only:
-            return [n for n,d in self.nodes(data = True) 
-                    if d["death"] == t
-                    and n not in self.removed(t)]
-        else:
-            return [(n,d) for n,d in self.nodes(data = True) 
-                    if d["death"] == t
-                    and n not in self.removed(t)]
-            
+        
             
         
     def erase_from(self, t):

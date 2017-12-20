@@ -1,103 +1,199 @@
- \documentclass[12pt]{article}
+\documentclass[12pt]{article}
 
-\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,natbib,pdflscape,subfigure,array,hyperref}
+\usepackage{amssymb,amsmath,amsfonts,eurosym,geometry,ulem,graphicx,caption,color,setspace,sectsty,comment,footmisc,caption,pdflscape,subfigure,array,hyperref}
+\usepackage{cite}
+\usepackage{natbib}
+\usepackage{booktabs}
 
 \normalem
 
-\onehalfspacing
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{proposition}{Proposition}
-\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
-
-\newtheorem{hyp}{Hypothesis}
-\newtheorem{subhyp}{Hypothesis}[hyp]
-\renewcommand{\thesubhyp}{\thehyp\alph{subhyp}}
-
-\newcommand{\red}[1]{{\color{red} #1}}
-\newcommand{\blue}[1]{{\color{blue} #1}}
-
-\newcolumntype{L}[1]{>{\raggedright\let\newline\\arraybackslash\hspace{0pt}}m{#1}}
-\newcolumntype{C}[1]{>{\centering\let\newline\\arraybackslash\hspace{0pt}}m{#1}}
-\newcolumntype{R}[1]{>{\raggedleft\let\newline\\arraybackslash\hspace{0pt}}m{#1}}
-
-\geometry{left=1.0in,right=1.0in,top=1.0in,bottom=1.0in}
+%\geometry{left=1.0in,right=1.0in,top=1.0in,bottom=1.0in}
 
 \begin{document}
 
 \begin{titlepage}
-\title{Improving Kidney Matching \\ with  Monte Carlo Tree Search \\ and  Deep Graph Learning}
-\author{Vitor Hadad}
-\date{\today}
+\title{Improving Dynamic Kidney Exchange}
+\author{Vitor Hadad\thanks{Boston College}}
+\date{December 2017}
 \maketitle
 \begin{abstract}
-\noindent Placeholder\\
-\vspace{0in}\\
-\noindent\textbf{Keywords:} key1, key2, key3\\
-\vspace{0in}\\
-\noindent\textbf{JEL Codes:} key1, key2, key3\\
+%\noindent Placeholder\\
+%\vspace{0in}\\
+%\noindent\textbf{Keywords:} key1, key2, key3\\
+%\vspace{0in}\\
+%\noindent\textbf{JEL Codes:} key1, key2, key3\\
 
 \bigskip
 \end{abstract}
 \setcounter{page}{0}
 \thispagestyle{empty}
-\end{titlepage} 
-\pagebreak \newpage
+\end{titlepage}
+\pagebreak 
+
+
+
 
 \doublespacing
 
 
 \section{Introduction} \label{sec:introduction}
 
-\subsection{Terminology}
-
-\subsubsection{Static matching}
-
-
-\subsubsection{Dynamic matching}
-
-
 \section{Literature Review} \label{sec:literature}
 
-\subsection{Organ Matching}
-
-\subsubsection{Medicine}
-
-\subsubsection{Economics}
-
-\subsubsection{Computer Science and Operations Research} 
-
-\subsection{Artificial Intelligence}
-
-\subsubsection{}
-
-\section{Models} \label{sec:data}
+\subsection{Kidney Exchange} \label{sec:literature:subsec:kidney}
 
 
-\subsubsection{How bad is \texttt{Greedy}?}
+\begin{align}
+  &\max_{x} \sum_{c \in C} w_{c} x_{c} \\
+  s.t. &\sum_{v \in c'} x_{c'} = 1 \qquad \forall v \in V\\ 
+  s.t. &\sum_{v \in c'} x_{c'} = 1 \qquad \forall v \in V\\ 
+       &x_c \in \{ 0, 1\}  \qquad \forall c \in C
+\end{align}
 
-\subsubsection{Extracting heuristics}
+
+
+\subsubsection{Economics and Operations Research}
+
+ \citet{unver2010dynamic}
+
+
+
+\subsubsection{Computer Science}
+
+\subsection{Machine learning and Artificial Intelligence}
+\subsubsection{Neural Networks}
+\subsubsection{Sequence-to-sequence models}
+\subsubsection{Embedding non-euclidean domains}
+\subsubsection{Search algorithms}
+\subsubsection{Reinforcement learning}
+
+
+\section{Models, Environments and Data} \label{sec:data}
+
+A \textbf{dynamic kidney exchange problem} is a discrete-time Markov Decision Process (MDP) described by the tuple $(S, A, P, R)$, where
+
+\begin{itemize}
+  \item $S = (V, A, X)$ is a directed graph representing the current \emph{state}: the set $V$ is the finite set of patient-donor pairs and their observable characteristics; and an adjacency matrix $A$ whose entry $(i,j)$ is positive whenever the donor of vertex $i$ can donate to the patient of vertex $j$. The set $X$ is a set of 
+  \item $Act$ is the finite set of available \emph{actions} when the current state is $S$. In our applications, this is the set of 2- or 3-cycles available to be cleared.
+  \item $P$ is the \emph{transition probability} over the next states given current state and taken action.
+  \item $R$ is the \emph{reward function} indicating how desirable it is to take an action $a \in Act$ when the state is $S$.
+\end{itemize}
+
+The space where a dynamic kidney exchange problem tuple lives is called a \textbf{kidney exchange environment}. Informally, an environment is the set of rules or configurations that govern, for example, whether we can match 2-cycles or 3-cycles per period, or which characteristic are relevant and available for the decision agent to observe. Before we describe each environment in detail, here are some common assumptions.
+
+\paragraph{Poisson entry, Geometric death} At time point, the number of new incoming pairs is drawn from the $Poisson(r)$ distribution, where $r \in \mathbb{N}$ denotes the \emph{entry rate}, and equals the expected number of entrants per period. Upon entrance, each pair independently draws the length of their sojourn from the $Geometric(d)$ distribution. The parameter $d \in \mathbb{R}$ is the \emph{death rate}, and its reciprocal $\frac{1}{d}$ is the expected sojourn length. We note that, due to the memoryless property\footnote{If $X \sim Geometric(p)$, then $P(X > t+s | X > s) = P(X > t)$} of the Geometric distribution, the amount of time a pair has waited in the pool gives us no information about how much time they have until their death.
+
+\paragraph{Observables} In every environment, at least two characteristics are relevant and observable: the major blood type group (A, B, O or AB); and how long the pair has been in the pool.
+
+\paragraph{0-1 Preferences} In reality, some exchanges are more or less desirable than others, either for ethical concerns or because of predicted health benefit. For example, it is common for pediatric patients and previous organ donors receive higher priority, as do exchanges involving patients with no HLA mismatch. However, in this work we abstract from these concerns and consider every exchange to be equally desirable, so long as it is available. This is the same assumption as used in \cite{roth2005pairwise}.
+
+
+\noindent Now, let's see each of the different environments in turn.  
+
+\subsection{ABO}
+
+The \emph{ABO environment} is the barest: each pair in the pool is solely characterized by their entry time, the length of their sojourn, and the ABO blood types of its patient and donor. Compatibility between two pairs is also decided only on blood-type compatibility. However, we make an assumption previously used in \cite{unver2010dynamic} and allow for incompatibility between a donor and their own patient. The reason for this additional assumption is that, if there were truly no tissue type compatibilities, we would never see pairs of type (AB,$\cdot$), ($\cdot$, O), or (A,A), (O,O), (B,B), and (AB,AB), since their donors would be automatically compatible with their patients and they would never participate in an exchange. Let's explain the effect of this assumption in more detail.
+
+The distribution of blood types in the US population is roughly O:48\%, A:36\%, B:11\%, AB:4\%. If we initially independently draw two people from this distribution and they form, say, an (A,B) pair (which happens with probability $0.36 \cdot 0.12 \approx 0.0432$), then we allow them to the pool immediately, since their B-donor is blood-type incompatible with their A-patient. However, if they happen to form an (A,O) pair (with probability $0.36 \cdot 0.48 \approx 0.172$), then they should only enter the pool if the donor and patient are tissue-type incompatible, otherwise the O donor would immediately donate their kidney to the patient and they would not need to enter the exchange pool at all. So we assume the probability of a positive crossmatch is $p_c = 0.11$ as in \cite{zenios2001primum}, then the probability that two people form an (A,O) and enter the pool becomes in fact $0.36 \cdot 0.48  \cdot 0.11 \approx 0.019$. By computing the probabilities of each pair in this manner and then normalizing so that they add up to one, we arrive at the numbers displayed on Table \ref{tab:abo_blood_type}. 
+
+\begin{table}[htdp]
+\centering
+\begin{tabular}{lr}
+\toprule
+Pair blood type &         Probability \\
+\midrule
+(O, O) &  0.058689 \\
+(O, A) &  0.373803 \\
+(O, B) &  0.158257 \\
+(O, AB) &  0.042669 \\
+(A, O) &  0.041119 \\
+(A, A) &  0.028809 \\
+(A, B) &  0.110888 \\
+(A, AB) &  0.029899 \\
+(B, O) &  0.017410 \\
+(B, A) &  0.110888 \\
+(B, B) &  0.005160 \\
+(B, AB) &  0.012660 \\
+(AB, O) &  0.004690 \\
+(AB, A) &  0.003290 \\
+(AB, B) &  0.001390 \\
+(AB, AB) &  0.000380 \\
+\bottomrule
+\end{tabular}
+\caption{Blood type probabilities in the ABO environment}
+\label{tab:abo_blood_type}
+\end{table}
+
+\subsection{Saidman}
+
+The \emph{Saidman} environment was inspired largely by the simulation setup in \cite{saidman2006increasing}, although a very similar model has been studied by \cite{toulis2011random}. In these works, in addition to the blood type, a pair is also endowed with a panel reactive antibody (PRA) level that governs the probability of a crossmatch with a random donor. The lower the PRA, the higher the number of potentially compatible pairs.
+
+The simulation process is as follows. Initially, we draw a pair in the same manner as in the ABO environment. Next, we draw whether the patient is a female (with probability around 41\%), and if so we also draw whether her donor is her husband (spouses comprise about 49\% of donors). Finally, we draw a PRA level for the patient (Low: 70.1\%, Medium: 20\%, High: 9.9\%). This PRA level determines the probability that they can receive a kidney from any donor, including their own: patients with low PRA have a 5\% probability of positive crossmatch with a random donor; patients with medium PRA have a 45\% chance, and patients with high PRA have a 90\% chance of a crossmatch. If a patient is bloody or tissue-type incompatible with their own donor, they enter the pool. In addition, if the patient is female and her husband is the donor, the probability of positive crossmatch for low, medium and high PRA patients goes up to 28.75\%, 58.75\% and 92.25\%. This last adjustment reflects the fact that women tend to produce antibodies against their husbands' antigens during pregnancy.
+
+Once in the pool, the pair immediately forms directed edges with the existing pairs, again following the patient PRA distribution. The resulting random graph is akin to a Erd\"{o}s-R\'{e}nyi $G(n,p)$ random graph, except that the edge-forming probability is heterogeneous across different pair types.
+
+\subsection{OPTN}
+
+In this scenario, patients and donors are drawn from historical data collected by the United Network for Organ Sharing (UNOS) data as provided in the Standard Research and Analysis (STAR) dataset. The STAR dataset contains information from all patients that were ever registered to the kidney waiting list in the United States for the past three decades, as well as from all living donors that actually went to transplant. 
+
+Here we must emphasize that these are \emph{not} the patients that belong to the Kidney Paired Donation Pilot Program, and pairs that belong to kidney exchanges may have different characteristics from patients who were only waiting for a living donor (for example, \cite{ashlagi2013kidney} states that patients are much more likely to be highly sensitized). However, we believe that, as exchanges get larger, the distribution of pair characteristics should grow similar to their historical counterpart in the STAR dataset. 
+
+The simulation process consists of drawing pairs of donors and patients from the historical data and allowing them into the pool if they are incompatible. Upon entrance, they immediately form directed edges with existing pairs.
+
+A donor and a patient are deemed compatible if the donor does not possess antigens that are unacceptable for the patient in any of the HLA-A, HLA-B, HLA-C, and HLA-DR loci. We admit that in real life this is not the only reason for why pairs may be deemed incompatible. Most notably, doctors may be conceivably less willing to conduct transplants when patients are HLA mismatched, or when the donor has undesirable characteristics such as diabetes, advanced age, and so on. We will revisit this issue in section \ref{sec:discussion}.
+
+
+\subsection{Algorithms}
+
+\subsection{Problem}
+
+In this work, we focus on maximizing the cardinality of matchings over $T$ periods. 
+
+
+\subsection{Myopic}
+
+The \emph{myopic}\footnote{In the computer science literature, algorithms that optimize locally at every step are usually called \emph{greedy}. However, in the kidney exchange literature this name is already reserved to an algorithm that matches incoming pairs at random, without necessarily optimizing the cardinality of matchings at every period.} algorithm is one that finds the maximal number of matchings at every period, ignoring that it might be useful to keep certain pairs in the pool for later use. As a result, the graph at the end of every period has no cycles shorter than the maximal allowed cycle length, for they would have been already cleared.
+
+This algorithm also does not take into consideration any of the observables in the data. In particular, it makes no use of the fact that some pairs may be harder to match in the future, and therefore it might be advantageous to match them today if the opportunity arises. Conversely, it will not be less likely to carry out matchings involving easy-to-match pairs that could be postponed to the future at low expected cost.
+
+
+\subsection{Infeasible Optimal (OPT)}
+
+The infeasible optimal algorithm (henceforth OPT) does away with the uncertainty arising from the temporal structure of the problem: it knows exactly which pairs will come into the pool, as well as their arrival, and the duration of their sojourns. In effect, this algorithm simply solves the static integer programming problem described at the beginning of section \ref{sec:literature:subsec:kidney}, except that the set of cycles has the additional constraint that a cycle cannot exist between two vertices if their sojourns fail to overlap.
+
+
+
+\subsection{Empirical comparison between myopic and OPT}
+
+We simulated each environment for 3000 periods for each given environment and for each combination of entry rate, death rate and maximum available cycle length. Next, we analyzed the performance of OPT and myopic in each setup, as measured by the average number of pairs they were able to match per period. In order to avoid mixing problems, we discarded the first 1000 periods as burn-in.\footnote{While we refrain from a formal analysis of mixing time here, our thousand-period burn-in may be fairly conservative, as we empirically observe that for all our parameter combinations the size of the graph quick grows from zero to a stable level in (sometimes much) fewer than one hundred periods.}
+
+The results are seen on Figure \ref{???}, where we show the performance ratio between the two algorithms. It is perhaps surprising that myopic's performance is often very close to OPT. In particular, when entry rates are relatively large or death rates are relatively low, the pool becomes thick enough that  opportunities for a reasonably good matching abound, so even a simple heuristic like myopic is able to do well. A bit less remarkably, high death rates also allow myopic to thrive, since dynamic considerations play a much smaller role when pairs leave the pool more often.
+
+A more interesting remark is that in all of our three environments, when 3-cycles are allowed myopic does relative worse to OPT than when only 2-cycles are allowed. 
+
+
 
 
 \section{Results} \label{sec:result}
 
-\subsubsection{Matching uniformly at random}
+\clearpage
+\subsection{Short-run gains}
 
-\subsubsection{Greedy matchings}
+\section{Discussions and Extensions} \label{sec:discussion}
 
-\subsubsection{Optimal matchings}
-
-\section{Discussions} \label{sec:discussion}
+HLA mistmatch -- doctors are willing 
 
 \section{Conclusion} \label{sec:conclusion}
 
 
+\section{Acknowledgements}
 
-\singlespacing
-\setlength\bibsep{0pt}
-\bibliographystyle{my-style}
-\bibliography{Placeholder}
+This work was supported in part by Health Resources and Services Administration contract 234-2005-37011C. The content is the responsibility of the authors alone and does not necessarily reflect the views or policies of the Department of Health and Human Services, nor does mention of trade names, commercial products, or organizations imply endorsement by the U.S. Government.
 
+\clearpage
+
+\bibliographystyle{/Users/vitorhadad/Documents/kidney/matching/paper/te.bst}
+\bibliography{references}
 
 
 \clearpage
@@ -114,13 +210,6 @@
 \section*{Figures} \label{sec:fig}
 \addcontentsline{toc}{section}{Figures}
 
-%\begin{figure}[hp]
-%  \centering
-%  \includegraphics[width=.6\textwidth]{../fig/placeholder.pdf}
-%  \caption{Placeholder}
-%  \label{fig:placeholder}
-%\end{figure}
-
 
 
 
@@ -132,4 +221,3 @@
 
 
 \end{document}
-              

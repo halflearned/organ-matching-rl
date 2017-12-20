@@ -12,13 +12,22 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 from random import shuffle, choice
+from itertools import chain
+from torch.autograd import Variable
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import torch
+from torch import nn, cuda
+from torch.autograd import Variable
+import torch.nn.functional as F
+from torch import optim
+import numpy as np
 
 from matching.solver.kidney_solver2 import  optimal, greedy
 from matching.utils.data_utils import get_additional_regressors, clock_seed
 from matching.utils.env_utils import snapshot, remove_taken
 from matching.utils.data_utils import flatten_matched, disc_mean , get_n_matched
 
-from itertools import chain
+
 
 
 def get_cycles(env, t, n_times):
@@ -65,6 +74,9 @@ def next_nonoverlapping_cycle(cur, cycles):
     except StopIteration:
         return []
         
+
+
+
 
 
 def get_actions(net, env, t, n_times = 50):
@@ -313,28 +325,7 @@ def rollout(env, t_begin, t_end, taken, gamma = 0.97):
 
 
 
-    
-def evaluate_policy(net, env, t):
 
-    if net is None:
-        raise ValueError("net cannot be NoneType")
-    
-    elif "GCN" in str(type(net)):
-        X = env.X(t)[np.newaxis,:]
-        A = env.A(t)[np.newaxis,:]
-        yhat = net.forward(A, X)
-        
-    elif "MLP" in str(type(net)):  
-        X = env.X(t)
-        G, N = get_additional_regressors(env, t)
-        Z = np.hstack([X, G, N])
-        yhat = net.forward(Z)
-        
-    return pd.Series(index = env.get_living(t),
-                     data = yhat\
-                                .data\
-                                .numpy()\
-                                .flatten())
 
 
 
