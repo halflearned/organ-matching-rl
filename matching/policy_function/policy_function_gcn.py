@@ -171,7 +171,7 @@ safe_invert = lambda x: np.where(x > 0, 1/x, 0)
     
 if __name__ == "__main__":
 
-    from sys import argv
+    from sys import argv, platform
     from matching.utils.data_utils import open_file, confusion
 
     batch_size = 32
@@ -179,6 +179,15 @@ if __name__ == "__main__":
     log_every = 10
     save_every = 500
  
+    if platform == "darwin":
+        argv.extend(["optn", 3, 100, .5, np.random.randint(1e8)])
+    
+    print("Creating new RNN")
+    env_type = argv[1]
+    num_layers = int(argv[2])
+    hidden_size = int(argv[3])
+    c = float(argv[4])
+    s = str(argv[5])
     
     if len(argv) > 1:
         use_gn = bool(argv[1])
@@ -190,18 +199,25 @@ if __name__ == "__main__":
         
     net = GCNet(280 + 14*use_gn, 
                 hidden,
-                dropout_prob = .2,
-                loss_fn = loss_fn) 
+                dropout_prob = .2) 
+    
+    name = "{}-{}_{}".format(
+            str(net),
+            env_type,
+            s)
+
     #%%
 
     for i in range(int(1e8)):
         if i % open_every == 0:
             if use_gn:
-                A, X, GN, Y = open_file(open_A = True,
+                A, X, GN, Y = open_file(env_type = env_type,
+                                        open_A = True,
                                         open_GN = True)
                 Z = np.concatenate([X, GN], 2)
             else:
-                A, X, Y = open_file(open_A = True,
+                A, X, Y = open_file(env_type = env_type,
+                                    open_A = True,
                                     open_GN = False)
                 Z = X
             

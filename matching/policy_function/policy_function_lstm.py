@@ -187,7 +187,6 @@ if __name__ == "__main__":
         lens = inputs.any(2).sum(0)
         
         avg_ones = np.hstack([Y[k,:l,0] for k,l in zip(idx, lens)]).mean()
-        
         if avg_ones > 0:
             w = c*1/avg_ones
             

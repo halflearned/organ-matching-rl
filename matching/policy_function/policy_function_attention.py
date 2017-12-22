@@ -108,21 +108,20 @@ class AttentionDecoderRNN(nn.Module):
         
 
     def forward(self, enc_outputs, last_enc_state, lengths):
-        probs = []
         batch_size = enc_outputs.size(1)
         dec_output = Variable(torch.zeros(self.seq_len,
                                 batch_size,
                                 self.input_size))
         cur_state = last_enc_state
+        htildes = []
         for i in range(max(lengths)):
             dec_output, cur_state = self.gru(dec_output, cur_state)
-            p, h_tilde = self.attention_step(enc_outputs,
+            htilde = self.attention_step(enc_outputs,
                                        cur_state,
                                        lengths)
-            #enc_outputs = torch.cat([enc_outputs, h_tilde], 0)
-            probs.append(p)
+            htildes.append(htilde)
             
-        return torch.stack(probs, 1)
+        return torch.cat(htildes).transpose(1,0)
 
 
 
@@ -134,8 +133,8 @@ class AttentionDecoderRNN(nn.Module):
         sc = torch.cat([context, cur_state.transpose(0,1)], 2)
         htilde = self.W_ctxt @ sc.transpose(2,1)
         #probs = F.softmax(self.W_s @ htilde, dim = 1).squeeze()
-        probs = self.prob_layer(sc).squeeze(1)
-        return probs, htilde.transpose(1,2).transpose(0,1)
+        #probs = self.prob_layer(sc).squeeze(1)
+        return htilde.transpose(1,2).transpose(0,1)
     
     
 
@@ -163,7 +162,7 @@ class AttentionDecoderRNN(nn.Module):
                     align[i,l:,0].data.fill_(-np.inf)
                 except ValueError:
                     pass
-            
+        
         return F.softmax(align, dim = 1)
 
 
@@ -198,10 +197,15 @@ class AttentionRNN:
         else:
             self.rnn_dec = torch.load(path_dec)
 
+
+        self.logit_layer = nn.Linear(hidden_size, 2)
+        self.count_layer = nn.Linear(hidden_size, 1)
+
         self.enc_optim = optim.Adam(self.rnn_enc.parameters(), lr=learning_rate)
         self.dec_optim = optim.Adam(self.rnn_dec.parameters(), lr=learning_rate)
-        self.loss_fn = nn.CrossEntropyLoss(reduce = False,
+        self.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
                             weight = torch.FloatTensor([1,10]))
+        self.count_loss_fn = nn.MSELoss()
         
     
     def forward(self, inputs, lens = None):
@@ -216,10 +220,12 @@ class AttentionRNN:
         seq = pack_padded_sequence(inputs[:,order,:], lens[order])
         
         enc_outputs, last_enc_output = self.rnn_enc(seq)
-        yhat = self.rnn_dec(enc_outputs, last_enc_output, lens[order])
+        prelogits_r = self.rnn_dec(enc_outputs, last_enc_output, lens[order])
+        prelogits = prelogits_r[order_r]
         
-        #import pdb; pdb.set_trace()
-        return yhat[order_r] #TODO: Confirm this
+        count = self.count_layer(prelogits.sum(1))
+        logits = self.logit_layer(prelogits)
+        return  logits, count
      
     
     def run(self, inputs, true_outputs, lens = None):
@@ -230,23 +236,31 @@ class AttentionRNN:
         self.enc_optim.zero_grad()
         self.dec_optim.zero_grad()
         
-        yhat = self.forward(inputs, lens)
+        ylogits,ycount = self.forward(inputs, lens)
         ytruth = Variable(torch.LongTensor(true_outputs), requires_grad = False)
-        
-        loss = 0
+    
+        logit_loss = 0
         for i,l in enumerate(lens):
             l = lens[i]
-            yh = yhat[i,:l]
-            yt = ytruth[i,:l].view(-1)        
-            #assert yt.data.numpy().sum() % 2 == 0
-            loss += self.loss_fn(yh, yt).mean()        
-        loss /= batch_size
+            yh = ylogits[i,:l]
+            yt = ytruth[i,:l].view(-1)  
+            try:
+                logit_loss += self.logit_loss_fn(yh, yt).mean() 
+            except RuntimeError as e:
+                print(e)
+        logit_loss /= batch_size
+        
+        count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
     
+        loss = logit_loss + count_loss
+
         loss.backward()
-        self.enc_optim.step()
         self.dec_optim.step()
-    
-        return loss.data.numpy()[0], yhat
+        self.enc_optim.step()
+
+        return (logit_loss.data.numpy()[0], 
+                count_loss.data.numpy()[0], 
+                ylogits, ycount.data.numpy())
     
     
     def __str__(self):
@@ -261,64 +275,83 @@ class AttentionRNN:
 if __name__ == "__main__":
     
     from matching.utils.data_utils import open_file, confusion
-        
-    encoder_input_size = 294
-    encoder_hidden_size = 100
-    decoder_hidden_size = 100
-    num_directions = 1
-    num_layers = 1
-    batch_size = 32
+    from sys import platform, argv
     
-    open_every = 100
-    log_every = 10
+    if platform == "darwin":
+        argv.extend(["optn", 3, 100, .5, np.random.randint(1e8)])
+        
+    
+    encoder_input_size = {"abo":24, "optn":294}
+    env_type = argv[1]
+    num_layers = int(argv[2])
+    hidden_size = int(argv[3])
+    c = float(argv[4])
+    s = str(argv[5])
+    
+    batch_size = 32
+    open_every = 10
     save_every = 500
- 
-    net = AttentionRNN(input_size = 294,
-                       hidden_size = 100,
-                       num_layers = 1)
+    log_every = 10
 
+    
+      
+    net = AttentionRNN(input_size = encoder_input_size[env_type],
+                       hidden_size = hidden_size,
+                       num_layers = num_layers)
+  
+    name = "{}-{}_{}".format(
+            str(net),
+            env_type,
+            s)
 #%%
     for i in range(10000000):
         
         if i % open_every == 0:
-            X, Y, GN = open_file(open_GN = True, open_A = False)
+            X, Y, GN = open_file(env_type = env_type, open_GN = True, open_A = False)
             SS = np.concatenate([X, GN], 2).transpose((1,0,2))
             n = SS.shape[1]
-            num_ys = None
         
-        idx = np.random.choice(n, size=batch_size, p=num_ys)
+        idx = np.random.choice(n, size=batch_size)
         inputs = SS[:,idx,:]
         ytrue = Y[idx]
         
         lens = inputs.any(2).sum(0)
-        loss, yhat = net.run(inputs, ytrue, lens) 
+        
+        avg_ones = np.hstack([Y[k,:l,0] for k,l in zip(idx, lens)]).mean()
+        if avg_ones > 0:
+            w = c*1/avg_ones
+        
+        net.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor([1, w]))
+        
+
+        lloss,closs, ylogits, ycount = net.run(inputs, ytrue, lens) 
             
-        tp, tn, fp, fn = confusion(yhat, ytrue, lens)
+        cacc = np.mean(ycount.round() == ytrue.sum(1))
+        tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
         tpr = tp/(tp+fn)
         tnr = tn/(tn+fp)
-        acc = (tp + tn)/(tp+fp+tn+fn)
-        msg = "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
-                .format(loss,
+        lacc = (tp + tn)/(tp+fp+tn+fn)
+        
+        if tpr < .1:
+            c *= 1.05
+        if tnr < .1:
+            c *= .95
+        
+        msg = "{:1.4f},{:1.4f},{:1.4f},"\
+                "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+                .format(lloss,
+                        closs,
                     tpr, # True positive rate
                     tnr, # True negative rate
-                    acc) # Accuracy
-            
-        print(msg)
+                    lacc, # Logits accuracy
+                    cacc, # Count accuracy
+                    w) 
         if i % log_every == 0:
-            with open("results/" + str(net) + ".txt", "a") as f:
-                print(msg, file = f)
+            print(msg)
+            if platform == "linux":
+                with open("results/" + name + ".txt", "a") as f:
+                    print(msg, file = f)
         
-#            if tpr > .8 and tnr < .5:
-#                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-#                            weight = torch.FloatTensor([1, 1]))
-#            elif tpr < .5 and tnr > .8:
-#                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-#                            weight = torch.FloatTensor([1, 10]))
-#            else:
-#                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-#                            weight = torch.FloatTensor([1, 5]))
-#     
-#            
-         
-        if i % save_every == 0:
-            torch.save(net, "results/" + str(net))
+        if platform == "linux" and i % save_every == 0:
+            torch.save(net, "results/" + name)
