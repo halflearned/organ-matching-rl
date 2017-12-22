@@ -206,9 +206,9 @@ if __name__ == "__main__":
                 Z = X
             
         n = A.shape[0]
-        b_idx = np.random.choice(n, size = batch_size)   
-        inputs = (A[b_idx], Z[b_idx])
-        ytrue = Y[b_idx]
+        idx = np.random.choice(n, size = batch_size)   
+        inputs = (A[idx], Z[idx])
+        ytrue = Y[idx]
         lens = inputs[1].any(2).sum(1)
 
         loss, yhat = net.run(*inputs, ytrue)
@@ -226,15 +226,15 @@ if __name__ == "__main__":
             with open("results/" + str(net) + ".txt", "a") as f:
                 print(msg, file = f)
                 
-            if tpr > .8 and tnr < .5:
-                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-                            weight = torch.FloatTensor([1, 1]))
-            elif tpr < .5 and tnr > .8:
-                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-                            weight = torch.FloatTensor([1, 10]))
-            else:
-                net.loss_fn = nn.CrossEntropyLoss(reduce = False,
-                            weight = torch.FloatTensor([1, 5]))
+            #if tpr > .8 and tnr < .5:
+            #    net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+            #                weight = torch.FloatTensor([1, 1]))
+            #elif tpr < .5 and tnr > .8:
+            #net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+            #                weight = torch.FloatTensor([1, 10]))
+            #else:
+            #    net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+            #                weight = torch.FloatTensor([1, 5]))
         
     if i % save_every == 0:
         torch.save(net, "results/" + str(net))

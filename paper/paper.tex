@@ -143,27 +143,26 @@ The simulation process consists of drawing pairs of donors and patients from the
 A donor and a patient are deemed compatible if the donor does not possess antigens that are unacceptable for the patient in any of the HLA-A, HLA-B, HLA-C, and HLA-DR loci. We admit that in real life this is not the only reason for why pairs may be deemed incompatible. Most notably, doctors may be conceivably less willing to conduct transplants when patients are HLA mismatched, or when the donor has undesirable characteristics such as diabetes, advanced age, and so on. We will revisit this issue in section \ref{sec:discussion}.
 
 
-\subsection{Algorithms}
+\subsection{Benchmarks}
 
-\subsection{Problem}
 
 In this work, we focus on maximizing the cardinality of matchings over $T$ periods. 
 
 
-\subsection{Myopic}
+\subsubsection{Myopic}
 
 The \emph{myopic}\footnote{In the computer science literature, algorithms that optimize locally at every step are usually called \emph{greedy}. However, in the kidney exchange literature this name is already reserved to an algorithm that matches incoming pairs at random, without necessarily optimizing the cardinality of matchings at every period.} algorithm is one that finds the maximal number of matchings at every period, ignoring that it might be useful to keep certain pairs in the pool for later use. As a result, the graph at the end of every period has no cycles shorter than the maximal allowed cycle length, for they would have been already cleared.
 
 This algorithm also does not take into consideration any of the observables in the data. In particular, it makes no use of the fact that some pairs may be harder to match in the future, and therefore it might be advantageous to match them today if the opportunity arises. Conversely, it will not be less likely to carry out matchings involving easy-to-match pairs that could be postponed to the future at low expected cost.
 
 
-\subsection{Infeasible Optimal (OPT)}
+\subsubsection{Infeasible Optimal (OPT)}
 
 The infeasible optimal algorithm (henceforth OPT) does away with the uncertainty arising from the temporal structure of the problem: it knows exactly which pairs will come into the pool, as well as their arrival, and the duration of their sojourns. In effect, this algorithm simply solves the static integer programming problem described at the beginning of section \ref{sec:literature:subsec:kidney}, except that the set of cycles has the additional constraint that a cycle cannot exist between two vertices if their sojourns fail to overlap.
 
 
 
-\subsection{Empirical comparison between myopic and OPT}
+\subsubsection{Empirical comparison between myopic and OPT}
 
 We simulated each environment for 3000 periods for each given environment and for each combination of entry rate, death rate and maximum available cycle length. Next, we analyzed the performance of OPT and myopic in each setup, as measured by the average number of pairs they were able to match per period. In order to avoid mixing problems, we discarded the first 1000 periods as burn-in.\footnote{While we refrain from a formal analysis of mixing time here, our thousand-period burn-in may be fairly conservative, as we empirically observe that for all our parameter combinations the size of the graph quick grows from zero to a stable level in (sometimes much) fewer than one hundred periods.}
 
@@ -171,12 +170,18 @@ The results are seen on Figure \ref{???}, where we show the performance ratio be
 
 A more interesting remark is that in all of our three environments, when 3-cycles are allowed myopic does relative worse to OPT than when only 2-cycles are allowed. 
 
+\subsection{Proposed methods}
+
+\subsubsection{Simulation-based methods}
+
+At a first glance, 
 
 
 
-\section{Results} \label{sec:result}
+\section{Results} \label{sec:results}
 
-\clearpage
+
+
 \subsection{Short-run gains}
 
 \section{Discussions and Extensions} \label{sec:discussion}
