@@ -15,104 +15,54 @@ from torch import optim
 import numpy as np
 
 
-def all_sum(x):
-    return x.sum()
-
-use_cuda = cuda.is_available()
+from matching.policy_function.policy_function_gcn import GCNet
+from matching.policy_function.policy_function_lstm import RNN
 
 def to_var(x, requires_grad = True):
     return Variable(torch.FloatTensor(np.array(x, dtype = np.float32)),
                     requires_grad = requires_grad)
 
 
-class GCNet(nn.Module):
+class RGCNet(nn.Module):
     
     def __init__(self, 
-                 feature_size,
-                 hidden_sizes = None,
-                 output_size = 2,
-                 dropout_prob = 0.2,
-                 activation_fn = nn.SELU,
-                 output_fn = nn.Sigmoid,
-                 opt = optim.Adam,
-                 opt_params = dict(lr = 0.001),
-                 seed = None):
-    
+                 input_size,
+                 hidden_size,
+                 num_layers):
         
-        if seed : torch.manual_seed(seed)
+        super(RGCNet, self).__init__()
         
-        super(GCNet, self).__init__()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.num_directions = 2 
+        self.seq_len = 1
+        self.gcn = GCNet(input_size,
+                      [hidden_size]*num_layers)
+        self.rnn = RNN(hidden_size,
+                       hidden_size,
+                       num_layers = 1)
+        self.logit_layer = self.Linear(hidden_size, 2)
+        self.count_layer = self.Linear(hidden_size, 1)
         
-        self.feature_size  = feature_size
-        self.hidden_sizes = hidden_sizes or []
-        self.output_size = output_size
+        self.opt = torch.optim.Adam(self.parameters())
         
-        self.activation_fn = activation_fn
-        self.dropout_prob = dropout_prob
-        self.output_fn = output_fn()
         
-        self.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
-                        weight = torch.FloatTensor([1, 10]))
-        self.count_loss_fn = nn.MSELoss()
+    def forward(self, A, X, lens = None):
+        if lens is None:
+            lens = X.any(2).sum(1)
+            
+        A, X = self.gcn.make_variables(A, X)
         
-        self.model = self.build_model()
-        self.logit_layer = nn.Linear(hidden_sizes[-1], 2)
-        self.count_layer = nn.Linear(hidden_sizes[-1], 1)
-    
-        self.opt=opt(self.parameters(), **opt_params)
-        
-  
-        
-    def forward(self, A, X):
-        
-        A, X = self.make_variables(A, X)
         h = X
-        for layer in self.model:
+        for layer in self.gcn.model:
             h = layer(A @ h)
-            
-        logits = self.logit_layer(h)
-        counts = self.count_layer(h.sum(1))
+        
+        logits, counts = self.rnn.forward(h, lens)
         return logits, counts
+        
     
-
-    def make_variables(self, AA, XX):
-
-        with np.errstate(divide='ignore'):  
-            As = []
-            for A in AA:
-                outdeg = A.sum(1)
-                D = np.diag(np.sqrt(safe_invert(outdeg)))
-                I = np.eye(A.shape[0])
-                Atilde = D @ (I + A) @ D
-                As.append(Atilde)   
-            As = np.stack(As)
-            
-        XX = to_var(XX)
-        AA = to_var(AA)
-        
-        return AA, XX
-            
-
-
-    def build_model(self):
-        
-        layer = lambda inp, out: \
-                nn.Sequential(
-                    nn.Linear(inp, out),
-                    self.activation_fn(),
-                    nn.AlphaDropout(self.dropout_prob))
-        
-        sizes = [ self.feature_size,
-                 *self.hidden_sizes]
-        
-        mlp = [layer(h0,h1) for h0, h1 in zip(sizes[:-1], sizes[1:])]
-        
-        return nn.Sequential(*mlp)
-            
-    
-    
-    def run(self, A, X, y, lengths = None):
-        
+    def run(self, A, X, y, lengths):
         if lengths is None:
             lengths = X.any(2).sum(1)
             
@@ -133,10 +83,6 @@ class GCNet(nn.Module):
     
         loss = logit_loss + count_loss
         
-        #stop = (loss > 10000).data.numpy()[0]
-        #if stop:
-        #    import pdb; pdb.set_trace()
-        
         self.opt.zero_grad()
         loss.backward()
         self.opt.step()
@@ -144,40 +90,13 @@ class GCNet(nn.Module):
         return (logit_loss.data.numpy()[0], 
                 count_loss.data.numpy()[0], 
                 ylogits, ycount.data.numpy())
+        
     
-    
-    
+        
     def __str__(self):
-        
-        if self.hidden_sizes:
-            hs = "-".join([str(x) for x in self.hidden_sizes])
-        else: 
-            hs = "None"
-        
-        return "GCN_" + hs + \
-            "_{:1d}".format(int(100*self.dropout_prob))
-    
-
-
-def pad(A, X, y, size):
-    
-    if len(A.shape) > 2 or len(X.shape) > 2:
-        raise ValueError("A and X must be 2D.")
-        
-    n = size - X.shape[0]
-    y = y.reshape(-1, 1)
-    
-    if n > 0:
-        A = np.pad(A.toarray(), ((0,n),(0,n)), mode = "constant", constant_values = 0) 
-        X = np.pad(X, ((0,n),(0,0)), mode = "constant", constant_values = 0)
-        y = np.pad(y, ((0,n),(0,0)), mode = "constant", constant_values = 0)    
-        
-    return A, X, y
-
-
-
-safe_invert = lambda x: np.where(x > 0, 1/x, 0)
-
+        return "RGCNet-{}-{}"\
+                .format(self.hidden_size,
+                        self.num_layers)
 
 
 #%%    

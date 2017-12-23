@@ -15,104 +15,64 @@ from torch import optim
 import numpy as np
 
 
-def all_sum(x):
-    return x.sum()
-
-use_cuda = cuda.is_available()
+from matching.policy_function.policy_function_gcn import GCNet
+from matching.policy_function.policy_function_lstm import RNN
 
 def to_var(x, requires_grad = True):
     return Variable(torch.FloatTensor(np.array(x, dtype = np.float32)),
                     requires_grad = requires_grad)
 
 
-class GCNet(nn.Module):
+class RGCNet(nn.Module):
     
     def __init__(self, 
-                 feature_size,
-                 hidden_sizes = None,
-                 output_size = 2,
-                 dropout_prob = 0.2,
-                 activation_fn = nn.SELU,
-                 output_fn = nn.Sigmoid,
-                 opt = optim.Adam,
-                 opt_params = dict(lr = 0.001),
-                 seed = None):
-    
+                 input_size,
+                 hidden_size,
+                 num_layers,
+                 dropout_prob = 0.4):
         
-        if seed : torch.manual_seed(seed)
+        super(RGCNet, self).__init__()
         
-        super(GCNet, self).__init__()
-        
-        self.feature_size  = feature_size
-        self.hidden_sizes = hidden_sizes or []
-        self.output_size = output_size
-        
-        self.activation_fn = activation_fn
-        self.dropout_prob = dropout_prob
-        self.output_fn = output_fn()
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.num_directions = 2 
+        self.seq_len = 1
         
         self.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
                         weight = torch.FloatTensor([1, 10]))
         self.count_loss_fn = nn.MSELoss()
         
-        self.model = self.build_model()
-        self.logit_layer = nn.Linear(hidden_sizes[-1], 2)
-        self.count_layer = nn.Linear(hidden_sizes[-1], 1)
-    
-        self.opt=opt(self.parameters(), **opt_params)
         
-  
+        self.gcn = GCNet(input_size,
+                      [hidden_size]*num_layers,
+                      dropout_prob = dropout_prob)
+        self.rnn = RNN(input_size = hidden_size,
+                       hidden_size = hidden_size,
+                       num_layers = 1)
+        self.logit_layer = nn.Linear(hidden_size, 2)
+        self.count_layer = nn.Linear(hidden_size, 1)
         
-    def forward(self, A, X):
+        self.opt = torch.optim.Adam(self.parameters())
         
-        A, X = self.make_variables(A, X)
+        
+    def forward(self, A, X, lens = None):
+        
+        if lens is None:
+            lens = X.any(2).sum(1)
+            
+        A, X = self.gcn.make_variables(A, X)
+        
         h = X
-        for layer in self.model:
-            h = layer(A @ h)
-            
-        logits = self.logit_layer(h)
-        counts = self.count_layer(h.sum(1))
+        for gcnlayer in self.gcn.model:
+            h = gcnlayer(A @ h)
+        
+        ht = h.transpose(1, 0)
+        logits, counts = self.rnn.forward(ht, lens)
         return logits, counts
+        
     
-
-    def make_variables(self, AA, XX):
-
-        with np.errstate(divide='ignore'):  
-            As = []
-            for A in AA:
-                outdeg = A.sum(1)
-                D = np.diag(np.sqrt(safe_invert(outdeg)))
-                I = np.eye(A.shape[0])
-                Atilde = D @ (I + A) @ D
-                As.append(Atilde)   
-            As = np.stack(As)
-            
-        XX = to_var(XX)
-        AA = to_var(AA)
-        
-        return AA, XX
-            
-
-
-    def build_model(self):
-        
-        layer = lambda inp, out: \
-                nn.Sequential(
-                    nn.Linear(inp, out),
-                    self.activation_fn(),
-                    nn.AlphaDropout(self.dropout_prob))
-        
-        sizes = [ self.feature_size,
-                 *self.hidden_sizes]
-        
-        mlp = [layer(h0,h1) for h0, h1 in zip(sizes[:-1], sizes[1:])]
-        
-        return nn.Sequential(*mlp)
-            
-    
-    
-    def run(self, A, X, y, lengths = None):
-        
+    def run(self, A, X, y, lengths):
         if lengths is None:
             lengths = X.any(2).sum(1)
             
@@ -131,11 +91,7 @@ class GCNet(nn.Module):
         
         count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
     
-        loss = logit_loss + count_loss
-        
-        #stop = (loss > 10000).data.numpy()[0]
-        #if stop:
-        #    import pdb; pdb.set_trace()
+        loss = logit_loss + torch.clamp(count_loss, 0, 1000)
         
         self.opt.zero_grad()
         loss.backward()
@@ -144,40 +100,13 @@ class GCNet(nn.Module):
         return (logit_loss.data.numpy()[0], 
                 count_loss.data.numpy()[0], 
                 ylogits, ycount.data.numpy())
+        
     
-    
-    
+        
     def __str__(self):
-        
-        if self.hidden_sizes:
-            hs = "-".join([str(x) for x in self.hidden_sizes])
-        else: 
-            hs = "None"
-        
-        return "GCN_" + hs + \
-            "_{:1d}".format(int(100*self.dropout_prob))
-    
-
-
-def pad(A, X, y, size):
-    
-    if len(A.shape) > 2 or len(X.shape) > 2:
-        raise ValueError("A and X must be 2D.")
-        
-    n = size - X.shape[0]
-    y = y.reshape(-1, 1)
-    
-    if n > 0:
-        A = np.pad(A.toarray(), ((0,n),(0,n)), mode = "constant", constant_values = 0) 
-        X = np.pad(X, ((0,n),(0,0)), mode = "constant", constant_values = 0)
-        y = np.pad(y, ((0,n),(0,0)), mode = "constant", constant_values = 0)    
-        
-    return A, X, y
-
-
-
-safe_invert = lambda x: np.where(x > 0, 1/x, 0)
-
+        return "RGCNet-{}-{}"\
+                .format(self.hidden_size,
+                        self.num_layers)
 
 
 #%%    
@@ -193,7 +122,7 @@ if __name__ == "__main__":
     save_every = 500
  
     if platform == "darwin":
-        argv = [None, "optn", "3", "100", "True", np.random.randint(1e8)]
+        argv = [None, "optn", "2", "50", "True", np.random.randint(1e8)]
 
     env_type = argv[1]
     hidden = int(argv[3])
@@ -203,9 +132,9 @@ if __name__ == "__main__":
     
     input_size = {"abo":10, "optn":280}
         
-    net = GCNet(input_size[env_type] + 14*use_gn, 
-                [hidden]*num_layers,
-                dropout_prob = .2) 
+    net = RGCNet(input_size[env_type] + 14*use_gn, 
+                 hidden,
+                 num_layers)
     
     name = "{}-{}_{}".format(
             str(net),
@@ -241,7 +170,7 @@ if __name__ == "__main__":
         net.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
                         weight = torch.FloatTensor([1, w]))
         
-        lloss,closs, ylogits, ycount = net.run(*inputs, ytrue)
+        lloss,closs, ylogits, ycount = net.run(*inputs, ytrue, lens)
         cacc = np.mean(ycount.round() == ytrue.sum(1))
         tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
         tpr = tp/(tp+fn)

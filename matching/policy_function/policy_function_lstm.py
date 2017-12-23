@@ -22,7 +22,6 @@ class RNN(nn.Module):
                  input_size,
                  hidden_size,
                  num_layers=1,
-                 bidirectional = False,
                  class_weights = [1, 10]):
         
         super(RNN, self).__init__()
@@ -30,7 +29,7 @@ class RNN(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.num_directions = 2 if bidirectional else 1
+        self.num_directions = 2 
         self.seq_len = 1
         self.num_classes = 2
         self.class_weights = class_weights
@@ -42,7 +41,7 @@ class RNN(nn.Module):
         self.rnn = nn.LSTM(input_size,
                            hidden_size,
                            num_layers,
-                           bidirectional = bidirectional)
+                           bidirectional = True)
                     
         self.logit_layer = nn.Linear(hidden_size, self.num_classes)
         
@@ -68,7 +67,9 @@ class RNN(nn.Module):
         if lens is None:
             lens = inputs.any(2).sum(0)
         
-        inputs = Variable(torch.FloatTensor(inputs),
+        if not isinstance(inputs, torch.autograd.variable.Variable):
+            #import pdb; pdb.set_trace()
+            inputs = Variable(torch.FloatTensor(inputs),
                           requires_grad = False)
         
         order = np.flip(np.argsort(lens), 0).astype(int)
@@ -159,7 +160,6 @@ if __name__ == "__main__":
     net = RNN(input_size=input_size[env_type],
           hidden_size=hidden_size,
           num_layers=num_layers,
-          bidirectional=True,
           class_weights = [1,100*c])
     
     batch_size = 32
