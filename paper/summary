@@ -1,0 +1,56 @@
+
+
+I should have a readable version of the paper in the next 2-3 weeks, but today I would like to tell you what I've been doing, to 1. get your reaction and feedback, 2. maybe you can let me know if you or one of your co-authors have been trying to do similar things, and 3. if there are any questions that immediately come to mind or additional tests you think that should definitely be in the paper, please let me know.
+
+With Prof. Athey I'm not immediately working on kidney exchange, but I think that the machinery that I'll be using for that research might still be useful to find computational solutions to this sort of mechanism design problem.
+
+The first step was the model setup. I have three different "environments" that differ on the compatibility rules, but in all setups we have the following. Time is discrete. At every period, the number of arrivals is drawn from a Poisson random variable. Each pair contains one patient and only one donor. At the moment of entrance, the patient draws their the length of their sojourn from a Geometric distribution. So Poisson entrance, Geometric death.
+
+Now, regarding what is observable and relevant, we have three "environments", that I call "ABO", "RSU", and "OPTN". In the "ABO" environment, no patient is incompatible with the donor from another pair. In the "RSU" (for Roth, Sonmez, Unver), each pair has a PRA value and that represents the probability of forming edges with other pairs in the pool. Finally, in the OPTN environment I draw a donor and a patient from the *historical* OPTN pool of living donor transplants, and once a pair enters pool it becomes compatible with anyone who does *not* have unacceptable antigens.
+
+Given this setup, we are assuming the problem is to maximize the cardinality of matchings from period 0 to T. 
+
+There are two benchmark algorithms: "Myopic" and "Optimal". Myopic looks at the pool at every period and clears out a maximal matching. Optimal is an infeasible oracle: it knows exactly which pairs will enter and leave the pool for all periods from 0 to T.
+
+--- 
+
+FIRST IDEA: is to just simulate the future and choose the one that gives us the best 
+
+E.g., suppose that right now we have
+(1,2), (2,3), (2,4), (5, 6)
+Then we simulate up to a horizon H. During the simulation also draw new sojourns for each pair.
+(1,2), (2,3), (2,4), (5, 6), (2,7), (2,8), (2,9), (5,10), (1,10)
+Then for each action we can think:
++ Match (1,2) today: roughly "costs" 5 cycles, "gains" +2 in the obj
++ Never match (1,2): "costs" 1 cycle, "gains" nothing
+Problems:
+1. What is the optimal horizon H? H small --> small "cost", H high ---> costs goes to zero
+2. How do we choose "not to match anyone today"?
+
+
+
+SECOND IDEA: bandits
+When the graph is larger, bandit algorithms can help explore only promising "arms".
+Connection with combinatorial bandits that I haven't really delved into yet.
+
+Can use estimation procedures: find graph "features", predict a *joint distribution* of [1,0,1,0,1,1,0], at least use that as prior.
+
+
+THIRD IDEA: reinforcement learning
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

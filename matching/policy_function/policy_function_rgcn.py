@@ -41,7 +41,8 @@ class RGCNet(nn.Module):
         
         self.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
                         weight = torch.FloatTensor([1, 10]))
-        self.count_loss_fn = nn.MSELoss()
+        self.count_loss_fn = nn.CrossEntropyLoss(reduce = True,
+                        weight = torch.FloatTensor([1, 2]))
         
         
         self.gcn = GCNet(input_size,
@@ -51,9 +52,9 @@ class RGCNet(nn.Module):
                        hidden_size = hidden_size,
                        num_layers = 1)
         self.logit_layer = nn.Linear(hidden_size, 2)
-        self.count_layer = nn.Linear(hidden_size, 1)
+        self.count_layer = nn.Linear(hidden_size, 2)
         
-        self.opt = torch.optim.Adam(self.parameters())
+        self.optim = torch.optim.Adam(self.parameters())
         
         
     def forward(self, A, X, lens = None):
@@ -72,34 +73,40 @@ class RGCNet(nn.Module):
         return logits, counts
         
     
+    
+    
     def run(self, A, X, y, lengths):
         if lengths is None:
             lengths = X.any(2).sum(1)
             
         batch_size = X.shape[0]
         ylogits, ycount = self.forward(A, X)
+
         ytruth = to_var(y, False).long()
-        
-        # Compute loss, leaving out padded bits      
+        ctruth = to_var(y.any(1).flatten(), False).long()
+
         logit_loss = 0
-        for s,yh,yt in zip(lengths, ylogits, ytruth):
-            try:
-                logit_loss += self.logit_loss_fn(yh[:s], yt[:s].view(-1)).mean()
-            except RuntimeError as e:
-                print("RuntimeError", e)
+        for i,l in enumerate(lens):
+            l = lens[i]
+            yh = ylogits[i,:l]
+            yt = ytruth[i,:l].view(-1)  
+            logit_loss += self.logit_loss_fn(yh, yt).mean() 
+                
         logit_loss /= batch_size
-        
-        count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
+            
+        count_loss = self.count_loss_fn(ycount, ctruth).mean() 
     
-        loss = logit_loss + torch.clamp(count_loss, 0, 1000)
+        loss = logit_loss + count_loss
         
-        self.opt.zero_grad()
+        self.optim.zero_grad()
         loss.backward()
-        self.opt.step()
+        self.optim.step()
+    
         
         return (logit_loss.data.numpy()[0], 
                 count_loss.data.numpy()[0], 
                 ylogits, ycount.data.numpy())
+
         
     
         
@@ -114,15 +121,15 @@ class RGCNet(nn.Module):
 if __name__ == "__main__":
 
     from sys import argv, platform
-    from matching.utils.data_utils import open_file, confusion
+    from matching.utils.data_utils import open_file, confusion, confusion1d
 
     batch_size = 32
-    open_every = 100
+    open_every = 10
     log_every = 10
     save_every = 500
  
     if platform == "darwin":
-        argv = [None, "optn", "2", "50", "True", np.random.randint(1e8)]
+        argv = [None, "abo", "3", "50", "True", np.random.randint(1e8)]
 
     env_type = argv[1]
     hidden = int(argv[3])
@@ -141,7 +148,8 @@ if __name__ == "__main__":
             env_type,
             s)
     c = .5
-    #%%
+    c2 = .2
+
 
     for i in range(int(1e8)):
         if i % open_every == 0:
@@ -171,26 +179,38 @@ if __name__ == "__main__":
                         weight = torch.FloatTensor([1, w]))
         
         lloss,closs, ylogits, ycount = net.run(*inputs, ytrue, lens)
-        cacc = np.mean(ycount.round() == ytrue.sum(1))
-        tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
-        tpr = tp/(tp+fn)
-        tnr = tn/(tn+fp)
-        lacc = (tp + tn)/(tp+fp+tn+fn)
+        ctrue = ytrue.any(1)
+
+        ltp, ltn, lfp, lfn = confusion(ylogits, ytrue, lens)
+        ctp, ctn, cfp, cfn = confusion1d(ycount, ytrue.any(1).flatten())
+        ltpr = ltp/(ltp+lfn)
+        ltnr = ltn/(ltn+lfp)
+        lacc = (ltp + ltn)/(ltp+lfp+ltn+lfn)
         
-        if tpr < .1:
-            c *= 1.05
-        if tnr < .1:
-            c *= .95
-        
-        msg = "{:1.4f},{:1.4f},{:1.4f},"\
-                "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+        ctpr = ctp/(ctp+cfn)
+        ctnr = ctn/(ctn+cfp)
+        cacc = (ctp + ctn)/(ctp+cfp+ctn+cfn)
+        if ltpr < .1 and ltnr > .5:
+            c = np.minimum(c*1.001, 5)
+        elif ltnr < .1 and ltpr > .5:
+            c = np.maximum(.999*c, .1)
+            
+        if ctpr < .1 and ctnr > .5:
+            c2 = np.minimum(c2*1.01, 5)
+        elif ctnr < .1 and ctpr > .5:
+            c2 = np.maximum(.99*c2, .1)         
+#            
+        msg = ",".join(["{:1.4f}"]*10)\
                 .format(lloss,
                         closs,
-                    tpr, # True positive rate
-                    tnr, # True negative rate
+                    ltpr, # True positive rate
+                    ltnr, # True negative rate
                     lacc, # Logits accuracy
+                    ctpr,
+                    ctnr,
                     cacc, # Count accuracy
-                    w) 
+                    c, 
+                    c2) 
                 
         if i % log_every == 0:
             print(msg)

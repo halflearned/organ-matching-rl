@@ -199,6 +199,32 @@ def optimal(env,
     return parse_solution(env, cs, m, t_begin)
     
 
+def compare_to_skip(env, t_begin, t_end, max_cycle_length = 2):
+   
+    if t_begin is None:
+        t_begin = 0
+    if t_end is None:
+        t_end = env.time_length
+    
+    today_nodes = set(env.get_living(t_begin, t_begin))
+    all_nodes = set(env.get_living(t_begin, t_end))
+    
+    ws_full, cs_full = get_cycles(env, all_nodes, max_cycle_length)
+    _, cs_today = get_cycles(env, today_nodes, max_cycle_length)
+    
+    cs_skip = [c for c in cs_full if c not in cs_today]
+    ws_skip = [len(c) for c in cs_skip]
+    
+    m_skip  = solve(ws_skip, cs_skip)
+    m_full = solve(ws_full, cs_full)
+    
+    sol_skip = parse_solution(env, cs_skip, m_skip,  t_begin)
+    sol_full = parse_solution(env, cs_full, m_full, t_begin)
+        
+    return sol_full["obj"], sol_skip["obj"]
+    
+
+
 
 def compare_optimal(env, 
                     t_begin,
@@ -210,6 +236,9 @@ def compare_optimal(env,
         t_begin = 0
     if t_end is None:
         t_end = env.time_length
+        
+    if not isinstance(perturb, set):
+        perturb = set(perturb)
         
     nodes = set(env.get_living(t_begin, t_end))
     
@@ -224,15 +253,47 @@ def compare_optimal(env,
     m_take  = solve(ws_take, cs_take)
     m_leave = solve(ws_leave, cs_leave)
     
-    sol_take = parse_solution(env, cs_take,  m_take,  t_begin)
+    sol_take  = parse_solution(env, cs_take,  m_take,  t_begin)
     sol_leave = parse_solution(env, cs_leave, m_leave, t_begin)
     
     sol_take["obj"] += len(perturb)
     sol_take["matched"][t_begin].update(perturb)
     sol_take["matched_cycles"][t_begin].append(perturb)
     
-    return sol_take, sol_leave
+    return sol_take["obj"], sol_leave["obj"]
     
+
+
+def same_rewards(env, 
+            t_begin,
+            t_end,
+            perturb,
+            max_cycle_length = 2):
+    
+    if t_begin is None:
+        t_begin = 0
+    if t_end is None:
+        t_end = env.time_length
+        
+    if not isinstance(perturb, set):
+        perturb = set(perturb)
+        
+    nodes = set(env.get_living(t_begin, t_end))
+    
+    ws_leave, cs_leave = get_cycles(env, nodes, max_cycle_length)
+    ws_take, cs_take = remove_from_cycles(ws_leave, cs_leave, perturb)
+    
+    m_take  = solve(ws_take, cs_take)
+    m_leave = solve(ws_leave, cs_leave)
+    
+    sol_take  = parse_solution(env, cs_take,  m_take,  t_begin)
+    sol_leave = parse_solution(env, cs_leave, m_leave, t_begin)
+    
+    sol_take["obj"] += len(perturb)
+    sol_take["matched"][t_begin].update(perturb)
+    sol_take["matched_cycles"][t_begin].append(perturb)
+    
+    return  sol_take["obj"] == sol_leave["obj"] 
     
 
 

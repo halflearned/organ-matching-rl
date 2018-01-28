@@ -72,6 +72,13 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
         
         
         
+    def __str__(self):
+        return "RSU({},{},{},{})".format(self.entry_rate,
+                                      self.death_rate,
+                                      self.time_length,
+                                      self.seed)
+        
+        
     def draw_blood_type(self, n):
         pat_is_female = np.random.uniform(size=n) < self.patient_is_female_freq
         don_is_husband = np.random.uniform(size=n) < self.donor_is_spouse_freq

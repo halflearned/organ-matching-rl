@@ -1,0 +1,73 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: paper.aux
+The style file: /Users/vitorhadad/Documents/kidney/matching/paper/te.bst.bst
+Database file #1: references.bib
+Repeated entry---line 143 of file references.bib
+ : @inproceedings{dickerson2016position
+ :                                     ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 294 of file references.bib
+ : @techreport{ashlagi2012need
+ :                            ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 324 of file references.bib
+ : @inproceedings{rapaport1986case
+ :                                ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 372 of file references.bib
+ : @article{ashlagi2011nonsimultaneous
+ :                                    ,
+I'm skipping whatever remains of this entry
+Repeated entry---line 384 of file references.bib
+ : @article{ashlagi2013kidney
+ :                           ,
+I'm skipping whatever remains of this entry
+Warning--empty journal in akbarpour2017thickness
+Warning--can't use both volume and number fields in rapaport1986case
+"" can't start a style-file command---line 3035 of file /Users/vitorhadad/Documents/kidney/matching/paper/te.bst.bst
+ : 
+ : 
+(Error may have been on previous line)
+You've used 25 entries,
+            2904 wiz_defined-function locations,
+            751 strings with 9597 characters,
+and the built_in function-call counts, 16910 in all, are:
+= -- 1338
+> -- 884
+< -- 10
++ -- 297
+- -- 264
+* -- 1380
+:= -- 2494
+add.period$ -- 72
+call.type$ -- 25
+change.case$ -- 226
+chr.to.int$ -- 25
+cite$ -- 52
+duplicate$ -- 1245
+empty$ -- 1208
+format.name$ -- 343
+if$ -- 3394
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 260
+newline$ -- 113
+num.names$ -- 100
+pop$ -- 506
+preamble$ -- 1
+purify$ -- 186
+quote$ -- 0
+skip$ -- 438
+stack$ -- 0
+substring$ -- 783
+swap$ -- 610
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 219
+warning$ -- 2
+while$ -- 120
+width$ -- 0
+write$ -- 311
+(There were 6 error messages)

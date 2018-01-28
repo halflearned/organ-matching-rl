@@ -48,6 +48,14 @@ class ABOKidneyExchange(BaseKidneyExchange):
                         populate=populate)
         
         
+    def __str__(self):
+        return "ABO({},{},{},{})".format(self.entry_rate,
+                                      self.death_rate,
+                                      self.time_length,
+                                      self.seed)
+        
+        
+        
     def draw_node_features(self, t_begin, t_end):
         
         if t_begin == 0:

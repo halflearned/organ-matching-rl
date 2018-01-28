@@ -199,13 +199,17 @@ class AttentionRNN:
 
 
         self.logit_layer = nn.Linear(hidden_size, 2)
-        self.count_layer = nn.Linear(hidden_size, 1)
+        self.count_layer = nn.Linear(hidden_size, 2)
 
         self.enc_optim = optim.Adam(self.rnn_enc.parameters(), lr=learning_rate)
         self.dec_optim = optim.Adam(self.rnn_dec.parameters(), lr=learning_rate)
         self.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
                             weight = torch.FloatTensor([1,10]))
-        self.count_loss_fn = nn.MSELoss()
+        self.count_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                            weight = torch.FloatTensor([1,10]))
+        
+        
+        
         
     
     def forward(self, inputs, lens = None):
@@ -223,9 +227,14 @@ class AttentionRNN:
         prelogits_r = self.rnn_dec(enc_outputs, last_enc_output, lens[order])
         prelogits = prelogits_r[order_r]
         
-        count = self.count_layer(prelogits.sum(1))
         logits = self.logit_layer(prelogits)
-        return  logits, count
+        
+        precounts = torch.stack([prelogits[i,:l].mean(0)
+                    for i,l in enumerate(lens)])
+        
+        counts = self.count_layer(precounts)
+        
+        return  logits, counts
      
     
     def run(self, inputs, true_outputs, lens = None):
@@ -236,9 +245,11 @@ class AttentionRNN:
         self.enc_optim.zero_grad()
         self.dec_optim.zero_grad()
         
-        ylogits,ycount = self.forward(inputs, lens)
+        ylogits, ycount = self.forward(inputs, lens)
+
         ytruth = Variable(torch.LongTensor(true_outputs), requires_grad = False)
-    
+        ctruth = Variable(torch.LongTensor(true_outputs.any(1).flatten().astype(float)), requires_grad = False)
+        
         logit_loss = 0
         for i,l in enumerate(lens):
             l = lens[i]
@@ -248,16 +259,19 @@ class AttentionRNN:
                 logit_loss += self.logit_loss_fn(yh, yt).mean() 
             except RuntimeError as e:
                 print(e)
+                
         logit_loss /= batch_size
-        
-        count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
+        count_loss = self.count_loss_fn(ycount, ctruth).mean()
     
         loss = logit_loss + count_loss
-
+        
+        self.enc_optim.zero_grad()
+        self.dec_optim.zero_grad()
         loss.backward()
-        self.dec_optim.step()
         self.enc_optim.step()
-
+        self.dec_optim.step()
+    
+        
         return (logit_loss.data.numpy()[0], 
                 count_loss.data.numpy()[0], 
                 ylogits, ycount.data.numpy())
@@ -274,11 +288,11 @@ class AttentionRNN:
     
 if __name__ == "__main__":
     
-    from matching.utils.data_utils import open_file, confusion
+    from matching.utils.data_utils import open_file, confusion, confusion1d
     from sys import platform, argv
     
     if platform == "darwin":
-        argv.extend(["optn", 3, 100, .5, np.random.randint(1e8)])
+        argv.extend(["abo", 1, 100, .5, np.random.randint(1e8)])
         
     
     encoder_input_size = {"abo":24, "optn":294}
@@ -303,6 +317,9 @@ if __name__ == "__main__":
             str(net),
             env_type,
             s)
+    
+    c = .5
+    c2 = .25
 #%%
     for i in range(10000000):
         
@@ -320,33 +337,46 @@ if __name__ == "__main__":
         avg_ones = np.hstack([Y[k,:l,0] for k,l in zip(idx, lens)]).mean()
         if avg_ones > 0:
             w = c*1/avg_ones
-        
+            
         net.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
                         weight = torch.FloatTensor([1, w]))
+        net.count_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor([1, c2*1/avg_ones]))
         
+        lloss, closs, ylogits, ycount = net.run(inputs, ytrue, lens)
+        ctrue = ytrue.any(1)
 
-        lloss,closs, ylogits, ycount = net.run(inputs, ytrue, lens) 
+        ltp, ltn, lfp, lfn = confusion(ylogits, ytrue, lens)
+        ctp, ctn, cfp, cfn = confusion1d(ycount, ytrue.any(1).flatten())
+        ltpr = ltp/(ltp+lfn)
+        ltnr = ltn/(ltn+lfp)
+        lacc = (ltp + ltn)/(ltp+lfp+ltn+lfn)
+        
+        ctpr = ctp/(ctp+cfn)
+        ctnr = ctn/(ctn+cfp)
+        cacc = (ctp + ctn)/(ctp+cfp+ctn+cfn)
+        if ltpr < .1 and ltnr > .5:
+            c = np.minimum(c*1.001, 5)
+        elif ltnr < .1 and ltpr > .5:
+            c = np.maximum(.999*c, .1)
             
-        cacc = np.mean(ycount.round() == ytrue.sum(1))
-        tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
-        tpr = tp/(tp+fn)
-        tnr = tn/(tn+fp)
-        lacc = (tp + tn)/(tp+fp+tn+fn)
-        
-        if tpr < .1:
-            c *= 1.05
-        if tnr < .1:
-            c *= .95
-        
-        msg = "{:1.4f},{:1.4f},{:1.4f},"\
-                "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+        if ctpr < .1 and ctnr > .5:
+            c2 = np.minimum(c2*1.01, 5)
+        elif ctnr < .1 and ctpr > .5:
+            c2 = np.maximum(.99*c2, .1)         
+#            
+        msg = ",".join(["{:1.4f}"]*10)\
                 .format(lloss,
                         closs,
-                    tpr, # True positive rate
-                    tnr, # True negative rate
+                    ltpr, # True positive rate
+                    ltnr, # True negative rate
                     lacc, # Logits accuracy
+                    ctpr,
+                    ctnr,
                     cacc, # Count accuracy
-                    w) 
+                    c, 
+                    c2) 
+                
         if i % log_every == 0:
             print(msg)
             if platform == "linux":

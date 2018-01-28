@@ -9,7 +9,6 @@ import abc
 import numpy as np
 import networkx as nx
 from collections import defaultdict
-from matching.solver.trimble_solver.kidney_digraph import Digraph
 
 
 def draw(p_dict, n = 1):
@@ -184,33 +183,4 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         
     
     
-    
-    # Use this method instead of nx.relabel_nodes
-    def relabel_nodes(self, mapping):
-        # ??? What if this init had other parameters ???
-        relabeled_env = self.__class__(self.entry_rate,
-                           self.death_rate,
-                           self.time_length,
-                           seed = None,
-                           populate = False)
         
-        for i, attrs in self.nodes(data=True):
-            relabeled_env.add_node(mapping[i], **attrs)
-            
-        for i, nbrs in self.adjacency():
-            for j, attrs in nbrs.items():
-                relabeled_env.add_edge(mapping[i], mapping[j], **attrs)
-        
-        return relabeled_env
-            
-        
-    
-    
-    def to_trimble_digraph(self, g, weight = "weight"):
-        vtx_count = g.number_of_nodes()
-        digraph = Digraph(vtx_count)
-        for i, j, data in g.edges(data = True):
-            digraph.add_edge(data["weight"], digraph.vs[i], digraph.vs[j])
-        
-        return digraph
-    

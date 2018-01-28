@@ -22,7 +22,8 @@ class RNN(nn.Module):
                  input_size,
                  hidden_size,
                  num_layers=1,
-                 class_weights = [1, 10]):
+                 logit_class_weights = [1, 10],
+                 count_class_weights = [1, 5]):
         
         super(RNN, self).__init__()
         
@@ -32,11 +33,11 @@ class RNN(nn.Module):
         self.num_directions = 2 
         self.seq_len = 1
         self.num_classes = 2
-        self.class_weights = class_weights
-        self.loss_fn = nn.CrossEntropyLoss(reduce = False,
-                        weight = torch.FloatTensor(self.class_weights))
-        
-        self.count_loss_fn = nn.MSELoss()
+        self.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor(logit_class_weights))
+        self.count_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor(count_class_weights))
+                
         
         self.rnn = nn.LSTM(input_size,
                            hidden_size,
@@ -45,7 +46,7 @@ class RNN(nn.Module):
                     
         self.logit_layer = nn.Linear(hidden_size, self.num_classes)
         
-        self.count_layer = nn.Linear(hidden_size, 1)
+        self.count_layer = nn.Linear(hidden_size, 2)
                             
         
         self.c0 = nn.Parameter(torch.randn(num_layers * self.num_directions, 
@@ -59,7 +60,7 @@ class RNN(nn.Module):
 
         
  
-        self.optim = optim.Adam(self.parameters(), lr=0.001)
+        self.optim = optim.Adam(self.parameters(), lr=.005)
         
         
     def forward(self, inputs, lens = None):    
@@ -81,7 +82,7 @@ class RNN(nn.Module):
                          self.h0.repeat(1, this_batch_size, 1))
         
         outputs, staten = self.rnn(seq, initial_state)
-        outputs, lens = pad_packed_sequence(outputs) 
+        outputs, _ = pad_packed_sequence(outputs) 
         outputs = outputs[:, :, :self.hidden_size] +\
                   outputs[:, :, self.hidden_size:]  
     
@@ -89,7 +90,8 @@ class RNN(nn.Module):
         
         logits = self.logit_layer(prelogits)
         
-        precounts = prelogits.sum(1).squeeze()
+        precounts = torch.stack([prelogits[i,:l].mean(0)
+                    for i,l in enumerate(lens)])
         
         counts = self.count_layer(precounts)
         return logits, counts
@@ -106,6 +108,7 @@ class RNN(nn.Module):
         
         ylogits, ycount = self.forward(inputs, lens)
         ytruth = Variable(torch.LongTensor(true_outputs), requires_grad = False)
+        ctruth = Variable(torch.LongTensor(true_outputs.any(1).flatten().astype(float)), requires_grad = False)
         
         logit_loss = 0
         for i,l in enumerate(lens):
@@ -113,15 +116,15 @@ class RNN(nn.Module):
             yh = ylogits[i,:l]
             yt = ytruth[i,:l].view(-1)  
             try:
-                logit_loss += self.loss_fn(yh, yt).mean() 
+                logit_loss += self.logit_loss_fn(yh, yt).mean() 
             except RuntimeError as e:
                 print(e)
+                
         logit_loss /= batch_size
-        
-        count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
+        count_loss = self.count_loss_fn(ycount, ctruth).mean()
     
         loss = logit_loss + count_loss
-    
+        
         self.optim.zero_grad()
         loss.backward()
         self.optim.step()
@@ -142,11 +145,11 @@ class RNN(nn.Module):
     
 if __name__ == "__main__":
     
-    from matching.utils.data_utils import open_file, confusion
+    from matching.utils.data_utils import open_file, confusion, confusion1d
     from sys import argv, platform
     
     if platform == "darwin":
-        argv.extend(["abo", 1, 100, .5, np.random.randint(1e8)])
+        argv.extend(["abo", 3, 50, 1, np.random.randint(1e8)])
     
     
     #if len(argv) > 1:
@@ -160,9 +163,10 @@ if __name__ == "__main__":
     net = RNN(input_size=input_size[env_type],
           hidden_size=hidden_size,
           num_layers=num_layers,
-          class_weights = [1,100*c])
+          logit_class_weights = [1,100*c],
+          count_class_weights = [1, 3])
     
-    batch_size = 32
+    batch_size = 64
     open_every = 10
     save_every = 500
     log_every = 10
@@ -171,7 +175,7 @@ if __name__ == "__main__":
             str(net),
             env_type,
             s)
-
+    c2 = 1
 #%%
     for i in range(10000000):
         
@@ -190,32 +194,40 @@ if __name__ == "__main__":
         if avg_ones > 0:
             w = c*1/avg_ones
             
-        net.loss_fn = nn.CrossEntropyLoss(reduce = False,
+        net.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
                         weight = torch.FloatTensor([1, w]))
+        net.count_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor([1, c2*1/avg_ones]))
         
+        lloss, closs, ylogits, ycount = net.run(inputs, ytrue, lens)
+        ctrue = ytrue.any(1)
+
         
-        lloss,closs, ylogits, ycount = net.run(inputs, ytrue, lens) 
-        
-        cacc = np.mean(ycount.round() == ytrue.sum(1))
-        tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
-        tpr = tp/(tp+fn)
-        tnr = tn/(tn+fp)
-        lacc = (tp + tn)/(tp+fp+tn+fn)
-        
-        if tpr < .1:
-            c *= 1.05
-        if tnr < .1:
-            c *= .95
-        
-        msg = "{:1.4f},{:1.4f},{:1.4f},"\
-                "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+        ctpr = ctp/(ctp+cfn)
+        ctnr = ctn/(ctn+cfp)
+        cacc = (ctp + ctn)/(ctp+cfp+ctn+cfn)
+        if ltpr < .1 and ltnr > .5:
+            c = np.minimum(c*1.001, 5)
+        elif ltnr < .1 and ltpr > .5:
+            c = np.maximum(.999*c, .1)
+            
+        if ctpr < .1 and ctnr > .5:
+            c2 = np.minimum(c2*1.01, 5)
+        elif ctnr < .1 and ctpr > .5:
+            c2 = np.maximum(.99*c2, .1)         
+#            
+        msg = ",".join(["{:1.4f}"]*10)\
                 .format(lloss,
                         closs,
-                    tpr, # True positive rate
-                    tnr, # True negative rate
+                    ltpr, # True positive rate
+                    ltnr, # True negative rate
                     lacc, # Logits accuracy
+                    ctpr,
+                    ctnr,
                     cacc, # Count accuracy
-                    w) 
+                    c, 
+                    c2) 
+                
         if i % log_every == 0:
             print(msg)
             if platform == "linux":
@@ -224,5 +236,3 @@ if __name__ == "__main__":
         
         if platform == "linux" and i % save_every == 0:
             torch.save(net, "results/" + name)
-
-                

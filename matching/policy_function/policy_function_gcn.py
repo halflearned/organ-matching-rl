@@ -53,25 +53,31 @@ class GCNet(nn.Module):
         
         self.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
                         weight = torch.FloatTensor([1, 10]))
-        self.count_loss_fn = nn.MSELoss()
+        self.count_loss_fn = nn.CrossEntropyLoss(reduce = True,
+                        weight = torch.FloatTensor([1, 2]))
         
         self.model = self.build_model()
         self.logit_layer = nn.Linear(hidden_sizes[-1], 2)
-        self.count_layer = nn.Linear(hidden_sizes[-1], 1)
+        self.count_layer = nn.Linear(hidden_sizes[-1], 2)
     
-        self.opt=opt(self.parameters(), **opt_params)
+        self.optim=opt(self.parameters(), **opt_params)
         
   
         
     def forward(self, A, X):
         
+        lens = X.any(2).sum(1)
+
         A, X = self.make_variables(A, X)
         h = X
         for layer in self.model:
             h = layer(A @ h)
             
         logits = self.logit_layer(h)
-        counts = self.count_layer(h.sum(1))
+        counts = self.count_layer(
+                    torch.stack([h[i,:l].mean(0)
+                    for i,l in enumerate(lens)])
+        )
         return logits, counts
     
 
@@ -111,35 +117,34 @@ class GCNet(nn.Module):
             
     
     
-    def run(self, A, X, y, lengths = None):
+    def run(self, A, X, y, lens = None):
         
-        if lengths is None:
-            lengths = X.any(2).sum(1)
+        if lens is None:
+            lens = X.any(2).sum(1)
             
         batch_size = X.shape[0]
         ylogits, ycount = self.forward(A, X)
+
         ytruth = to_var(y, False).long()
-        
-        # Compute loss, leaving out padded bits      
+        ctruth = to_var(y.any(1).flatten(), False).long()
+
         logit_loss = 0
-        for s,yh,yt in zip(lengths, ylogits, ytruth):
-            try:
-                logit_loss += self.logit_loss_fn(yh[:s], yt[:s].view(-1)).mean()
-            except RuntimeError as e:
-                print("RuntimeError", e)
+        for i,l in enumerate(lens):
+            l = lens[i]
+            yh = ylogits[i,:l]
+            yt = ytruth[i,:l].view(-1)  
+            logit_loss += self.logit_loss_fn(yh, yt).mean() 
+                
         logit_loss /= batch_size
-        
-        count_loss = self.count_loss_fn(ycount, ytruth.sum(1).float())
+            
+        count_loss = self.count_loss_fn(ycount, ctruth).mean() 
     
         loss = logit_loss + count_loss
         
-        #stop = (loss > 10000).data.numpy()[0]
-        #if stop:
-        #    import pdb; pdb.set_trace()
-        
-        self.opt.zero_grad()
+        self.optim.zero_grad()
         loss.backward()
-        self.opt.step()
+        self.optim.step()
+    
         
         return (logit_loss.data.numpy()[0], 
                 count_loss.data.numpy()[0], 
@@ -185,15 +190,15 @@ safe_invert = lambda x: np.where(x > 0, 1/x, 0)
 if __name__ == "__main__":
 
     from sys import argv, platform
-    from matching.utils.data_utils import open_file, confusion
+    from matching.utils.data_utils import open_file, confusion, confusion1d
 
     batch_size = 32
-    open_every = 100
+    open_every = 20
     log_every = 10
     save_every = 500
  
     if platform == "darwin":
-        argv = [None, "optn", "3", "100", "True", np.random.randint(1e8)]
+        argv = [None, "abo", "5", "100", "True", np.random.randint(1e8)]
 
     env_type = argv[1]
     hidden = int(argv[3])
@@ -205,13 +210,14 @@ if __name__ == "__main__":
         
     net = GCNet(input_size[env_type] + 14*use_gn, 
                 [hidden]*num_layers,
-                dropout_prob = .2) 
+                dropout_prob = .4) 
     
     name = "{}-{}_{}".format(
             str(net),
             env_type,
             s)
-    c = .5
+    c = 1
+    c2 = .25
     #%%
 
     for i in range(int(1e8)):
@@ -238,30 +244,44 @@ if __name__ == "__main__":
         if avg_ones > 0:
             w = c*1/avg_ones
         
-        net.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
+        net.logit_loss_fn = nn.CrossEntropyLoss(reduce = False,
                         weight = torch.FloatTensor([1, w]))
+        net.count_loss_fn = nn.CrossEntropyLoss(reduce = False,
+                        weight = torch.FloatTensor([1, c2*1/avg_ones]))
         
-        lloss,closs, ylogits, ycount = net.run(*inputs, ytrue)
-        cacc = np.mean(ycount.round() == ytrue.sum(1))
-        tp, tn, fp, fn = confusion(ylogits, ytrue, lens)
-        tpr = tp/(tp+fn)
-        tnr = tn/(tn+fp)
-        lacc = (tp + tn)/(tp+fp+tn+fn)
+        lloss, closs, ylogits, ycount = net.run(*inputs, ytrue, lens)
+        ctrue = ytrue.any(1)
+
+        ltp, ltn, lfp, lfn = confusion(ylogits, ytrue, lens)
+        ctp, ctn, cfp, cfn = confusion1d(ycount, ytrue.any(1).flatten())
+        ltpr = ltp/(ltp+lfn)
+        ltnr = ltn/(ltn+lfp)
+        lacc = (ltp + ltn)/(ltp+lfp+ltn+lfn)
         
-        if tpr < .1:
-            c *= 1.05
-        if tnr < .1:
-            c *= .95
-        
-        msg = "{:1.4f},{:1.4f},{:1.4f},"\
-                "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
+        ctpr = ctp/(ctp+cfn)
+        ctnr = ctn/(ctn+cfp)
+        cacc = (ctp + ctn)/(ctp+cfp+ctn+cfn)
+        if ltpr < .1 and ltnr > .5:
+            c = np.minimum(c*1.001, 5)
+        elif ltnr < .1 and ltpr > .5:
+            c = np.maximum(.999*c, .1)
+            
+        if ctpr < .1 and ctnr > .5:
+            c2 = np.minimum(c2*1.01, 5)
+        elif ctnr < .1 and ctpr > .5:
+            c2 = np.maximum(.99*c2, .1)         
+#            
+        msg = ",".join(["{:1.4f}"]*10)\
                 .format(lloss,
                         closs,
-                    tpr, # True positive rate
-                    tnr, # True negative rate
+                    ltpr, # True positive rate
+                    ltnr, # True negative rate
                     lacc, # Logits accuracy
+                    ctpr,
+                    ctnr,
                     cacc, # Count accuracy
-                    w) 
+                    c, 
+                    c2) 
                 
         if i % log_every == 0:
             print(msg)

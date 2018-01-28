@@ -1,0 +1,183 @@
+\begin{thebibliography}{25}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\bibAnnoteFile}[1]{%
+  \IfFileExists{#1}{\begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ \input{#1}\end{quotation}}{}}
+\providecommand{\bibAnnote}[2]{%
+  \begin{quotation}\noindent\textsc{Key:} #1\\
+  \textsc{Annotation:}\ #2\end{quotation}}
+
+\bibitem[{Abdulkadiro{\u{g}}lu and S{\"o}nmez(1999)}]{abdulkadirouglu1999house}
+Abdulkadiro{\u{g}}lu, Atila and Tayfun S{\"o}nmez (1999), \enquote{House
+  allocation with existing tenants.} \emph{Journal of Economic Theory}, 88,
+  233--260.
+\bibAnnoteFile{abdulkadirouglu1999house}
+
+\bibitem[{Abraham et~al.(2007)Abraham, Blum, and
+  Sandholm}]{abraham2007clearing}
+Abraham, David~J, Avrim Blum, and Tuomas Sandholm (2007), \enquote{Clearing
+  algorithms for barter exchange markets: Enabling nationwide kidney
+  exchanges.} In \emph{Proceedings of the 8th ACM conference on Electronic
+  commerce}, 295--304, ACM.
+\bibAnnoteFile{abraham2007clearing}
+
+\bibitem[{Akbarpour et~al.(2017)Akbarpour, Li, and
+  Oveis~Gharan}]{akbarpour2017thickness}
+Akbarpour, Mohammad, Shengwu Li, and Shayan Oveis~Gharan (2017),
+  \enquote{Thickness and information in dynamic matching markets.}
+\bibAnnoteFile{akbarpour2017thickness}
+
+\bibitem[{Anderson et~al.(2015)Anderson, Ashlagi, Gamarnik, and
+  Roth}]{anderson2015finding}
+Anderson, Ross, Itai Ashlagi, David Gamarnik, and Alvin~E Roth (2015),
+  \enquote{Finding long chains in kidney exchange using the traveling salesman
+  problem.} \emph{Proceedings of the National Academy of Sciences}, 112,
+  663--668.
+\bibAnnoteFile{anderson2015finding}
+
+\bibitem[{Ashlagi et~al.(2012)Ashlagi, Gamarnik, Rees, and
+  Roth}]{ashlagi2012need}
+Ashlagi, Itai, David Gamarnik, Michael~A Rees, and Alvin~E Roth (2012),
+  \enquote{The need for (long) chains in kidney exchange.} Technical report,
+  National Bureau of Economic Research.
+\bibAnnoteFile{ashlagi2012need}
+
+\bibitem[{Ashlagi et~al.(2011)Ashlagi, Gilchrist, Roth, and
+  Rees}]{ashlagi2011nonsimultaneous}
+Ashlagi, Itai, Duncan~S Gilchrist, Alvin~E Roth, and Michael~A Rees (2011),
+  \enquote{Nonsimultaneous chains and dominos in kidney-paired
+  donation—revisited.} \emph{American Journal of transplantation}, 11,
+  984--994.
+\bibAnnoteFile{ashlagi2011nonsimultaneous}
+
+\bibitem[{Ashlagi et~al.(2013)Ashlagi, Jaillet, and
+  Manshadi}]{ashlagi2013kidney}
+Ashlagi, Itai, Patrick Jaillet, and Vahideh~H Manshadi (2013), \enquote{Kidney
+  exchange in dynamic sparse heterogenous pools.} \emph{arXiv preprint
+  arXiv:1301.3509}.
+\bibAnnoteFile{ashlagi2013kidney}
+
+\bibitem[{Awasthi and Sandholm(2009)}]{awasthi2009online}
+Awasthi, Pranjal and Tuomas Sandholm (2009), \enquote{Online stochastic
+  optimization in the large: Application to kidney exchange.} In \emph{IJCAI},
+  volume~9, 405--411.
+\bibAnnoteFile{awasthi2009online}
+
+\bibitem[{Dickerson et~al.(2017)Dickerson, Kazachkov, Procaccia, and
+  Sandholm}]{dickerson2017small}
+Dickerson, John~P, Aleksandr~M Kazachkov, Ariel~D Procaccia, and Tuomas
+  Sandholm (2017), \enquote{Small representations of big kidney exchange
+  graphs.} In \emph{AAAI}, 487--493.
+\bibAnnoteFile{dickerson2017small}
+
+\bibitem[{Dickerson et~al.(2016)Dickerson, Manlove, Plaut, Sandholm, and
+  Trimble}]{dickerson2016position}
+Dickerson, John~P, David~F Manlove, Benjamin Plaut, Tuomas Sandholm, and James
+  Trimble (2016), \enquote{Position-indexed formulations for kidney exchange.}
+  In \emph{Proceedings of the 2016 ACM Conference on Economics and
+  Computation}, 25--42, ACM.
+\bibAnnoteFile{dickerson2016position}
+
+\bibitem[{Dickerson et~al.(2012)Dickerson, Procaccia, and
+  Sandholm}]{dickerson2012dynamic}
+Dickerson, John~P, Ariel~D Procaccia, and Tuomas Sandholm (2012),
+  \enquote{Dynamic matching via weighted myopia with application to kidney
+  exchange.} In \emph{AAAI}.
+\bibAnnoteFile{dickerson2012dynamic}
+
+\bibitem[{Dickerson and Sandholm(2015)}]{dickerson2015futurematch}
+Dickerson, John~P and Tuomas Sandholm (2015), \enquote{Futurematch: Combining
+  human value judgments and machine learning to match in dynamic environments.}
+  In \emph{AAAI}, 622--628.
+\bibAnnoteFile{dickerson2015futurematch}
+
+\bibitem[{Goodfellow et~al.(2016)Goodfellow, Bengio, and
+  Courville}]{goodfellow2016deep}
+Goodfellow, Ian, Yoshua Bengio, and Aaron Courville (2016), \emph{Deep
+  learning}. MIT press.
+\bibAnnoteFile{goodfellow2016deep}
+
+\bibitem[{Montgomery et~al.(2006)Montgomery, Gentry, Marks, Warren, Hiller,
+  Houp, Zachary, Melancon, Maley, Rabb et~al.}]{montgomery2006domino}
+Montgomery, Robert~A, Sommer~E Gentry, William~H Marks, Daniel~S Warren, Janet
+  Hiller, Julie Houp, Andrea~A Zachary, J~Keith Melancon, Warren~R Maley, Hamid
+  Rabb, et~al. (2006), \enquote{Domino paired kidney donation: a strategy to
+  make best use of live non-directed donation.} \emph{The Lancet}, 368,
+  419--421.
+\bibAnnoteFile{montgomery2006domino}
+
+\bibitem[{Rapaport(1986)}]{rapaport1986case}
+Rapaport, Felix~T (1986), \enquote{The case for a living emotionally related
+  international kidney donor exchange registry.} In \emph{Transplantation
+  proceedings}, volume~18, 5--9.
+\bibAnnoteFile{rapaport1986case}
+
+\bibitem[{Rees et~al.(2009)Rees, Kopke, Pelletier, Segev, Rutter, Fabrega,
+  Rogers, Pankewycz, Hiller, Roth et~al.}]{rees2009nonsimultaneous}
+Rees, Michael~A, Jonathan~E Kopke, Ronald~P Pelletier, Dorry~L Segev, Matthew~E
+  Rutter, Alfredo~J Fabrega, Jeffrey Rogers, Oleh~G Pankewycz, Janet Hiller,
+  Alvin~E Roth, et~al. (2009), \enquote{A nonsimultaneous, extended,
+  altruistic-donor chain.} \emph{New England Journal of Medicine}, 360,
+  1096--1101.
+\bibAnnoteFile{rees2009nonsimultaneous}
+
+\bibitem[{Roth(2015)}]{roth2015gets}
+Roth, Alvin~E (2015), \emph{Who Gets What—and Why: The New Economics of
+  Matchmaking and Market Design}. Houghton Mifflin Harcourt.
+\bibAnnoteFile{roth2015gets}
+
+\bibitem[{Roth et~al.(2004)Roth, S{\"o}nmez, and {\"U}nver}]{roth2004kidney}
+Roth, Alvin~E, Tayfun S{\"o}nmez, and M~Utku {\"U}nver (2004), \enquote{Kidney
+  exchange.} \emph{The Quarterly Journal of Economics}, 119, 457--488.
+\bibAnnoteFile{roth2004kidney}
+
+\bibitem[{Roth et~al.(2005)Roth, S{\"o}nmez, and {\"U}nver}]{roth2005pairwise}
+Roth, Alvin~E, Tayfun S{\"o}nmez, and M~Utku {\"U}nver (2005),
+  \enquote{Pairwise kidney exchange.} \emph{Journal of Economic theory}, 125,
+  151--188.
+\bibAnnoteFile{roth2005pairwise}
+
+\bibitem[{Roth et~al.(2007)Roth, S{\"o}nmez, and {\"U}nver}]{roth2007efficient}
+Roth, Alvin~E, Tayfun S{\"o}nmez, and M~Utku {\"U}nver (2007),
+  \enquote{Efficient kidney exchange: Coincidence of wants in markets with
+  compatibility-based preferences.} \emph{American Economic Review}, 97,
+  828--851.
+\bibAnnoteFile{roth2007efficient}
+
+\bibitem[{Saidman et~al.(2006)Saidman, Roth, S{\"o}nmez, {\"U}nver, and
+  Delmonico}]{saidman2006increasing}
+Saidman, Susan~L, Alvin~E Roth, Tayfun S{\"o}nmez, M~Utku {\"U}nver, and
+  Francis~L Delmonico (2006), \enquote{Increasing the opportunity of live
+  kidney donation by matching for two-and three-way exchanges.}
+  \emph{Transplantation}, 81, 773--782.
+\bibAnnoteFile{saidman2006increasing}
+
+\bibitem[{Shapley and Scarf(1974)}]{shapley1974cores}
+Shapley, Lloyd and Herbert Scarf (1974), \enquote{On cores and indivisibility.}
+  \emph{Journal of mathematical economics}, 1, 23--37.
+\bibAnnoteFile{shapley1974cores}
+
+\bibitem[{Toulis and Parkes(2011)}]{toulis2011random}
+Toulis, Panagiotis and David~C Parkes (2011), \enquote{A random graph model of
+  kidney exchanges: efficiency, individual-rationality and incentives.} In
+  \emph{Proceedings of the 12th ACM conference on Electronic commerce},
+  323--332, ACM.
+\bibAnnoteFile{toulis2011random}
+
+\bibitem[{{\"U}nver(2010)}]{unver2010dynamic}
+{\"U}nver, M~Utku (2010), \enquote{Dynamic kidney exchange.} \emph{The Review
+  of Economic Studies}, 77, 372--414.
+\bibAnnoteFile{unver2010dynamic}
+
+\bibitem[{Zenios et~al.(2001)Zenios, Woodle, and Ross}]{zenios2001primum}
+Zenios, Stefanos, E~Steve Woodle, and Lainie~Friedman Ross (2001),
+  \enquote{Primum non nocere: avoiding increased waiting times for individual
+  racial and blood-type subsets of kidney wait list candidates in a living
+  donor/cadaveric donor exchange program.} \emph{Transplantation}, 72,
+  648--654.
+\bibAnnoteFile{zenios2001primum}
+
+\end{thebibliography}

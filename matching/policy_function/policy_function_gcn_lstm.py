@@ -47,6 +47,11 @@ class RGCNet(nn.Module):
         
         self.opt = torch.optim.Adam(self.parameters())
         
+        self.logit_loss_fn = nn.CrossEntropyLoss(reduce = True,
+                        weight = torch.FloatTensor([1, 10]))
+        self.count_loss_fn = nn.PoissonNLLLoss(log_input =True)
+
+        
         
     def forward(self, A, X, lens = None):
         if lens is None:
@@ -68,6 +73,7 @@ class RGCNet(nn.Module):
             
         batch_size = X.shape[0]
         ylogits, ycount = self.forward(A, X)
+        ycount = torch.clamp(ycount, -200, 10)
         ytruth = to_var(y, False).long()
         
         # Compute loss, leaving out padded bits      
@@ -112,7 +118,7 @@ if __name__ == "__main__":
     save_every = 500
  
     if platform == "darwin":
-        argv = [None, "optn", "3", "100", "True", np.random.randint(1e8)]
+        argv = [None, "abo", "3", "100", "True", np.random.randint(1e8)]
 
     env_type = argv[1]
     hidden = int(argv[3])
@@ -130,7 +136,7 @@ if __name__ == "__main__":
             str(net),
             env_type,
             s)
-    c = .5
+    c = 1
     #%%
 
     for i in range(int(1e8)):
@@ -168,10 +174,10 @@ if __name__ == "__main__":
         lacc = (tp + tn)/(tp+fp+tn+fn)
         
         if tpr < .1:
-            c *= 1.05
+            c = np.minimum(c*1.001, 5)
         if tnr < .1:
-            c *= .95
-        
+            c = np.maximum(.999*c, .1)
+            
         msg = "{:1.4f},{:1.4f},{:1.4f},"\
                 "{:1.4f},{:1.4f},{:1.4f},{:1.4f}"\
                 .format(lloss,
