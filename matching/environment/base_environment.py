@@ -100,7 +100,6 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         new_ids = tuple(range(next_id, next_id+len(nodefts)))
         
         self.add_nodes_from(zip(new_ids, nodefts))
-
         
         newnew_edges = self.draw_edges(new_ids, new_ids)
         

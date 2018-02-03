@@ -65,7 +65,7 @@ def get_loss(env, t_begin, t_end, matched):
 
     
 def snapshot(env, t):
-
+    
     new_env = env.__class__(entry_rate = env.entry_rate,
                             death_rate = env.death_rate,
                             time_length = env.time_length,
@@ -73,7 +73,8 @@ def snapshot(env, t):
                             populate = False)
 
 
-    subg = env.subgraph(env.get_living(t))
+    nodelist = env.get_living(t)
+    subg = env.subgraph(nodelist)
     new_env.add_nodes_from(subg.nodes(data = True))
     new_env.add_edges_from(subg.edges(data = True))
     
@@ -82,9 +83,19 @@ def snapshot(env, t):
     new_env.removed_container[t] = rem_in_new_env
     
     # Forget death times
-    for node in new_env.nodes:
-        new_env.node[node]["death"] = t + \
-                            np.random.geometric(new_env.death_rate) - 1
+    try:
+        new_env.data = env.data.loc[nodelist].copy()
+        n = len(new_env.data)
+        if n > 0:
+            new_env.data["death"] =  t + np.random.geometric(new_env.death_rate, size = n)
+    
+        assert np.all(new_env.data.index == new_env.nodes)
+    
+    except AttributeError:
+        for node in new_env.nodes:
+            new_env.node[node]["death"] = t + \
+                                np.random.geometric(new_env.death_rate) - 1
+        
     
     return new_env
 

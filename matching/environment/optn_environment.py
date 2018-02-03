@@ -15,7 +15,7 @@ import pickle
 
 from itertools import product 
 
-from matching.environment.base_environment import BaseKidneyExchange
+from matching.environment.base_environment2 import BaseKidneyExchange
 
 
 class OPTNKidneyExchange(BaseKidneyExchange):
@@ -52,7 +52,68 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         return "OPTN({},{},{},{})".format(self.entry_rate,
                       self.death_rate, self.time_length, self.seed)
 
+    #def __class__(self):
+    #    return OPTNKidneyExchange
 
+
+
+    def initial_populate(self, t_end, seed):
+        self.data = self.draw_node_features(0, t_end)
+        ids = list(self.data.index)
+        self.add_nodes_from(ids)
+        
+        edges = self.draw_edges(ids, ids)
+        self.add_edges_from(edges, weight = 1)
+        
+        
+
+    def repopulate(self, t_begin, t_end, seed):
+        
+        assert len(self.nodes) > 0
+        assert self.data is not None
+        assert np.all(self.nodes == self.data.index)
+        
+        # Get existing ids        
+        old_ids = list(self.nodes)
+        next_id = max(self.nodes) + 1 
+        
+        # Draw new data
+        new_data = self.draw_node_features(t_begin, t_end)
+        new_ids = list(range(next_id, next_id+len(new_data)))
+        new_data.index = new_ids
+        
+        # Update graph
+        self.add_nodes_from(new_ids)
+                
+        # Update data
+        self.data = pd.concat([self.data, new_data], axis = 0)   
+        
+        # Update edges
+        newnew_edges = self.draw_edges(new_ids, new_ids)
+        self.add_edges_from(newnew_edges, weight = 1)
+        
+        oldnew_edges = self.draw_edges(old_ids, new_ids)
+        self.add_edges_from(oldnew_edges, weight = 1)
+    
+        newold_edges = self.draw_edges(new_ids, old_ids)
+        self.add_edges_from(newold_edges, weight = 1)
+
+
+
+
+    def populate(self, t_begin = 0, t_end = None, seed = None):
+        np.random.seed(seed)        
+        
+        if t_end is None:
+            t_end = self.time_length
+            
+        if self.data is None:
+            self.initial_populate(t_end=t_end, seed=seed)        
+        else:
+            self.repopulate(t_begin=t_begin, t_end=t_end, seed=seed)
+            
+        
+        
 
     def draw_node_features(self, t_begin, t_end):
         
@@ -65,7 +126,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         sojourns = np.random.geometric(self.death_rate, n) - 1
         deaths = entries + sojourns
         
-        # This looks very costly, but actually really fast
+        # This may look costly, but actually really fast
         idx_rnd = np.random.randint(len(self.optn_pairs), size = n)
     
         data = self.optn_pairs.iloc[idx_rnd]
@@ -74,22 +135,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
             data["entry"] = entries
             data["death"] = deaths
         
-        
-        if self.data is None:
-            data.reset_index(drop = True, inplace = True)
-            self.data = data
-        else:
-            next_idx = max(self.data.index)+1
-            data.index = range(next_idx, next_idx+len(data))
-            self.data = pd.concat([self.data, data], axis = 0)
-        
-
-        result=data.apply(lambda x: dict(zip(self.data.columns,
-                                            x.values)),
-                                axis = 1).tolist()
-        
-
-        return result
+        return data.reset_index(drop=True)
  
     
     
@@ -109,21 +155,27 @@ class OPTNKidneyExchange(BaseKidneyExchange):
     
     def filter_blood_compatible(self, source_nodes, target_nodes):
 
-        s_blood = self.data.loc[source_nodes, self.don_blood_cols].values
-        t_blood = self.data.loc[target_nodes, self.pat_blood_cols].values 
+        try:
+            s_blood = self.data.loc[source_nodes, self.don_blood_cols].values
+            t_blood = self.data.loc[target_nodes, self.pat_blood_cols].values 
+            
+            o_col = self.don_blood_cols.index("blood_O_don")
+            ab_col = self.pat_blood_cols.index("blood_AB_pat")
+    
+            comp = s_blood[:,o_col] | \
+                   t_blood[:,ab_col] | \
+                   np.any(s_blood & t_blood, 1)
+        except Exception as e:
+            print(e)
+            import pdb; pdb.set_trace()
         
-        o_col = self.don_blood_cols.index("blood_O_don")
-        ab_col = self.pat_blood_cols.index("blood_AB_pat")
-
-        comp = s_blood[:,o_col] | \
-               t_blood[:,ab_col] | \
-               np.any(s_blood & t_blood, 1)
      
         return source_nodes[comp], target_nodes[comp]
     
     
     
     def filter_tissue_compatible(self, source_nodes, target_nodes):
+        
         
         s_tissue = self.data.loc[source_nodes, self.don_tissue_cols].values
         t_tissue = self.data.loc[target_nodes, self.pat_tissue_cols].values
@@ -142,7 +194,8 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         if len(source_nodes) == 0 or len(target_nodes) == 0:
             return []
     
-        #import pdb; pdb.set_trace()        
+        #import pdb; pdb.set_trace()
+            
     
         pairs = np.array(list(product(source_nodes, target_nodes))).T
 
@@ -206,11 +259,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
 env = OPTNKidneyExchange(5, .1, 10)
 
 
-
-X = env.X(2, tissue_dummies=False, graph_attributes=True, dtype="pandas")
-
-
-       
+env.populate(5, 10)
     
     
     

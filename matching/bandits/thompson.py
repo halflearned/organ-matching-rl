@@ -96,9 +96,18 @@ class Thompson:
     
     def get_rewards(self, cycle):  
         snap = snapshot(self.env, self.t)
-        h = max(snap.nodes[a]["death"] for a in cycle)    
+        try:
+            h = max(snap.data.loc[cycle, "death"])    
+        except AttributeError:
+            h = max(snap.nodes[a]["death"] for a in cycle)    
         snap.populate(self.t+1, h+1, seed = clock_seed())
         return same_rewards(snap, 
                               t_begin = self.t,
                               t_end = h+1,
                               perturb = cycle)
+        
+        
+        
+        
+        
+        

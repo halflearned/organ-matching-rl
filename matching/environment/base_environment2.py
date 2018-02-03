@@ -100,7 +100,6 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         new_ids = tuple(range(next_id, next_id+len(nodefts)))
         
         self.add_nodes_from(zip(new_ids, nodefts))
-
         
         newnew_edges = self.draw_edges(new_ids, new_ids)
         
@@ -114,18 +113,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
             self.add_edges_from(newold_edges, weight = 1)
         
         
-    
-        
-        
-    def attr(self, *attrs, nodes = None):
-        if nodes is None:
-            nodes = self.nodes()
-            
-        np_attrs = []
-        for at in attrs:
-            np_attrs.append(np.array([self.node[n][at] for n in nodes]).reshape(-1, 1))
-        return np.hstack(np_attrs)
-        
+
     
     
     def validate_cycle(self, cycle):
@@ -149,9 +137,15 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         """
         Erases all with entry >= t
         """
-        to_remove = [n for n,d in self.nodes(data = True) if d["entry"] >= t]
+        to_remove = list(self.data.query('entry >= @t').index)
         
+        # Remove from pandas data
+        self.data = self.data.drop(to_remove, errors="ignore")
+        
+        # Remove from graph
         self.remove_nodes_from(to_remove)
+        
+        # Remove from removed_container
         for k in self.removed_container:
             if k > t:
                 self.removed_container[k].clear()
@@ -161,30 +155,14 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
     
     def get_living(self, t_begin, t_end = None, indices_only = True):
         if t_end is None: t_end = t_begin
+        
+        
+        query = self.data.query('(entry <= @t_end) & (death >= @t_begin)')
+        query = query.drop(self.removed(t_begin), errors="ignore")
         if indices_only:
-            return [n for n,d in self.nodes(data = True) 
-                    if d["entry"] <= t_end and d["death"] >= t_begin 
-                    and n not in self.removed(t_begin)]
+            return list(query.index)
         else:
-            return [(n,d) for n,d in self.nodes(data = True) 
-                    if d["entry"] <= t_end and d["death"] >= t_begin
-                    and n not in self.removed(t_begin)]
-    
-    
-    
-    
-    def reindex_to_absolute(self, vs, t):
-        living = self.get_living(t, indices_only = True)
-        reindexed = [living[i] for i in vs]
-        map_back = dict(zip(reindexed, vs))
-        return reindexed, map_back
-        
-        
-    def reindex_to_period(self, vs, t):
-        living = self.get_living(t, indices_only = True)
-        reindexed = np.argwhere(np.isin(living, vs)).flatten()
-        return reindexed
-        
+            return query
     
     
         

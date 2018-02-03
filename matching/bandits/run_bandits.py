@@ -45,13 +45,13 @@ for i in range(n_iters):
         c = choice([.01, 0.05, .1, .5])
     else:
         env_type = "abo"
-        entry_rate = choice([3]) 
+        entry_rate = choice([ 5]) 
         death_rate = choice([.1])          
-        max_time = 10
+        max_time = 25
         seed = 126296
         thres = choice([.5])
-        algorithm = "Thompson"
-        env = OPTNKidneyExchange
+        algorithm = "UCB1"
+        env = ABOKidneyExchange
         gamma = .1
         c = 2
 

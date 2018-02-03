@@ -144,9 +144,10 @@ def solve(weights, cycles):
 
 def find_matching_date(env, nodes):
     try:
+        return max(env.data.loc[nodes, "entry"])
+    except AttributeError:
         return max(env.node[v]["entry"] for v in nodes)
-    except TypeError:
-        import pdb; pdb.set_trace()
+
 
 
 
