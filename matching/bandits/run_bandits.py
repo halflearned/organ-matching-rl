@@ -38,20 +38,20 @@ for i in range(n_iters):
         algorithm = choice(["EXP3",
                             "UCB1",
                             "Thompson"])  
-        env = ABOKidneyExchange #choice([ABOKidneyExchange,
-              #        SaidmanKidneyExchange,
-              #        OPTNKidneyExchange])
+        env = choice([ABOKidneyExchange,
+                      SaidmanKidneyExchange,
+                      OPTNKidneyExchange])
         gamma = choice([.01, .05, .1, .5])
         c = choice([.01, 0.05, .1, .5])
     else:
         env_type = "abo"
-        entry_rate = choice([5]) 
+        entry_rate = choice([3]) 
         death_rate = choice([.1])          
         max_time = 10
         seed = 126296
         thres = choice([.5])
-        algorithm = "EXP3"
-        env = ABOKidneyExchange
+        algorithm = "Thompson"
+        env = OPTNKidneyExchange
         gamma = .1
         c = 2
 
@@ -67,7 +67,7 @@ for i in range(n_iters):
     rewards = np.zeros(env.time_length)
     log_every = 1
 
-    np.random.seed(clock_seed())
+    np.random.seed(seed)
     #%%
 
     for t in range(env.time_length):
@@ -106,7 +106,7 @@ for i in range(n_iters):
             stats=[algorithm,
                    param,
                    thres,
-                   str(env),
+                   "\"" + str(env) + "\"",
                    seed,
                    t,
                    int(env.entry_rate),

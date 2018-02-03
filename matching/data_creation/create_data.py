@@ -40,9 +40,9 @@ while True:
     else:
         env_type = "optn"
         s = 1234
-        env = ABOKidneyExchange(entry_rate=3,
+        env = OPTNKidneyExchange(entry_rate=5,
                                 death_rate=.1, 
-                                time_length=10, 
+                                time_length=1000, 
                                 seed=1234)    
         
     X, G, E, Y = get_features(env)
@@ -57,10 +57,10 @@ while True:
     pickle.dump(E, open(e_filename + ".pkl", "wb"))
     pickle.dump(Y, open(y_filename + ".pkl", "wb"))
     
-    np.save(x_filename + ".npy", np.vstack(X))
-    np.save(g_filename + ".npy", np.vstack(G))
-    np.save(e_filename + ".npy", np.vstack(E))
-    np.save(y_filename + ".npy", np.hstack(Y))
+    np.save("data/" + x_filename + ".npy", np.vstack(X))
+    np.save("data/" + g_filename + ".npy", np.vstack(G))
+    np.save("data/" + e_filename + ".npy", np.vstack(E))
+    np.save("data/" + y_filename + ".npy", np.hstack(Y))
     
     if platform == "darwin":
         break

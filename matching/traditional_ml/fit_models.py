@@ -34,6 +34,7 @@ elif add == "networkx":
     G = np.load("data/G_{}.npy".format(envtype))
     XX = np.stack([X, G])
 elif add == "both": 
+    G = np.load("data/G_{}.npy".format(envtype))
     E = np.load("data/E_{}.npy".format(envtype))
     XX = np.stack([X, G, E])
 elif add == "none":
@@ -52,7 +53,7 @@ algorithms = {
                verbose=True),
     "rf": RandomForestClassifier(n_estimators=200, n_jobs=-1,
                                  class_weight="balanced"),      
-    "mlp": MLPClassifier(hidden_layer_sizes=(100)),
+    "mlp": MLPClassifier(hidden_layer_sizes=(100, 100)),
     "grb": GradientBoostingClassifier(n_estimators=1000)
     }
 

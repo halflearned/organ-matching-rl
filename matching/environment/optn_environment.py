@@ -6,12 +6,11 @@ Created on Sun Jan 28 11:41:59 2018
 @author: vitorhadad
 """
 
-import os
-os.chdir("/Users/vitorhadad/Documents/kidney/matching")
+#import os
+#os.chdir("/Users/vitorhadad/Documents/kidney/matching")
 
 import numpy as np
 import pandas as pd
-from tqdm import trange
 import pickle
 
 from itertools import product 
@@ -44,12 +43,15 @@ class OPTNKidneyExchange(BaseKidneyExchange):
                     seed=seed,
                     populate=False)
 
+        self.data = None
         if populate: self.populate(seed = seed)
+        
 
         
     def __str__(self):
         return "OPTN({},{},{},{})".format(self.entry_rate,
                       self.death_rate, self.time_length, self.seed)
+
 
 
     def draw_node_features(self, t_begin, t_end):
@@ -63,17 +65,26 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         sojourns = np.random.geometric(self.death_rate, n) - 1
         deaths = entries + sojourns
         
-        # (This looks very costly, but actually really fast)
+        # This looks very costly, but actually really fast
         idx_rnd = np.random.randint(len(self.optn_pairs), size = n)
-        self.data = self.optn_pairs.iloc[idx_rnd]
+    
+        data = self.optn_pairs.iloc[idx_rnd]
         
         with pd.option_context("chained_assignment", None):
-            self.data["entry"] = entries
-            self.data["death"] = deaths
+            data["entry"] = entries
+            data["death"] = deaths
         
-        self.data.reset_index(drop = True, inplace = True)
-       
-        result=self.data.apply(lambda x: dict(zip(self.data.columns,
+        
+        if self.data is None:
+            data.reset_index(drop = True, inplace = True)
+            self.data = data
+        else:
+            next_idx = max(self.data.index)+1
+            data.index = range(next_idx, next_idx+len(data))
+            self.data = pd.concat([self.data, data], axis = 0)
+        
+
+        result=data.apply(lambda x: dict(zip(self.data.columns,
                                             x.values)),
                                 axis = 1).tolist()
         
@@ -103,11 +114,11 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         
         o_col = self.don_blood_cols.index("blood_O_don")
         ab_col = self.pat_blood_cols.index("blood_AB_pat")
-    
+
         comp = s_blood[:,o_col] | \
                t_blood[:,ab_col] | \
                np.any(s_blood & t_blood, 1)
-        
+     
         return source_nodes[comp], target_nodes[comp]
     
     
@@ -130,15 +141,22 @@ class OPTNKidneyExchange(BaseKidneyExchange):
     def draw_edges(self, source_nodes, target_nodes):
         if len(source_nodes) == 0 or len(target_nodes) == 0:
             return []
-       
+    
+        #import pdb; pdb.set_trace()        
+    
         pairs = np.array(list(product(source_nodes, target_nodes))).T
 
         pairs = self.filter_blood_compatible(*pairs)
-        pairs = self.filter_tissue_compatible(*pairs)        
+            
+        pairs = self.filter_tissue_compatible(*pairs)  
+            
         pairs = self.filter_time_compatible(*pairs)
+            
         pairs = self.filter_not_same(*pairs)
         
         return np.vstack(pairs).T
+    
+    
     
     
     def X(self, t, graph_attributes = True, tissue_dummies = True, dtype = "numpy"):

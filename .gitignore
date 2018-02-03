@@ -1,0 +1,13 @@
+__pycache__*
+*egg*
+gcn.pem
+environment2.py
+*.ipynb
+*.npy
+*.png
+*.csv
+*.log
+!figures/*.png
+*data/
+*dyngcnptr*
+results/*

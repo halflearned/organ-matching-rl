@@ -41,6 +41,9 @@ def run_node2vec(A, d = 10):
         for k, line in enumerate(lines[1:]):
             _, *xs = line.split(" ")
             features[k] = [float(x) for x in xs]
+            
+    os.remove(input)
+    os.remove(output)
 
     return features
         

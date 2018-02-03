@@ -151,13 +151,6 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         """
         to_remove = [n for n,d in self.nodes(data = True) if d["entry"] >= t]
         
-        # Necessary to make OPTNEnvironment work, but really bad code :(
-        try:
-            self.data = self.data.drop(to_remove, axis = 0)
-        except AttributeError: # Ouch, that's bad code
-            pass
-        
-        
         self.remove_nodes_from(to_remove)
         for k in self.removed_container:
             if k > t:
