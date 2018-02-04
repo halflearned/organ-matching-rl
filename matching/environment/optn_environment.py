@@ -194,9 +194,7 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         if len(source_nodes) == 0 or len(target_nodes) == 0:
             return []
     
-        #import pdb; pdb.set_trace()
-            
-    
+
         pairs = np.array(list(product(source_nodes, target_nodes))).T
 
         pairs = self.filter_blood_compatible(*pairs)
