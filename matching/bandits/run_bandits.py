@@ -6,9 +6,12 @@ Created on Sun Jan 21 20:37:48 2018
 @author: vitorhadad
 """
 
+# SEND
+# scp -P 22022 -r matching/bandits/ baisihad@sirius.bc.edu:/data/baisihad/matching/matching/
+
 #%%
 
-from sys import platform
+from sys import platform, argv
 from random import choice
 import numpy as np
 
@@ -24,41 +27,53 @@ from matching.bandits.exp3 import EXP3
 from matching.bandits.ucb1 import UCB1
 from matching.bandits.thompson import Thompson
 
+if len(argv) > 1:
+    task = argv[1]
+else:
+    task = choice(["large", "small"])
+    
+platform == "linux"
+
 n_iters = 1 if platform == "darwin" else 10000
 #%%
 for i in range(n_iters):
-    
+
     if platform == "linux":
-        env_type = "abo"
-        entry_rate = choice([5, 7, 10])
-        death_rate = choice([.1, .08, .05]) 
+        if task == "large":
+            entry_rate, death_rate = choice([(7, 0.08), (7, 0.05),
+                                             (10, 0.08), (10, 0.05)])
+        elif task == "small":
+            entry_rate, death_rate = choice([(3, 0.1), (3, 0.08),
+                                             (3, 0.05), (5, 0.1),
+                                             (5, 0.08), (5, 0.05),
+                                             (7, 0.1), (10, 0.1)])
+        else:
+            ValueError("Unknown task size")
+            
         max_time = 1001
-        thres = choice([.5, .7, .9])
+        thres = choice([.5])
         seed = clock_seed()
-        algorithm = choice(["EXP3",
-                            "UCB1",
-                            "Thompson"])  
+        algorithm = choice(["EXP3", "UCB1", "Thompson"])
         env = choice([ABOKidneyExchange,
                       SaidmanKidneyExchange,
                       OPTNKidneyExchange])
-        gamma = choice([.01, .05, .1, .5])
-        c = choice([.01, 0.05, .1, .5])
+        gamma = choice([.1])
+        c = choice([.1])
     else:
-        env_type = "abo"
-        entry_rate = choice([ 5]) 
-        death_rate = choice([.1])          
-        max_time = 25
+        entry_rate = choice([ 5])
+        death_rate = choice([.1])
+        max_time = 10
         seed = 126296
         thres = choice([.5])
-        algorithm = "UCB1"
+        algorithm = "EXP3"
         env = ABOKidneyExchange
         gamma = .1
         c = 2
 
-                      
-                      
+
+if __name__ == "__main__":
     env = env(entry_rate, death_rate, max_time)
-        
+
     opt = optimal(env)
     gre = greedy(env)
     o = get_n_matched(opt["matched"], 0, env.time_length)
@@ -75,14 +90,14 @@ for i in range(n_iters):
             cycles = two_cycles(env, t)
             if len(cycles) == 0:
                 break
-            else: 
+            else:
                 if algorithm == "EXP3":
                     algo = EXP3(env, t, gamma=gamma, thres=thres)
                 elif algorithm == "Thompson":
                     algo = Thompson(env, t, thres=thres)
                 elif algorithm == "UCB1":
                     algo = UCB1(env, t, c=c, thres=thres)
-                    
+
                 algo.simulate()
                 res = algo.choose()
                 if res is not None:
@@ -90,18 +105,18 @@ for i in range(n_iters):
                     rewards[t] = len(env.removed_container[t])
                 else:
                     break
-        
+
         if t == env.time_length - 1:
             rewards[t] += len(optimal(env, t, t)["matched_pairs"])
-        
+
         if algorithm == "EXP3":
             param = gamma
         elif algorithm == "Thompson":
             param = np.nan
         elif algorithm == "UCB1":
             param = c
-        
-        
+
+
         if t % log_every == 0 and t > 0:
             stats=[algorithm,
                    param,
@@ -115,13 +130,12 @@ for i in range(n_iters):
                    g[t],
                    o[t]]
             msg = ",".join(["{}"]*len(stats)).format(*stats)
-        
+
             if platform == "linux":
-                with open("results/bandit_results3.txt".format(env_type), "a") as f:
+                with open("results/bandit_results4.txt", "a") as f:
                     print(msg, file = f)
-            else:    
+            else:
                 print(t, np.sum(rewards[:t+1]),
                           np.sum(g[:t+1]),
                           np.sum(o[:t+1]))
-           
-            
+

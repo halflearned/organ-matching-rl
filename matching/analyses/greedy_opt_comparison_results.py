@@ -12,16 +12,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from itertools import product
 
-df = pd.read_csv("results/summary_results.txt",
+df = pd.read_csv("results/greedy_opt_comparison_results.txt",
                  header = None,
-                 names = ["environment", "entry", "death","mcl","time",
+                 names = ["environment", "entry", "death","time","mcl",
                           "greedy", "optimal", "ratio"])
 
 df["entry"] = df["entry"].astype(int)
 df["ratio"] *= 100
-df["death"] = (df["death"]*100).astype(int)
+#df["death"] = (df["death"]*100).astype(int)
 
-env_types = ["abo", "saidman", "optn"]
+env_types = ["ABO", "RSU", "OPTN"]
 mcls = [2,3]
 
 fig, axs = plt.subplots(3, 2, figsize = (11,12))
@@ -69,33 +69,56 @@ for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
 
     
 ax.get_figure().savefig(
-   "figures/myopic_vs_opt_performance_ratio.pdf".format(env_type))
+   "phd_thesis/figures/greedy_opt_comparison.pdf".format(env_type))
 
 
 #%%
-from itertools import product
-env_type = "optn"
-mcl = 2
 
-df = pd.read_csv("results/summary_results.txt",
-                 header = None,
-                 names = ["environment", "entry", "death","mcl","time",
-                          "greedy", "optimal", "ratio"])
-df["entry"] = df["entry"].astype(int)
-df["ratio"] *= 100
-df["death"] = (df["death"]*100).astype(int)
-cond = (df["environment"] == env_type) & (df["mcl"] == mcl)
-means = df[cond].groupby(["entry", "death"])["ratio"].mean().reset_index()
-tab = means.pivot("entry","death","ratio")
 
-null = np.argwhere(tab.isnull().values)
-missing_entry = tab.index[null[:,0]]
-missing_death = tab.columns[null[:,1]]/100
-missing_mcl = [2]*len(missing_entry)
+env_types = ["ABO", "RSU", "OPTN"]
+mcls = [2]
 
-for e,d,m in zip(missing_entry, missing_death, missing_mcl):
-    mem = 100#min(int(e*10/2 + 20*(d < 0.08) + 30), 100)
-    walltime = 99#nt(e*5) + (int(1/d) // 5)
-    cmd = 'qsub -F "{} {} {:1.2f} {}" job_solutions.pbs -l mem={}GB,walltime={}:00:00'\
-            .format(env_type,e,d,m,mem,walltime)
-    print(cmd)
+fig, axs = plt.subplots(1, 3, figsize = (18, 5))
+cbar_ax = fig.add_axes([.9, .3, .015, 0.5])
+cbar_ax.tick_params(labelsize=15)
+
+fig.tight_layout(rect = [.15, .15, .9, .9])
+fig.subplots_adjust(top = 0.85, hspace = .4)
+fig.suptitle("Performance ratio: Myopic / OPT (%)", fontsize = 18)
+
+axs = axs.flatten()
+
+for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
+
+    cond = (df["environment"] == env_type) & (df["mcl"] == mcl)
+    means = df[cond].groupby(["entry", "death"])["ratio"].mean().reset_index()
+    tab = means.pivot("entry","death","ratio")
+    
+    ax = sns.heatmap(tab, vmin = 83, vmax = 100,
+                     ax = axs[k],
+                     cbar= k == 2,
+                     cmap = plt.cm.viridis_r,
+                     cbar_ax=None if k < 2 else cbar_ax)
+    
+    ax.set_xticklabels(tab.columns, 
+                       fontsize=13,
+                       rotation = 45,
+                       ha = "center")
+    
+    ax.set_yticklabels(reversed(tab.index), 
+                       fontsize=13)
+    
+    ax.set_ylabel("Entry rate", fontsize = 14)
+    ax.set_xlabel("Death rate $\\times 100$", fontsize = 14)
+
+    
+    ax.set_title("{}".format(env_type.upper(), mcl), 
+                 fontsize = 14)
+
+
+
+    
+ax.get_figure().savefig(
+   "phd_thesis/figures/greedy_opt_comparison_mcl2.pdf".format(env_type))
+
+

@@ -6,8 +6,8 @@ Created on Sun Jan 28 11:41:59 2018
 @author: vitorhadad
 """
 
-#import os
-#os.chdir("/Users/vitorhadad/Documents/kidney/matching")
+import os
+os.chdir("/Users/vitorhadad/Documents/kidney/matching")
 
 import numpy as np
 import pandas as pd
@@ -254,10 +254,9 @@ class OPTNKidneyExchange(BaseKidneyExchange):
     
 #%%
   
-env = OPTNKidneyExchange(5, .1, 10)
+env = OPTNKidneyExchange(5, .1, 1000)
 
 
-env.populate(5, 10)
     
     
     
