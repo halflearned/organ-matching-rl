@@ -29,6 +29,6 @@ df = df.sort_values(["Environment", "Algorithm", "Additional"])
 
 df = df.set_index("Environment")
 
-df.to_latex("phd_thesis/tables/traditional_ml.tex",
+df.to_latex("~/Documents/kidney/matching/phd_thesis/tables/traditional_ml_classifier.tex",
             escape=False,
             float_format= lambda x: "{:2.3f}".format(x))

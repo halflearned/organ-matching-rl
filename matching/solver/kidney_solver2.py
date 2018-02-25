@@ -8,6 +8,21 @@ Created on Tue Nov 14 21:51:19 2017
 from collections import defaultdict
 import gurobipy as gb
 import numpy as np
+import networkx as nx
+
+def get_chains(env, max_chain_length, nodes=None):
+
+    if nodes is not None:
+        subgraph = env.subgraph(nodes)
+    else:
+        subgraph = env
+
+    chains = []
+    for n, d in subgraph.nodes(data=True):
+        chains_from_n = nx.single_source_shortest_path(subgraph, n, cutoff=max_chain_length)
+        chains.append(chains_from_n)
+    return chains
+
 
 
 
@@ -323,22 +338,3 @@ def greedy(env, t_begin = None, t_end = None, max_cycle_length = 2):
             "matched_pairs": removed,
             "obj": obj}
         
-
-    
-    
-#%% 
-if __name__ == "__main__":
-    
-    s = optimal(env, 10, 20)
-    for t,m in s["matched"].items():
-        for v in m:
-            assert env.node[v]["entry"] <= t 
-            assert env.node[v]["death"] >= t 
-    
-    g = greedy(env, 10, 20)
-    for t,m in g["matched"].items():
-        for v in m:
-            assert env.node[v]["entry"] <= t 
-            assert env.node[v]["death"] >= t 
-
-

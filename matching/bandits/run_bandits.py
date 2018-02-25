@@ -12,12 +12,15 @@ Created on Sun Jan 21 20:37:48 2018
 #%%
 
 from sys import platform, argv
+from os import system
+
 from random import choice
 import numpy as np
+from time import time
 
 from matching.utils.env_utils import two_cycles
 from matching.solver.kidney_solver2 import optimal, greedy
-from matching.utils.data_utils import  clock_seed, get_n_matched
+from matching.utils.data_utils import clock_seed, get_n_matched
 
 from matching.environment.abo_environment import ABOKidneyExchange
 from matching.environment.optn_environment import OPTNKidneyExchange
@@ -27,51 +30,36 @@ from matching.bandits.exp3 import EXP3
 from matching.bandits.ucb1 import UCB1
 from matching.bandits.thompson import Thompson
 
-if len(argv) > 1:
-    task = argv[1]
-else:
-    task = choice(["large", "small"])
-    
-platform == "linux"
 
-n_iters = 1 if platform == "darwin" else 10000
-#%%
+t1 = time()
+
+if len(argv) == 1:
+    argv = [None, "ABO", "Thompson", 5, 0.1]
+
+environment = argv[1]
+algorithm = argv[2]
+entry_rate = float(argv[3])
+death_rate = float(argv[4])
+
+print("Using {} {} {} {}".format(*argv[1:]))
+
+seed = clock_seed()
+
+max_time = 1001 if platform == "linux" else 5
+
+envs = {"ABO": ABOKidneyExchange,
+        "RSU": SaidmanKidneyExchange,
+        "OPTN": OPTNKidneyExchange}
+env = envs[environment]
+thres = choice([.5])
+gamma = choice([.1])
+c = choice([.1])
+n_iters = 1
+ipa = 20
+
+
 for i in range(n_iters):
 
-    if platform == "linux":
-        if task == "large":
-            entry_rate, death_rate = choice([(7, 0.08), (7, 0.05),
-                                             (10, 0.08), (10, 0.05)])
-        elif task == "small":
-            entry_rate, death_rate = choice([(3, 0.1), (3, 0.08),
-                                             (3, 0.05), (5, 0.1),
-                                             (5, 0.08), (5, 0.05),
-                                             (7, 0.1), (10, 0.1)])
-        else:
-            ValueError("Unknown task size")
-            
-        max_time = 1001
-        thres = choice([.5])
-        seed = clock_seed()
-        algorithm = choice(["EXP3", "UCB1", "Thompson"])
-        env = choice([ABOKidneyExchange,
-                      SaidmanKidneyExchange,
-                      OPTNKidneyExchange])
-        gamma = choice([.1])
-        c = choice([.1])
-    else:
-        entry_rate = choice([ 5])
-        death_rate = choice([.1])
-        max_time = 10
-        seed = 126296
-        thres = choice([.5])
-        algorithm = "EXP3"
-        env = ABOKidneyExchange
-        gamma = .1
-        c = 2
-
-
-if __name__ == "__main__":
     env = env(entry_rate, death_rate, max_time)
 
     opt = optimal(env)
@@ -83,7 +71,6 @@ if __name__ == "__main__":
     log_every = 1
 
     np.random.seed(seed)
-    #%%
 
     for t in range(env.time_length):
         while True:
@@ -92,11 +79,11 @@ if __name__ == "__main__":
                 break
             else:
                 if algorithm == "EXP3":
-                    algo = EXP3(env, t, gamma=gamma, thres=thres)
+                    algo = EXP3(env, t, gamma=gamma, thres=thres, iters_per_arm=ipa)
                 elif algorithm == "Thompson":
-                    algo = Thompson(env, t, thres=thres)
+                    algo = Thompson(env, t, thres=thres, iters_per_arm=ipa)
                 elif algorithm == "UCB1":
-                    algo = UCB1(env, t, c=c, thres=thres)
+                    algo = UCB1(env, t, c=c, thres=thres, iters_per_arm=ipa)
 
                 algo.simulate()
                 res = algo.choose()
@@ -120,6 +107,7 @@ if __name__ == "__main__":
         if t % log_every == 0 and t > 0:
             stats=[algorithm,
                    param,
+                   ipa,
                    thres,
                    "\"" + str(env) + "\"",
                    seed,
@@ -132,10 +120,17 @@ if __name__ == "__main__":
             msg = ",".join(["{}"]*len(stats)).format(*stats)
 
             if platform == "linux":
-                with open("results/bandit_results4.txt", "a") as f:
-                    print(msg, file = f)
+                with open("results/bandit_results5.txt", "a") as f:
+                    print(msg, file=f)
             else:
                 print(t, np.sum(rewards[:t+1]),
                           np.sum(g[:t+1]),
                           np.sum(o[:t+1]))
 
+
+cmd = 'qsub -F "{} {} {} {}" job_bandits.pbs'.format(*argv[1:])
+system(cmd)
+
+t2 = time()
+
+print("Finished {} {} {} {} in {:4.2f} seconds".format(*argv[1:], t2 - t1))

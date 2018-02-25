@@ -7,7 +7,7 @@ Created on Sun Jan 28 11:41:59 2018
 """
 
 import os
-os.chdir("/Users/vitorhadad/Documents/kidney/matching")
+#os.chdir("/Users/vitorhadad/Documents/kidney/matching")
 
 import numpy as np
 import pandas as pd

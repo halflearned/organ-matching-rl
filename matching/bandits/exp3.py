@@ -16,14 +16,14 @@ from random import choice
 
 class EXP3:
     
-    def __init__(self, env, t, gamma=.1, iters_per_arm=100, thres = 0.5):
+    def __init__(self, env, t, gamma=.1, iters_per_arm=100, thres=0.5):
         
         self.env = env
         self.t = t
         self.arms = two_cycles(self.env, t) 
         self.n_arms = len(self.arms)
         self.w = np.ones(self.n_arms)
-        self.p = np.full_like(self.w, fill_value = 1/self.n_arms)
+        self.p = np.full_like(self.w, fill_value=1/self.n_arms)
         self.gamma = gamma
         self.r = np.zeros(self.n_arms)
         self.n = np.zeros(self.n_arms)
@@ -35,9 +35,9 @@ class EXP3:
         return "EXP3(gamma={})".format(self.gamma)
         
 
-    def simulate(self):        
+    def simulate(self):
         
-        total_iters = self.iters_per_arm*self.n_arms
+        total_iters = self.iters_per_arm * self.n_arms
         
         for i in range(total_iters):
             

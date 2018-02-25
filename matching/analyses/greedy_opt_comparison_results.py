@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from itertools import product
 
-df = pd.read_csv("results/greedy_opt_comparison_results.txt",
+df = pd.read_csv("/Users/vitorhadad/Documents/kidney/matching/results/greedy_opt_comparison_results.txt",
                  header = None,
                  names = ["environment", "entry", "death","time","mcl",
                           "greedy", "optimal", "ratio"])
@@ -42,7 +42,7 @@ for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
     ax = sns.heatmap(tab, vmin = 77, vmax = 100,
                      ax = axs[k],
                      cbar= k == 0,
-                     cmap = plt.cm.viridis_r,
+                     cmap="cubehelix_r",
                      cbar_ax=None if k else cbar_ax,
                      cbar_kws={"orientation": "horizontal"})
     
@@ -69,7 +69,7 @@ for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
 
     
 ax.get_figure().savefig(
-   "phd_thesis/figures/greedy_opt_comparison.pdf".format(env_type))
+   "/Users/vitorhadad/Documents/kidney/matching/phd_thesis/figures/greedy_opt_comparison_2.pdf".format(env_type))
 
 
 #%%
@@ -97,7 +97,7 @@ for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
     ax = sns.heatmap(tab, vmin = 83, vmax = 100,
                      ax = axs[k],
                      cbar= k == 2,
-                     cmap = plt.cm.viridis_r,
+                     cmap="cubehelix_r",
                      cbar_ax=None if k < 2 else cbar_ax)
     
     ax.set_xticklabels(tab.columns, 
@@ -119,6 +119,6 @@ for k,(env_type,mcl) in enumerate(product(env_types, mcls)):
 
     
 ax.get_figure().savefig(
-   "phd_thesis/figures/greedy_opt_comparison_mcl2.pdf".format(env_type))
+   "/Users/vitorhadad/Documents/kidney/matching/phd_thesis/figures/greedy_opt_comparison_mcl2_2.pdf".format(env_type))
 
 

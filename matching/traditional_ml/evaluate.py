@@ -6,15 +6,13 @@ Created on Tue Jan 23 18:27:19 2018
 @author: vitorhadad
 """
 
-
 from sys import platform, argv
 from tqdm import trange
 
 import numpy as np
+from random import choice
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 
 from matching.solver.kidney_solver2 import optimal, greedy
@@ -27,16 +25,22 @@ from sklearn.externals import joblib
     
 
 if platform=="darwin":
-    argv = [None, "lr", "abo", "none", .5]
+    argv = [None, "abo", "lr", "none", 5, 0.1]
 
-
-algo = joblib.load(argv[1])
-envtype = argv[2]
+envtype = argv[1]
+algorithm = argv[2]
 add = argv[3]
-thres = argv[4]
+entry_rate = float(argv[4])
+death_rate = float(argv[5])/100
+thres = 0.3
+algo = joblib.load("results/traditional_ml/{}_{}_{}.pkl".format(envtype, algorithm, add))
 
-args = dict(entry_rate = 5, death_rate = .1, 
-         time_length = 2000, seed = clock_seed())
+seed = clock_seed()
+
+args = {'entry_rate': entry_rate,
+        'death_rate': death_rate,
+        'time_length': 1001,
+        'seed': seed}
 
 if envtype == "abo":
     env = ABOKidneyExchange(**args)
@@ -48,8 +52,11 @@ elif envtype == "optn":
 opt = optimal(env)
 gre = greedy(env)
 
+g = get_n_matched(gre["matched"], 0, env.time_length)
+o = get_n_matched(opt["matched"], 0, env.time_length)
+
 #%%
-rewards = []
+rewards = np.zeros(env.time_length)
 for t in trange(env.time_length):
     
     liv = np.array(env.get_living(t))
@@ -71,22 +78,39 @@ for t in trange(env.time_length):
     elif add == "node2vec":
         E = run_node2vec(A[has_cycle,:][:,has_cycle])
         XX = np.hstack([X, E])
-        
-    yhat = algo.predict_proba(XX)[:,1] > thres
+    elif add == "both":
+        E = run_node2vec(A[has_cycle, :][:, has_cycle])
+        G = get_additional_regressors(env, t, dtype="numpy")[has_cycle]
+        XX = np.hstack([X, G, E])
+
+    yhat = algo.predict_proba(XX)[:,1] >  thres
     yhat_full[has_cycle] = yhat
     potential = liv[yhat_full]
     
     removed = optimal(env, t, t, subset=potential)["matched"][t]
     env.removed_container[t].update(removed)
-    rewards.append(len(removed))
+    rewards[t] = len(removed)
+
+
+    stats = [envtype,
+             algorithm,
+             thres,
+             add,
+             seed,
+             t,
+             int(env.entry_rate),
+             int(env.death_rate * 100),
+             rewards[t],
+             g[t],
+             o[t]]
+    msg = ",".join(["{}"] * len(stats)).format(*stats)
+
+    if platform == "linux":
+        with open("results/traditional_ml_mdp_results2.txt", "a") as f:
+            print(msg, file=f)
+    else:
+        print(stats)
 
 
 
-gre_n = get_n_matched(gre["matched"], 0, env.time_length)
-opt_n = get_n_matched(opt["matched"], 0, env.time_length)
-
-print("\nrewards\n",
-      np.sum(rewards),
-      np.sum(gre_n),
-      np.sum(opt_n))
     
