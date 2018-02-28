@@ -6,9 +6,7 @@ from matching.environment.saidman_environment import SaidmanKidneyExchange
 
 @pytest.fixture()
 def root():
-    env = SaidmanKidneyExchange(entry_rate = 5,
-                                death_rate = .1,
-                                time_length = 10)
+    env = SaidmanKidneyExchange(entry_rate=5, death_rate=.1, time_length=10)
     return mcts.Node(parent = None,
                 t = 0,
                 reward = 1,

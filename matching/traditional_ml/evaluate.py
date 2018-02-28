@@ -43,9 +43,9 @@ args = {'entry_rate': entry_rate,
         'seed': seed}
 
 if envtype == "abo":
-    env = ABOKidneyExchange(**args)
+    env = ABOKidneyExchange(,
 elif envtype == "saidman":
-    env = SaidmanKidneyExchange(**args)
+    env = SaidmanKidneyExchange(,
 elif envtype == "optn":
     env = OPTNKidneyExchange(**args)
 

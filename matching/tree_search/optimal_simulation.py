@@ -100,10 +100,7 @@ if __name__ == "__main__":
         seed = 123456#clock_seed()
         
     env_type = "abo"
-    env = ABOKidneyExchange(entry_rate,
-                            death_rate, 
-                            max_time, 
-                            seed = seed)
+    env = ABOKidneyExchange(entry_rate, death_rate, max_time, seed=seed)
     
     opt = optimal(env)
     gre = greedy(env)

@@ -114,10 +114,7 @@ if __name__ == "__main__":
         
             
         env_type = "abo"
-        env = ABOKidneyExchange(entry_rate,
-                                death_rate, 
-                                max_time, 
-                                seed = seed)
+        env = ABOKidneyExchange(entry_rate, death_rate, max_time, seed=seed)
         
         
         

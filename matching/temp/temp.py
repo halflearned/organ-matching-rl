@@ -82,10 +82,7 @@ def get_features(env):
     
     
     
-env = ABOKidneyExchange(entry_rate = 5,
-                        death_rate = .1, 
-                        time_length = 10, 
-                        seed = clock_seed())
+env = ABOKidneyExchange(entry_rate=5, death_rate=.1, time_length=10, seed=clock_seed())
 
 X, Y = get_features(env)
 np.save("X.npy", X)

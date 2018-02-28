@@ -23,15 +23,13 @@ while True:
         s = clock_seed()
         env_type = choice(["optn"])
         if env_type == "abo":
-            env = ABOKidneyExchange(entry_rate = np.random.randint(5, 10),
-                                death_rate = np.random.choice([.1,.09,.08,.07,.06,.05]), 
-                                time_length = 1000, 
-                                seed = s)     
+            env = ABOKidneyExchange(entry_rate=np.random.randint(5, 10),
+                                    death_rate=np.random.choice([.1, .09, .08, .07, .06, .05]), time_length=1000,
+                                    seed=s)
         elif env_type == "saidman":
-            env = SaidmanKidneyExchange(entry_rate = np.random.randint(5, 10),
-                                death_rate = np.random.choice([.1,.09,.08,.07,.06,.05]), 
-                                time_length = 1000, 
-                                seed = s)  
+            env = SaidmanKidneyExchange(entry_rate=np.random.randint(5, 10),
+                                        death_rate=np.random.choice([.1, .09, .08, .07, .06, .05]), time_length=1000,
+                                        seed=s)
         elif env_type == "optn":
             env = OPTNKidneyExchange(entry_rate = np.random.randint(5, 10),
                                 death_rate = np.random.choice([.1,.09,.08,.07,.06,.05]), 

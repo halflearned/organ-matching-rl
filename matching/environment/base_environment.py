@@ -23,12 +23,13 @@ def draw(p_dict, n = 1):
 class BaseKidneyExchange(nx.DiGraph, abc.ABC):
     
 
-    def __init__(self, 
+    def __init__(self,
                  entry_rate,
                  death_rate,
                  time_length,
-                 seed = None,
-                 populate = True):
+                 seed=None,
+                 populate=True,
+                 fraction_ndd=0):
         
         
         nx.DiGraph.__init__(self)
@@ -36,6 +37,7 @@ class BaseKidneyExchange(nx.DiGraph, abc.ABC):
         self.entry_rate = entry_rate
         self.death_rate = death_rate
         self.time_length = time_length
+        self.fraction_ndd = fraction_ndd
         self.removed_container = defaultdict(set)
         self.seed = clock_seed() if seed is None else seed
             

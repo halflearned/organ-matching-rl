@@ -7,11 +7,7 @@ from matching.utils.env_utils import two_cycles, remove_taken, snapshot
 
 @pytest.fixture
 def env():
-    e = SaidmanKidneyExchange(
-        entry_rate = 10,
-        death_rate = .1,
-        time_length = 50,
-        populate = True)
+    e = SaidmanKidneyExchange(entry_rate=10, death_rate=.1, time_length=50, populate=True)
     return e
     
 

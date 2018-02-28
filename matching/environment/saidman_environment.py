@@ -56,19 +56,11 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
     
     
 
-    def __init__(self, 
-                 entry_rate,
-                 death_rate,
-                 time_length = 400,
-                 seed = None,
-                 populate=True):
-        
-        super(self.__class__, self)\
-              .__init__(entry_rate=entry_rate,
-                        death_rate=death_rate,
-                        time_length=time_length,
-                        seed=seed,
-                        populate=populate)
+    def __init__(self, entry_rate, death_rate, time_length, seed=None, populate=True, fraction_ndd):
+
+        super(self.__class__, self) \
+            .__init__(entry_rate=entry_rate, death_rate=death_rate, time_length=time_length, seed=seed,
+                      populate=populate)
         
         
         
@@ -203,9 +195,7 @@ class SaidmanKidneyExchange(BaseKidneyExchange):
 if __name__ == "__main__":
     
     
-    env = SaidmanKidneyExchange(entry_rate  = 5,
-                                death_rate  = 0.1,
-                                time_length = 100)
+    env = SaidmanKidneyExchange(entry_rate=5, death_rate=0.1, time_length=100)
 
     A, X = env.A(3), env.X(3)
 

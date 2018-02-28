@@ -132,10 +132,7 @@ def prepare_mdp(n,
     
     for i_iter in trange(n, desc = "Preparing data"):
     
-        env = SaidmanKidneyExchange(entry_rate  = entry_rate,
-                                    death_rate  = death_rate,
-                                    time_length = time_length,
-                                    seed = seed)
+        env = SaidmanKidneyExchange(entry_rate=entry_rate, death_rate=death_rate, time_length=time_length, seed=seed)
 
         opt = solver.optimal(env)
         greedy = solver.greedy(env)

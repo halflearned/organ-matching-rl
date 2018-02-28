@@ -6,12 +6,7 @@ from matching.environment.saidman_environment import SaidmanKidneyExchange
 
 @pytest.fixture
 def env():
-    return SaidmanKidneyExchange(
-        entry_rate = 5,
-        death_rate = .1,
-        time_length = 50,
-        seed = 12345,
-        populate = True)
+    return SaidmanKidneyExchange(entry_rate=5, death_rate=.1, time_length=50, seed=12345, populate=True)
 
 
 def test_erase_future(env):

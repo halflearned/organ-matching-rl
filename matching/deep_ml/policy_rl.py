@@ -115,10 +115,7 @@ if __name__ == "__main__":
     
         
         print("Creating environment")
-        env = ABOKidneyExchange(entry_rate, 
-                                death_rate,
-                                time_length,
-                                seed = k)
+        env = ABOKidneyExchange(entry_rate, death_rate, time_length, seed=k)
         
         print("Solving environment")
         opt = optimal(env)
