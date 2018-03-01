@@ -101,8 +101,6 @@ def parse_trimble_solution(opt, g):
     return opt.ip_model.ObjVal, matched, timing
 
 
-
-
 def optimal(env, max_cycle, max_chain, t_begin=None, t_end=None):
     if t_begin is None:
         t_begin = 0
