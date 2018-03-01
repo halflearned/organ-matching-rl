@@ -12,13 +12,10 @@ import networkx as nx
 import numpy as np
 
 
-
-
 def get_cycles_and_chains(env,
                           nodes=None,
                           max_cycle_length=2,
                           max_chain_length=0):
-
     # Cycles
     cycle_weights, cycles = get_cycles(env,
                                        nodes,
@@ -29,7 +26,6 @@ def get_cycles_and_chains(env,
                                        max_chain_length)
 
     return cycle_weights + chain_weights, cycles + chains
-
 
 
 def find_chains(g, source, depth):
@@ -109,9 +105,6 @@ def get_two_cycles(env, nodes=None):
     return output
 
 
-
-
-
 def get_three_cycles(env, nodes=None):
     if nodes is not None:
         subgraph = env.subgraph(nodes)
@@ -129,9 +122,6 @@ def get_three_cycles(env, nodes=None):
                 output.append({u, w, v})
 
     return output
-
-
-
 
 
 def remove_from_cycles(ws_full, cs_full, restrict):
@@ -169,8 +159,6 @@ def parse_solution(env, cycles, model, t_begin=None, weights=None):
             "matched_pairs": matched_pairs,
             "matched_cycles": matched_cycles,
             "obj": obj}
-
-
 
 
 def solve(weights, cycles):
@@ -229,7 +217,6 @@ def optimal(env,
             subset=None,
             max_cycle_length=2,
             max_chain_length=0):
-
     if t_begin is None:
         t_begin = 0
     if t_end is None:
@@ -250,8 +237,6 @@ def optimal(env,
     solution = parse_solution(env, cs, m, t_begin)
 
     return solution
-
-
 
 
 def compare_optimal(env,

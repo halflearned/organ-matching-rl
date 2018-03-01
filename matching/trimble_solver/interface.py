@@ -1,16 +1,9 @@
-import networkx as nx
+from collections import defaultdict
 from copy import deepcopy
 
 import matching.trimble_solver.kidney_ip as k_ip
 from matching.trimble_solver.kidney_digraph import Digraph
 from matching.trimble_solver.kidney_ndds import Ndd, NddEdge
-
-
-def relabel(subg):
-    mapping = {v: k for k, v in enumerate(subg.nodes())}
-    inverse_mapping = {k: v for k, v in enumerate(subg.nodes())}
-    subg_relabeled = nx.relabel_nodes(subg, mapping)
-    return subg_relabeled, inverse_mapping
 
 
 def separate_ndds(g):
@@ -62,20 +55,52 @@ def solve(g, max_cycle, max_chain, formulation="hpief_prime_full_red"):
     return opt_result
 
 
+def get_chain_match_date(env, chain):
+    match_dates = defaultdict(list)
+    t = 0
+    for i in range(1, len(chain)):
+        v, w = chain[i - 1], chain[i]
+        t = max(get_max_entry(env, [v, w]), t)
+        if i == 1:
+            match_dates[t].extend([v, w])
+        else:
+            match_dates[t].append(w)
+    return match_dates
+
+
+def get_max_entry(env, nodes):
+    try:
+        return max(env.data.loc[nodes, "entry"])
+    except AttributeError:
+        return max(env.node[v]["entry"] for v in nodes)
+
+
 def parse_trimble_solution(opt, g):
     g_pairs, g_ndds = separate_ndds(g)
     matched = []
+    timing = defaultdict(list)
     for cyc in opt.cycles:
+        vs = []
         for v in cyc:
-            matched.append(g_pairs[v.id])
+            vs.append(g_pairs[v.id])
+
+        matched.extend(vs)
+        t = get_max_entry(g, vs)
+        timing[t].extend(vs)
 
     for chain in opt.chains:
         head, rest = chain.ndd_index, chain.vtx_indices
-        matched.append(g_ndds[head])
+        vs = [g_ndds[head]]
         for v in rest:
-            matched.append(g_pairs[v])
+            vs.append(g_pairs[v])
+        matched.extend(vs)
+        dates = get_chain_match_date(g, vs)
+        for t, vs in dates.items():
+            timing[t].extend(vs)
 
-    return opt.ip_model.ObjVal, matched
+    return opt.ip_model.ObjVal, matched, timing
+
+
 
 
 def optimal(env, max_cycle, max_chain, t_begin=None, t_end=None):
@@ -86,8 +111,10 @@ def optimal(env, max_cycle, max_chain, t_begin=None, t_end=None):
 
     g = env.subgraph(env.get_living(t_begin, t_end))
     opt = solve(g, max_cycle=max_cycle, max_chain=max_chain)
-    obj, matched = parse_trimble_solution(opt, g)
-    return {"obj": obj, "matched": matched}
+    obj, matched, timing = parse_trimble_solution(opt, g)
+    return {"obj": obj,
+            "matched": matched,
+            "timing": timing}
 
 
 def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None):
@@ -99,14 +126,16 @@ def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None):
     container = deepcopy(env.removed_container)
     obj = 0
     matched = []
+    timing = defaultdict(list)
     for t in range(t_begin, t_end):
         opt_t = optimal(env, max_cycle, max_chain, t_begin=t, t_end=t)
         obj += opt_t["obj"]
         matched.extend(opt_t["matched"])
         env.removed_container[t].update(opt_t["matched"])
+        timing[t].extend(opt_t["matched"])
 
     env.removed_container = container
-    return {"obj": obj, "matched": matched}
+    return {"obj": obj, "matched": matched, "timing": timing}
 
 
 if __name__ == "__main__":

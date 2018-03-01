@@ -21,7 +21,7 @@ if max_chain > 0:
     frac_ndd = choice([0.05, 0.1])
 else:
     frac_ndd = 0
-time_length = 100
+time_length = 1000
 
 t = time()
 

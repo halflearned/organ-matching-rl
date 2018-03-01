@@ -151,11 +151,3 @@ if __name__ == "__main__":
 
     A, X = env.A(3), env.X(3)
     opt = optimal(env, max_cycle=2, max_chain=3)
-
-    for v, w in env.edges():
-        assert env.node[w]["ndd"] is False
-
-
-
-
-
