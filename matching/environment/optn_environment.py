@@ -13,11 +13,13 @@ from itertools import product
 
 import numpy as np
 import pandas as pd
+import networkx as nx
 
 from matching.environment.base_environment2 import BaseKidneyExchange
 
 
 class OPTNKidneyExchange(BaseKidneyExchange):
+
     optn_pairs = pickle.load(open("matching/optn_data/optn_pairs.pkl", "rb"))
 
     don_blood_cols = [c for c in optn_pairs.columns if "blood" in c and "don" in c and "cpra" not in c]
@@ -96,6 +98,19 @@ class OPTNKidneyExchange(BaseKidneyExchange):
             self.initial_populate(t_end=t_end, seed=seed)
         else:
             self.repopulate(t_begin=t_begin, t_end=t_end, seed=seed)
+
+        # TODO: Refactor
+        ndd_status = []
+        for ndd in self.data["ndd"]:
+            ndd_status.append({"ndd": ndd})
+        nx.set_node_attributes(self, dict(zip(self.data.index, ndd_status)))
+
+        entries = []
+        for t in self.data["entry"]:
+            entries.append({"entry": t})
+
+        nx.set_node_attributes(self, dict(zip(self.data.index, entries)))
+
 
     def draw_node_features(self, t_begin, t_end):
 
@@ -217,6 +232,13 @@ class OPTNKidneyExchange(BaseKidneyExchange):
 
 
 # %%
+if __name__ == "__main__":
 
-env = OPTNKidneyExchange(5, .1, 150, fraction_ndd=0.1)
-env.X(3), env.A(3)
+    from matching.utils.data_utils import summary
+    from matching.trimble_solver.interface import optimal, greedy
+
+    env = OPTNKidneyExchange(5, .1, 500, fraction_ndd=0.1)
+    o = optimal(env, 2, 2)
+    g = greedy(env, 2, 2)
+
+

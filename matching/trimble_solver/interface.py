@@ -4,6 +4,7 @@ from copy import deepcopy
 import matching.trimble_solver.kidney_ip as k_ip
 from matching.trimble_solver.kidney_digraph import Digraph
 from matching.trimble_solver.kidney_ndds import Ndd, NddEdge
+from matching.environment.optn_environment import OPTNKidneyExchange
 
 
 def separate_ndds(g):
