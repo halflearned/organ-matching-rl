@@ -82,7 +82,7 @@ class ABOKidneyExchange(BaseKidneyExchange):
         source_nodes = np.array(source_nodes)
         target_nodes = np.array(target_nodes)
 
-        # Block ndds from receiving
+        # Block ndds from being recipients
         ndds = self.attr("ndd", nodes=target_nodes).astype(bool).flatten()
         target_nodes = target_nodes[~ndds]
 
@@ -108,32 +108,27 @@ class ABOKidneyExchange(BaseKidneyExchange):
 
         nodelist = self.get_living(t, indices_only=False)
         n = len(nodelist)
-        Xs = np.zeros((n, 9 + 2 * graph_attributes))
+        Xs = np.zeros((n, 8 + 2 * graph_attributes))
         indices = []
         for i, (n, d) in enumerate(nodelist):
-            Xs[i, 0] = (d["p_blood"] == 0) & ~d["ndd"]
-            Xs[i, 1] = d["p_blood"] == 1 & ~d["ndd"]
-            Xs[i, 2] = d["p_blood"] == 2 & ~d["ndd"]
+            Xs[i, 0] = (d["p_blood"] == 0) & (d["ndd"] == 0)
+            Xs[i, 1] = (d["p_blood"] == 1) & (d["ndd"] == 0)
+            Xs[i, 2] = (d["p_blood"] == 2) & (d["ndd"] == 0)
             Xs[i, 3] = d["d_blood"] == 0
             Xs[i, 4] = d["d_blood"] == 1
             Xs[i, 5] = d["d_blood"] == 2
             Xs[i, 6] = t - d["entry"]
-            Xs[i, 7] = d["death"] - t
-            Xs[i, 8] = d["ndd"]
+            Xs[i, 7] = d["ndd"]
             if graph_attributes:
-                Xs[i, 9] = self.entry_rate
-                Xs[i, 10] = self.death_rate
+                Xs[i, 8] = self.entry_rate
+                Xs[i, 9] = self.death_rate
             indices.append(n)
 
         if dtype == "numpy":
             return Xs
 
         elif dtype == "pandas":
-            columns = ["pO", "pA", "pAB",
-                       "dO", "dA", "dB",
-                       "waiting_time",
-                       "time_to_death",
-                       "ndd"]
+            columns = ["pO", "pA", "pB", "dO", "dA", "dB", "waiting_time", "ndd"]
             if graph_attributes:
                 columns += ["entry_rate", "death_rate"]
             return pd.DataFrame(index=indices,
@@ -146,19 +141,20 @@ class ABOKidneyExchange(BaseKidneyExchange):
 # %%
 if __name__ == "__main__":
 
-    from matching.solver.kidney_solver2 import optimal
+    from matching.trimble_solver.interface import optimal
 
-    env = ABOKidneyExchange(entry_rate=5, death_rate=0.1,
-                            time_length=1000,
+    env = ABOKidneyExchange(entry_rate=5,
+                            death_rate=0.1,
+                            time_length=100,
                             fraction_ndd=0.2,
                             seed=12345)
 
     A, X = env.A(3), env.X(3)
-    t = 3
+    opt = optimal(env, max_cycle=2, max_chain=3)
 
-    opt = optimal(env,
-                  max_cycle_length=2,
-                  max_chain_length=3)
+    for v, w in env.edges():
+        assert env.node[w]["ndd"] is False
+
 
 
 

@@ -2,35 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1e574e1e-19a4-4075-9c48-cd0cb79cf4f6" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/matching/solver/scratch.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/matching/trimble_solver/interface.py" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/vitorhadad.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/vitorhadad.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/tests/test_ndd.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" />
-      <change beforePath="$PROJECT_DIR$/matching/data_creation/create_data.py" afterPath="$PROJECT_DIR$/matching/data_creation/create_data.py" />
-      <change beforePath="$PROJECT_DIR$/matching/deep_ml/policy_rl.py" afterPath="$PROJECT_DIR$/matching/deep_ml/policy_rl.py" />
       <change beforePath="$PROJECT_DIR$/matching/environment/abo_environment.py" afterPath="$PROJECT_DIR$/matching/environment/abo_environment.py" />
       <change beforePath="$PROJECT_DIR$/matching/environment/base_environment.py" afterPath="$PROJECT_DIR$/matching/environment/base_environment.py" />
-      <change beforePath="$PROJECT_DIR$/matching/environment/base_environment2.py" afterPath="$PROJECT_DIR$/matching/environment/base_environment2.py" />
       <change beforePath="$PROJECT_DIR$/matching/environment/saidman_environment.py" afterPath="$PROJECT_DIR$/matching/environment/saidman_environment.py" />
-      <change beforePath="$PROJECT_DIR$/matching/solver/kidney_solver2.py" afterPath="$PROJECT_DIR$/matching/solver/kidney_solver2.py" />
-      <change beforePath="$PROJECT_DIR$/matching/temp/temp.py" afterPath="$PROJECT_DIR$/matching/temp/temp.py" />
-      <change beforePath="$PROJECT_DIR$/matching/traditional_ml/evaluate.py" afterPath="$PROJECT_DIR$/matching/traditional_ml/evaluate.py" />
-      <change beforePath="$PROJECT_DIR$/matching/tree_search/montecarlo.py" afterPath="$PROJECT_DIR$/matching/tree_search/montecarlo.py" />
-      <change beforePath="$PROJECT_DIR$/matching/tree_search/optimal_simulation.py" afterPath="$PROJECT_DIR$/matching/tree_search/optimal_simulation.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/count_cycles_and_chains.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/count_cycles_and_chains.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/count_cycles_and_chains_nx.py" afterPath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_ndds.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_ndds.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_solver.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_solver.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/sparsify.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/sparsify.py" />
-      <change beforePath="$PROJECT_DIR$/matching/utils/make_data.py" afterPath="$PROJECT_DIR$/matching/utils/make_data.py" />
       <change beforePath="$PROJECT_DIR$/phd_thesis" afterPath="$PROJECT_DIR$/phd_thesis" />
-      <change beforePath="$PROJECT_DIR$/tests/test_environment.py" afterPath="$PROJECT_DIR$/tests/test_environment.py" />
-      <change beforePath="$PROJECT_DIR$/tests/test_mcts.py" afterPath="$PROJECT_DIR$/tests/test_mcts.py" />
-      <change beforePath="$PROJECT_DIR$/tests/test_utils.py" afterPath="$PROJECT_DIR$/tests/test_utils.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -47,6 +24,7 @@
     <SUITE FILE_PATH="coverage/matching$tests.coverage" NAME="tests Coverage Results" MODIFIED="1519806912244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/matching/trimble_solver" />
     <SUITE FILE_PATH="coverage/matching$traditional_ml_mdp_analysis.coverage" NAME="traditional_ml_mdp_analysis Coverage Results" MODIFIED="1518297243882" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/matching/analyses" />
     <SUITE FILE_PATH="coverage/matching$scratch.coverage" NAME="scratch Coverage Results" MODIFIED="1518029205082" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/matching/bandits" />
+    <SUITE FILE_PATH="coverage/matching$py_test_in_test_ndd_py.coverage" NAME="py.test in test_ndd.py Coverage Results" MODIFIED="1519865783140" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -65,56 +43,60 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="grab_data.sh" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/analyses/grab_data.sh">
+      <file leaf-file-name="base_environment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/matching/environment/base_environment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="8" column="41" lean-forward="false" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="greedy_opt_comparison.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="752">
-              <caret line="49" column="65" lean-forward="false" selection-start-line="49" selection-start-column="65" selection-end-line="49" selection-end-column="65" />
+            <state relative-caret-position="1679">
+              <caret line="131" column="0" lean-forward="false" selection-start-line="131" selection-start-column="0" selection-end-line="131" selection-end-column="0" />
               <folding>
-                <element signature="e#114#139#0" expanded="true" />
+                <element signature="e#112#122#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
+      <file leaf-file-name="abo_environment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/matching/environment/abo_environment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="454">
-              <caret line="103" column="24" lean-forward="true" selection-start-line="103" selection-start-column="24" selection-end-line="103" selection-end-column="24" />
+            <state relative-caret-position="307">
+              <caret line="137" column="30" lean-forward="false" selection-start-line="137" selection-start-column="30" selection-end-line="137" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="saidman_environment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/matching/environment/saidman_environment.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="117">
+              <caret line="167" column="56" lean-forward="false" selection-start-line="167" selection-start-column="56" selection-end-line="167" selection-end-column="56" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#114#149#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gurobi.log" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/analyses/gurobi.log">
+      <file leaf-file-name="test_environment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/test_environment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="1349">
+              <caret line="71" column="25" lean-forward="true" selection-start-line="71" selection-start-column="25" selection-end-line="71" selection-end-column="25" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="greedy_opt_comparison_results.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_results.py">
+      <file leaf-file-name="test_ndd.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tests/test_ndd.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="795">
-              <caret line="115" column="31" lean-forward="false" selection-start-line="115" selection-start-column="31" selection-end-line="115" selection-end-column="31" />
-              <folding />
+            <state relative-caret-position="665">
+              <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+              <folding>
+                <element signature="e#55#68#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -144,6 +126,7 @@
       <find>0\..*</find>
       <find>read_</find>
       <find>Digraph</find>
+      <find>ndd</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -191,10 +174,12 @@
         <option value="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/tests.py" />
-        <option value="$PROJECT_DIR$/matching/environment/base_environment.py" />
-        <option value="$PROJECT_DIR$/matching/environment/abo_environment.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/interface.py" />
         <option value="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" />
+        <option value="$PROJECT_DIR$/matching/environment/abo_environment.py" />
+        <option value="$PROJECT_DIR$/matching/environment/saidman_environment.py" />
+        <option value="$PROJECT_DIR$/matching/environment/base_environment.py" />
+        <option value="$PROJECT_DIR$/tests/test_ndd.py" />
       </list>
     </option>
   </component>
@@ -262,13 +247,12 @@
               <item name="matching" type="b2602c69:ProjectViewProjectNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="analyses" type="462c0819:PsiDirectoryNode" />
+              <item name="environment" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="matching" type="b2602c69:ProjectViewProjectNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="trimble_solver" type="462c0819:PsiDirectoryNode" />
+              <item name="tests" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -311,7 +295,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.greedy_opt_comparison">
+  <component name="RunManager" selected="Python tests.py.test in test_ndd.py">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -326,6 +310,25 @@
       <module name="matching" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="abo_environment" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/matching/environment" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="matching" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/environment/abo_environment.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -369,50 +372,31 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="kidney_solver3" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="saidman_environment" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/matching/solver" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/matching/environment" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="matching" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/environment/saidman_environment.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="tests" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/matching/trimble_solver" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="matching" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/trimble_solver/tests.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
-    <configuration name="py.test in tests.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="py.test in test_ndd.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/matching/trimble_solver" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
@@ -420,23 +404,23 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/matching/trimble_solver/tests.py&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_ndd.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.kidney_solver3" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.py.test in tests.py" />
-      <item index="2" class="java.lang.String" itemvalue="Python.tests" />
-      <item index="3" class="java.lang.String" itemvalue="Python.interface" />
-      <item index="4" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
+      <item index="0" class="java.lang.String" itemvalue="Python.interface" />
+      <item index="1" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
+      <item index="2" class="java.lang.String" itemvalue="Python.saidman_environment" />
+      <item index="3" class="java.lang.String" itemvalue="Python tests.py.test in test_ndd.py" />
+      <item index="4" class="java.lang.String" itemvalue="Python.abo_environment" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
-        <item index="1" class="java.lang.String" itemvalue="Python.interface" />
-        <item index="2" class="java.lang.String" itemvalue="Python.tests" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.py.test in tests.py" />
-        <item index="4" class="java.lang.String" itemvalue="Python.kidney_solver3" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.py.test in test_ndd.py" />
+        <item index="1" class="java.lang.String" itemvalue="Python.saidman_environment" />
+        <item index="2" class="java.lang.String" itemvalue="Python.abo_environment" />
+        <item index="3" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
+        <item index="4" class="java.lang.String" itemvalue="Python.interface" />
       </list>
     </recent_temporary>
   </component>
@@ -457,20 +441,35 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="py_test_in_tests_py - 2018.02.28 at 00h 07m 03s.xml">
-      <configuration name="py.test in tests.py" configurationId="tests" />
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 38m 57s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_tests_py - 2018.02.28 at 00h 07m 16s.xml">
-      <configuration name="py.test in tests.py" configurationId="tests" />
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 39m 10s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_tests_py - 2018.02.28 at 00h 21m 18s.xml">
-      <configuration name="py.test in tests.py" configurationId="tests" />
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 39m 21s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_tests_py - 2018.02.28 at 00h 22m 07s.xml">
-      <configuration name="py.test in tests.py" configurationId="tests" />
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 39m 40s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="py_test_in_tests_py - 2018.02.28 at 00h 23m 15s.xml">
-      <configuration name="py.test in tests.py" configurationId="tests" />
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 40m 22s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 52m 15s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 54m 27s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 55m 26s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 56m 15s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="py_test_in_test_ndd_py - 2018.02.28 at 16h 56m 27s.xml">
+      <configuration name="py.test in test_ndd.py" configurationId="tests" />
     </history-entry>
   </component>
   <component name="TodoView">
@@ -489,11 +488,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287483" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44794953" sideWeight="0.47475728" order="10" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
-      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.44911146" sideWeight="0.08440913" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41922456" sideWeight="0.08440913" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3855165" sideWeight="0.9155909" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19628432" sideWeight="0.484" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19628432" sideWeight="0.47949526" order="0" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -501,7 +500,7 @@
       <window_info id="SciView" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.78848064" sideWeight="0.5103448" order="11" side_tool="false" content_ui="tabs" x="164" y="229" width="945" height="474" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39821252" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18796591" sideWeight="0.516" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19628432" sideWeight="0.5205047" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -517,14 +516,14 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287483" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.448858" sideWeight="0.47475728" order="10" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
+      <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44794953" sideWeight="0.47475728" order="10" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4600639" sideWeight="0.17477657" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.44911146" sideWeight="0.08440913" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.6219382" sideWeight="0.82522345" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3855165" sideWeight="0.9155909" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19648562" sideWeight="0.484" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19628432" sideWeight="0.47949526" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -534,8 +533,8 @@
       <window_info id="SciView" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.78848064" sideWeight="0.5103448" order="11" side_tool="false" content_ui="tabs" x="164" y="229" width="945" height="474" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39889959" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18828125" sideWeight="0.516" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39821252" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19628432" sideWeight="0.5205047" order="2" side_tool="true" content_ui="tabs" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -574,27 +573,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/matching/bandits/scratch.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="3" column="0" lean-forward="true" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2017.3/python_stubs/1242167321/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="809" column="8" lean-forward="false" selection-start-line="809" selection-start-column="8" selection-end-line="809" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/matching/utils/env_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="14" column="18" lean-forward="false" selection-start-line="14" selection-start-column="18" selection-end-line="14" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/bandits/run_combinatorial.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
@@ -754,17 +732,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/environment/optn_environment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="944">
-          <caret line="234" column="21" lean-forward="false" selection-start-line="234" selection-start-column="21" selection-end-line="234" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/utils/data_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-349">
           <caret line="0" column="1" lean-forward="true" selection-start-line="0" selection-start-column="1" selection-end-line="0" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -818,33 +790,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1904">
-          <caret line="187" column="0" lean-forward="false" selection-start-line="183" selection-start-column="0" selection-end-line="187" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/trimble_solver/kidney_solver.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="3" lean-forward="true" selection-start-line="0" selection-start-column="3" selection-end-line="0" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/matching/environment/abo_environment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="542">
-          <caret line="93" column="49" lean-forward="false" selection-start-line="93" selection-start-column="49" selection-end-line="93" selection-end-column="49" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/matching/environment/base_environment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="487">
-          <caret line="101" column="61" lean-forward="false" selection-start-line="101" selection-start-column="61" selection-end-line="101" selection-end-column="61" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -872,18 +821,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/analyses/grab_data.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="41" lean-forward="false" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/analyses/gurobi.log">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="184" column="34" lean-forward="true" selection-start-line="184" selection-start-column="34" selection-end-line="184" selection-end-column="34" />
+          <folding>
+            <element signature="e#112#133#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="764">
+          <caret line="91" column="0" lean-forward="true" selection-start-line="91" selection-start-column="0" selection-end-line="91" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#21#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="562">
+          <caret line="39" column="37" lean-forward="false" selection-start-line="39" selection-start-column="37" selection-end-line="39" selection-end-column="37" />
+          <folding>
+            <element signature="e#114#139#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/analyses/grab_data.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="41" lean-forward="false" selection-start-line="8" selection-start-column="41" selection-end-line="8" selection-end-column="41" />
           <folding />
         </state>
       </provider>
@@ -896,22 +875,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
+    <entry file="file://$PROJECT_DIR$/matching/environment/optn_environment.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="454">
-          <caret line="103" column="24" lean-forward="true" selection-start-line="103" selection-start-column="24" selection-end-line="103" selection-end-column="24" />
+        <state relative-caret-position="888">
+          <caret line="234" column="21" lean-forward="false" selection-start-line="234" selection-start-column="21" selection-end-line="234" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/environment/saidman_environment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="117">
+          <caret line="167" column="56" lean-forward="false" selection-start-line="167" selection-start-column="56" selection-end-line="167" selection-end-column="56" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#114#149#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py">
+    <entry file="file://$PROJECT_DIR$/matching/environment/base_environment.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="752">
-          <caret line="49" column="65" lean-forward="false" selection-start-line="49" selection-start-column="65" selection-end-line="49" selection-end-column="65" />
+        <state relative-caret-position="1679">
+          <caret line="131" column="0" lean-forward="false" selection-start-line="131" selection-start-column="0" selection-end-line="131" selection-end-column="0" />
           <folding>
-            <element signature="e#114#139#0" expanded="true" />
+            <element signature="e#112#122#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/environment/abo_environment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="307">
+          <caret line="137" column="30" lean-forward="false" selection-start-line="137" selection-start-column="30" selection-end-line="137" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_environment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1349">
+          <caret line="71" column="25" lean-forward="true" selection-start-line="71" selection-start-column="25" selection-end-line="71" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_ndd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="665">
+          <caret line="35" column="0" lean-forward="true" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+          <folding>
+            <element signature="e#55#68#0" expanded="true" />
           </folding>
         </state>
       </provider>
