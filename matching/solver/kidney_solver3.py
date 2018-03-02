@@ -59,7 +59,7 @@ def get_chain_positions(graph, max_chain_length, reduce=False):
     return variables
 
 
-def solve2(graph, max_cycle=2, max_chain=2):
+def solve(graph, max_cycle=2, max_chain=2):
 
     m = gb.Model()
     m.setParam("Threads", 1)
@@ -84,7 +84,7 @@ def solve2(graph, max_cycle=2, max_chain=2):
                 grb_vars.append(edge_var)
                 incoming_capacity[w].append(edge_var)
                 sequence_outgoing[v][k].append(edge_var)
-                if k < max_chain - 1: 
+                if k < max_chain - 1: # ...?
                     sequence_incoming[w][k].append(edge_var)
 
     m.update()
@@ -112,59 +112,107 @@ def solve2(graph, max_cycle=2, max_chain=2):
     return m
 
 
+def sojourn(graph, i):
+    i_entry = graph.node[i]["entry"]
+    i_death = graph.node[i]["death"]
+    return i_entry, i_death
+
+
+
+def sojourn_overlap(graph, i, j):
+    i_entry = graph.node[i]["entry"]
+    i_death = graph.node[i]["death"]
+    j_entry = graph.node[j]["entry"]
+    j_death = graph.node[j]["death"]
+
+    t_begin = max(i_entry, j_entry)
+    t_end = min(i_death, j_death)
+    return t_begin, t_end+1
+
+
+
+def solve_with_time_constraints(graph,
+                                max_cycle,
+                                max_chain,
+                                max_chain_per_period):
+    m = gb.Model()
+    m.setParam("Threads", 1)
+
+    ndd_capacity = defaultdict(list)
+    incoming_capacity = defaultdict(list)
+    sequence_incoming = defaultdict(lambda: defaultdict(list))
+    sequence_outgoing = defaultdict(lambda: defaultdict(list))
+
+    time_incoming = defaultdict(lambda: defaultdict(list))
+    time_outgoing = defaultdict(lambda: defaultdict(list))
+
+    grb_vars = []
+    for edge in graph.edges():
+        v, w = edge
+        for t in sojourn_overlap(graph, v, w):
+            if graph.node[v]["ndd"]:
+                edge_var = m.addVar(vtype=gb.GRB.BINARY, name=str((v, w, 0, t)))
+                grb_vars.append(edge_var)
+                ndd_capacity[v].append(edge_var)
+                incoming_capacity[w].append(edge_var)
+                sequence_incoming[w][0].append(edge_var)
+
+                time_incoming[w][t].append(edge_var)
+                time_outgoing[w][t].append(edge_var)
+            else:
+                for k in range(1, max_chain - 1):
+                    edge_var = m.addVar(vtype=gb.GRB.BINARY, name=str((v, w, k, t)))
+                    grb_vars.append(edge_var)
+                    incoming_capacity[w].append(edge_var)
+                    sequence_outgoing[v][k].append(edge_var)
+                    if k < max_chain - 1:
+                        sequence_incoming[w][k].append(edge_var)
+
+                    time_incoming[w][t].append(edge_var)
+                    time_outgoing[w][t].append(edge_var)
+
+    m.update()
+    # Add membership and chain length constraints
+    for i, data in graph.node(data=True):
+        if data["ndd"]:
+            m.addConstr(gb.quicksum(ndd_capacity[i]) <= 1)
+        else:
+            m.addConstr(gb.quicksum(incoming_capacity[i]) <= 1)
+            for k in range(max_chain - 1):
+                if sequence_outgoing[i][k + 1]:
+                    lhs = gb.quicksum(sequence_incoming[i][k])
+                    rhs = gb.quicksum(sequence_outgoing[i][k + 1])
+                    m.addConstr(lhs >= rhs)
+
+    # Add time constraints
+    for i in graph.node:
+        for t in sojourn(graph, i):
+            if time_outgoing[i][t + 1]:
+                lhs = gb.quicksum(time_incoming[i][t])
+                rhs = gb.quicksum(time_outgoing[i][t + 1])
+                m.addConstr(lhs >= rhs)
+                m.addConstr(lhs <= max_chain_per_period)
+
+
+    m.update()
+    m.setObjective(gb.quicksum(grb_vars), gb.GRB.MAXIMIZE)
+    m.optimize()
+
+    return m
 
 
 if __name__ == "__main__":
 
-    from matching.trimble_solver.kidney_digraph import read_digraph
-    import matching.trimble_solver.kidney_ip as k_ip
-    import matching.trimble_solver.kidney_ndds as k_ndds
-    import matching.trimble_solver.kidney_utils as k_utils
+    import numpy as np
+    import networkx as nx
+    from matching.trimble_solver.interface import solve as trimble_solve
+    from matching.environment.abo_environment import ABOKidneyExchange
 
-    # Move these to tests later
-    # graph = nx.DiGraph()
-    # graph.add_edges_from([(0, 1), (1, 2), (0, 2)])
-    # nx.set_node_attributes(G=graph, name="ndd", values={0: True, 1: False, 2: False})
-    # #
-    # m = solve2(graph, 2, 5)
-    # for v in m.getVars():
-    #     print(v)
-    #
-    # graph = nx.DiGraph()
-    # graph.add_edges_from([(0, 1), (0, 2), (2, 3), (3, 2)])
-    # nx.set_node_attributes(G=graph, name="ndd", values={0: True, 1: False, 2: False, 3:False})
-    # m = solve2(graph, max_chain=5)
-    #
-    # for v in m.getVars():
-    #     print(v)
+    env = ABOKidneyExchange(5, .1, 100, fraction_ndd=0.1)
+    m = solve_with_time_constraints(env,
+                                      max_cycle=0,
+                                      max_chain=3,
+                                      max_chain_per_period=1)
+    xs = [v for v in m.getVars() if v.x > 0]
 
-    # graph = nx.DiGraph()
-    # graph.add_edges_from([(0, 1), (0, 2), (0, 3), (1, 2), (2, 3)])
-    # nx.set_node_attributes(G=graph, name="ndd", values={0: True, 1: False, 2: False, 3: False})
-    # m = solve2(graph,
-    #           max_chain=5,
-    #           max_cycle=0)
-    #
-    # for v in m.getVars():
-    #     print(v)
 
-    graph = nx.DiGraph()
-    graph.add_edges_from([(1, 3),
-                          (1, 4),
-                          (2, 4),
-                          (3, 4),
-                          (4, 5),
-                          (5, 6),
-                          (6, 5),
-                          (6, 4)])
-
-    nx.set_node_attributes(G=graph, name="ndd",
-                           values={1: True, 2: True,
-                                   3: False, 4: False,
-                                   5: False, 6: False})
-    m = solve2(graph,
-              max_chain=5,
-              max_cycle=0)
-
-    for v in m.getVars():
-        print(v)
