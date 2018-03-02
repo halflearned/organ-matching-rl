@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Oct 17 12:50:59 2017
-z
-
+ls
 
 @author: vitorhadad
 """
@@ -25,6 +24,8 @@ def summary(env, timing):
     container = deepcopy(env.removed_container)
     pool_sizes = np.zeros(env.time_length)
     match_sizes = np.zeros(env.time_length)
+    # TODO: Include waiting times
+    # waiting_times = np.full(shape=env.nodes, fill_value=np.nan)
 
     for t in range(env.time_length):
         matched_t = timing[t]

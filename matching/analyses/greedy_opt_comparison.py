@@ -9,8 +9,11 @@ Created on Sat Feb  3 16:49:48 2018
 from random import choice
 from time import time
 from os import system
+from sys import platform
 
 from matching.environment.abo_environment import ABOKidneyExchange
+from matching.environment.optn_environment import OPTNKidneyExchange
+from matching.environment.saidman_environment import SaidmanKidneyExchange
 from matching.trimble_solver.interface import optimal, greedy
 
 entry_rate = choice([3, 5, 7])
@@ -35,9 +38,10 @@ env_params = dict(entry_rate=entry_rate,
                   time_length=time_length,
                   fraction_ndd=frac_ndd)
 
-envname, env = choice([  # ("OPTN", OPTNKidneyExchange(entry_rate,  death_rate, time_length)),
-    # ("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
-    ("ABO", ABOKidneyExchange(**env_params))])
+envname, env = choice([
+    ("OPTN", OPTNKidneyExchange(entry_rate,  death_rate, time_length)),
+    ("RSU",  SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
+    ("ABO",  ABOKidneyExchange(**env_params))])
 
 print("\tSolving optimal")
 opt = optimal(env, max_cycle=max_cycle, max_chain=max_chain)
@@ -45,7 +49,7 @@ opt = optimal(env, max_cycle=max_cycle, max_chain=max_chain)
 print("\tSolving greedy")
 gre = greedy(env, max_cycle=max_cycle, max_chain=max_chain)
 
-t_diff = t - time()
+t_diff = time() - t
 res = [envname,
        env.entry_rate, env.death_rate, env.time_length, frac_ndd,
        max_cycle, max_chain,
@@ -53,9 +57,12 @@ res = [envname,
        gre["obj"] / opt["obj"],
        t_diff]
 
-with open("results/greedy_opt_comparison_results_trimble.txt", "a") as f:
-    f.write(",".join([str(s) for s in res]) + "\n")
+print(res)
 
+if platform == "linux":
 
-system("qsub job_comparison.pbs")
+    with open("results/greedy_opt_comparison_results_trimble.txt", "a") as f:
+        f.write(",".join([str(s) for s in res]) + "\n")
+
+    system("qsub job_comparison.pbs")
 

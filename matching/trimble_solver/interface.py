@@ -1,5 +1,6 @@
 from collections import defaultdict
 from copy import deepcopy
+import networkx as nx
 
 import matching.trimble_solver.kidney_ip as k_ip
 from matching.trimble_solver.kidney_digraph import Digraph
@@ -48,6 +49,10 @@ def solve(g, max_cycle, max_chain, formulation="hpief_prime_full_red"):
         fn = k_ip.optimise_picef
     elif formulation == "ccf":
         fn = k_ip.optimise_ccf
+    elif formulation == "uef":
+        fn = k_ip.optimise_uuef
+    elif formulation == "eef":
+        fn = k_ip.optimise_eef
     else:
         raise ValueError("Cannot understand formulation")
 
@@ -80,6 +85,8 @@ def parse_trimble_solution(opt, g):
     g_pairs, g_ndds = separate_ndds(g)
     matched = []
     timing = defaultdict(list)
+    new_heads = []
+
     for cyc in opt.cycles:
         vs = []
         for v in cyc:
@@ -94,47 +101,70 @@ def parse_trimble_solution(opt, g):
         vs = [g_ndds[head]]
         for v in rest:
             vs.append(g_pairs[v])
+        new_heads.append(vs[-1])
         matched.extend(vs)
         dates = get_chain_match_date(g, vs)
         for t, vs in dates.items():
             timing[t].extend(vs)
 
-    return opt.ip_model.ObjVal, matched, timing
+
+    return opt.ip_model.ObjVal, matched, timing, new_heads
 
 
-def optimal(env, max_cycle, max_chain, t_begin=None, t_end=None):
+def optimal(env, max_cycle, max_chain,
+            t_begin=None, t_end=None,
+            formulation="hpief_prime_full_red"):
+
     if t_begin is None:
         t_begin = 0
     if t_end is None:
         t_end = env.time_length
 
     g = env.subgraph(env.get_living(t_begin, t_end))
-    opt = solve(g, max_cycle=max_cycle, max_chain=max_chain)
-    obj, matched, timing = parse_trimble_solution(opt, g)
+    opt = solve(g, max_cycle=max_cycle, max_chain=max_chain, formulation=formulation)
+    obj, matched, timing, new_heads = parse_trimble_solution(opt, g)
     return {"obj": obj,
             "matched": matched,
-            "timing": timing}
+            "timing": timing,
+            "opt": opt,
+            "new_heads": new_heads}
 
 
-def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None):
+def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None, formulation="hpief_prime_full_red"):
     if t_begin is None:
         t_begin = 0
     if t_end is None:
         t_end = env.time_length
 
-    container = deepcopy(env.removed_container)
+    #container = deepcopy(env.removed_container)
+    env = deepcopy(env)
     obj = 0
     matched = []
+    opts = []
     timing = defaultdict(list)
     for t in range(t_begin, t_end):
-        opt_t = optimal(env, max_cycle, max_chain, t_begin=t, t_end=t)
+        opt_t = optimal(env, max_cycle, max_chain, t_begin=t, t_end=t, formulation=formulation)
         obj += opt_t["obj"]
         matched.extend(opt_t["matched"])
         env.removed_container[t].update(opt_t["matched"])
         timing[t].extend(opt_t["matched"])
+        opts.append(opt_t)
 
-    env.removed_container = container
-    return {"obj": obj, "matched": matched, "timing": timing}
+        for node in opt_t["new_heads"]:
+            # Head of chain becomes ndd
+            nx.set_node_attributes(env, {node: 1}, name="ndd")
+            if hasattr(env, "data"):
+                env.data.loc[node, "ndd"] = 1
+
+            # Delete incoming edges
+            in_edges = list(env.in_edges(node))
+            env.remove_edges_from(in_edges)
+
+    #env.removed_container = container
+    return {"obj": obj,
+            "matched": matched,
+            "timing": timing,
+            "opt": opts}
 
 
 if __name__ == "__main__":
@@ -142,8 +172,13 @@ if __name__ == "__main__":
 
     env = ABOKidneyExchange(entry_rate=5,
                             death_rate=0.1,
-                            time_length=100,
+                            time_length=1000,
                             fraction_ndd=0.1)
 
-    g = greedy(env, 2, 2)
-    o = optimal(env, 2, 2)
+    # Uncapped edge formulation
+    #g_uef = greedy(env, 0, None, formulation="uef")
+    #o_uef = optimal(env, 0, None, formulation="uef")
+
+    #
+    #g_uef = greedy(env, 2, 2, formulation="hpief_prime_full_red")
+    o_hpief = optimal(env, 4, 0, formulation="hpief_prime_full_red")
