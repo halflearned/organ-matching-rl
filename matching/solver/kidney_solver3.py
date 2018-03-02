@@ -1,8 +1,10 @@
 import gurobipy as gb
 from collections import defaultdict
+from itertools import chain
 
 import networkx as nx
 import numpy as np
+
 
 
 def get_two_cycles(env, nodes=None):
@@ -186,12 +188,18 @@ def solve_with_time_constraints(graph,
 
     # Add time constraints
     for i in graph.node:
-        for t in sojourn(graph, i):
+        if i == 10:
+            import pdb; pdb.set_trace()
+        beg, end = sojourn(graph, i)
+        for t in range(beg, end):
             if time_outgoing[i][t + 1]:
-                lhs = gb.quicksum(time_incoming[i][t])
-                rhs = gb.quicksum(time_outgoing[i][t + 1])
-                m.addConstr(lhs >= rhs)
                 m.addConstr(lhs <= max_chain_per_period)
+
+            lhs_vars = list(chain(*[time_incoming[i][s] for s in range(beg, t)]))
+            rhs_vars = time_outgoing[i][t] #list(chain(*[time_outgoing[i][s] for s in range(t + 1, end)]))
+            lhs = gb.quicksum(lhs_vars)
+            rhs = gb.quicksum(rhs_vars)
+            m.addConstr(lhs >= rhs)
 
 
     m.update()
@@ -205,14 +213,22 @@ if __name__ == "__main__":
 
     import numpy as np
     import networkx as nx
+    import re
     from matching.trimble_solver.interface import solve as trimble_solve
     from matching.environment.abo_environment import ABOKidneyExchange
 
-    env = ABOKidneyExchange(5, .1, 100, fraction_ndd=0.1)
+    env = ABOKidneyExchange(5, .1, 100, fraction_ndd=0.1, seed=1234)
     m = solve_with_time_constraints(env,
                                       max_cycle=0,
                                       max_chain=3,
-                                      max_chain_per_period=1)
-    xs = [v for v in m.getVars() if v.x > 0]
-
+                                      max_chain_per_period=3)
+    xs = [eval(v.varName) for v in m.getVars() if v.x > 0]
+    received = dict()
+    donated = dict()
+    for v, w, k, t in xs:
+        received[w] = t
+        donated[v] = t
+    for n in env.nodes():
+        if not env.node[n]["ndd"] and donated.get(n, []):
+            assert received[n] <= donated[n]
 
