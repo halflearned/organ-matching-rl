@@ -18,8 +18,8 @@ from matching.trimble_solver.interface import optimal, greedy
 
 entry_rate = choice([3, 5, 7])
 death_rate = choice([0.05, 0.075, .1, .25, .5])
-max_chain = choice([0, 1, 2])
-max_cycle = choice([2, 3])
+max_chain = choice([True, False])
+max_cycle = choice([0, 2, 3, 4])
 if max_chain > 0:
     frac_ndd = choice([0.05, 0.1])
 else:
@@ -44,10 +44,10 @@ envname, env = choice([
     ("ABO",  ABOKidneyExchange(**env_params))])
 
 print("\tSolving optimal")
-opt = optimal(env, max_cycle=max_cycle, max_chain=max_chain)
+opt = optimal(env, max_cycle=0, max_chain=None, formulation="uef")
 
 print("\tSolving greedy")
-gre = greedy(env, max_cycle=max_cycle, max_chain=max_chain)
+gre = greedy(env, max_cycle=max_cycle, max_chain=None, formulation="uef")
 
 t_diff = time() - t
 res = [envname,
@@ -61,7 +61,7 @@ print(res)
 
 if platform == "linux":
 
-    with open("results/greedy_opt_comparison_results_trimble.txt", "a") as f:
+    with open("results/greedy_opt_comparison_results_uef.txt", "a") as f:
         f.write(",".join([str(s) for s in res]) + "\n")
 
     system("qsub job_comparison.pbs")

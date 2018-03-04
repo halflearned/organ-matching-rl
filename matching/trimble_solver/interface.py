@@ -1,11 +1,11 @@
 from collections import defaultdict
 from copy import deepcopy
+
 import networkx as nx
 
 import matching.trimble_solver.kidney_ip as k_ip
 from matching.trimble_solver.kidney_digraph import Digraph
 from matching.trimble_solver.kidney_ndds import Ndd, NddEdge
-from matching.environment.optn_environment import OPTNKidneyExchange
 
 
 def separate_ndds(g):
@@ -19,7 +19,7 @@ def separate_ndds(g):
 
 
 def nx_to_trimble(g):
-    """Reads a digraph from a networkx DiGraph into the timble input format."""
+    """Reads a digraph from a networkx DiGraph into the trimble input format."""
 
     g_pairs, g_ndds = separate_ndds(g)
     digraph = Digraph(len(g_pairs))
@@ -107,7 +107,6 @@ def parse_trimble_solution(opt, g):
         for t, vs in dates.items():
             timing[t].extend(vs)
 
-
     return opt.ip_model.ObjVal, matched, timing, new_heads
 
 
@@ -136,7 +135,7 @@ def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None, formulation="hpi
     if t_end is None:
         t_end = env.time_length
 
-    #container = deepcopy(env.removed_container)
+    # container = deepcopy(env.removed_container)
     env = deepcopy(env)
     obj = 0
     matched = []
@@ -160,7 +159,7 @@ def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None, formulation="hpi
             in_edges = list(env.in_edges(node))
             env.remove_edges_from(in_edges)
 
-    #env.removed_container = container
+    # env.removed_container = container
     return {"obj": obj,
             "matched": matched,
             "timing": timing,
@@ -176,9 +175,9 @@ if __name__ == "__main__":
                             fraction_ndd=0.1)
 
     # Uncapped edge formulation
-    #g_uef = greedy(env, 0, None, formulation="uef")
-    #o_uef = optimal(env, 0, None, formulation="uef")
+    # g_uef = greedy(env, 0, None, formulation="uef")
+    # o_uef = optimal(env, 0, None, formulation="uef")
 
     #
-    #g_uef = greedy(env, 2, 2, formulation="hpief_prime_full_red")
+    # g_uef = greedy(env, 2, 2, formulation="hpief_prime_full_red")
     o_hpief = optimal(env, 4, 0, formulation="hpief_prime_full_red")
