@@ -7,15 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e574e1e-19a4-4075-9c48-cd0cb79cf4f6" name="Default" comment="NDDs in OPTN (#7)">
-      <change beforePath="" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_uncapped.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/matching/bandits/contextual_bandits.py" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" />
-      <change beforePath="$PROJECT_DIR$/matching/environment/abo_environment.py" afterPath="$PROJECT_DIR$/matching/environment/abo_environment.py" />
       <change beforePath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" afterPath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/interface.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/interface.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" />
-      <change beforePath="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" afterPath="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" />
       <change beforePath="$PROJECT_DIR$/phd_thesis" afterPath="$PROJECT_DIR$/phd_thesis" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -53,21 +47,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="24" lean-forward="false" selection-start-line="0" selection-start-column="24" selection-end-line="0" selection-end-column="24" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="kidney_solver3.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="371">
-              <caret line="188" column="0" lean-forward="true" selection-start-line="188" selection-start-column="0" selection-end-line="188" selection-end-column="0" />
+            <state relative-caret-position="-44">
+              <caret line="137" column="19" lean-forward="true" selection-start-line="137" selection-start-column="19" selection-end-line="137" selection-end-column="19" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -75,22 +59,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="count_cycles_and_chains.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/trimble_solver/count_cycles_and_chains.py">
+      <file leaf-file-name="greedy_opt_comparison_capped.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="15" column="34" lean-forward="false" selection-start-line="15" selection-start-column="34" selection-end-line="15" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="kidney_utils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="554">
-              <caret line="127" column="25" lean-forward="true" selection-start-line="106" selection-start-column="8" selection-end-line="127" selection-end-column="25" />
-              <folding />
+            <state relative-caret-position="144">
+              <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+              <folding>
+                <element signature="e#114#135#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -140,8 +116,8 @@
       <find>get_optimal</find>
       <find>uef</find>
       <find>env</find>
-      <find>import pd</find>
       <find>impo</find>
+      <find>import pd</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -202,6 +178,7 @@
         <option value="$PROJECT_DIR$/matching/trimble_solver/interface.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" />
         <option value="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
+        <option value="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
       </list>
     </option>
   </component>
@@ -284,13 +261,7 @@
               <item name="matching" type="b2602c69:ProjectViewProjectNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="solver" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="matching" type="b2602c69:ProjectViewProjectNode" />
-              <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="matching" type="462c0819:PsiDirectoryNode" />
-              <item name="trimble_solver" type="462c0819:PsiDirectoryNode" />
+              <item name="analyses" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -339,7 +310,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.kidney_solver3">
+  <component name="RunManager" selected="Python.greedy_opt_comparison_capped">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -378,7 +349,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="greedy_opt_comparison" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="greedy_opt_comparison_capped" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -391,7 +362,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="matching" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -455,19 +426,19 @@
       <option name="MODULE_MODE" value="false" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
-      <item index="1" class="java.lang.String" itemvalue="Python.interface" />
-      <item index="2" class="java.lang.String" itemvalue="Python.kidney_solver3" />
-      <item index="3" class="java.lang.String" itemvalue="Python.kidney_bandits" />
-      <item index="4" class="java.lang.String" itemvalue="Python.abo_environment" />
+      <item index="0" class="java.lang.String" itemvalue="Python.interface" />
+      <item index="1" class="java.lang.String" itemvalue="Python.kidney_solver3" />
+      <item index="2" class="java.lang.String" itemvalue="Python.kidney_bandits" />
+      <item index="3" class="java.lang.String" itemvalue="Python.abo_environment" />
+      <item index="4" class="java.lang.String" itemvalue="Python.greedy_opt_comparison_capped" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.kidney_solver3" />
-        <item index="1" class="java.lang.String" itemvalue="Python.abo_environment" />
-        <item index="2" class="java.lang.String" itemvalue="Python.interface" />
-        <item index="3" class="java.lang.String" itemvalue="Python.kidney_bandits" />
-        <item index="4" class="java.lang.String" itemvalue="Python.greedy_opt_comparison" />
+        <item index="0" class="java.lang.String" itemvalue="Python.greedy_opt_comparison_capped" />
+        <item index="1" class="java.lang.String" itemvalue="Python.kidney_solver3" />
+        <item index="2" class="java.lang.String" itemvalue="Python.abo_environment" />
+        <item index="3" class="java.lang.String" itemvalue="Python.interface" />
+        <item index="4" class="java.lang.String" itemvalue="Python.kidney_bandits" />
       </list>
     </recent_temporary>
   </component>
@@ -535,11 +506,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287483" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3280757" sideWeight="0.47475728" order="11" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
-      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.503231" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24717286" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4701131" sideWeight="0.9106204" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22421876" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22374798" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -630,7 +601,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/matching/analyses/thompson_analysis.py" />
     <entry file="file://$PROJECT_DIR$/matching/data_creation/create_donor_cpra.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -894,17 +864,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_uncapped.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-360">
-          <caret line="3" column="28" lean-forward="true" selection-start-line="3" selection-start-column="28" selection-end-line="3" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="201">
           <caret line="12" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -948,7 +912,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/matching/trimble_solver/count_cycles_and_chains.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
+        <state relative-caret-position="-977">
           <caret line="15" column="34" lean-forward="false" selection-start-line="15" selection-start-column="34" selection-end-line="15" selection-end-column="34" />
           <folding />
         </state>
@@ -962,10 +926,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_uncapped.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="16" column="19" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+          <folding>
+            <element signature="e#114#135#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="371">
-          <caret line="188" column="0" lean-forward="true" selection-start-line="188" selection-start-column="0" selection-end-line="188" selection-end-column="0" />
+        <state relative-caret-position="-44">
+          <caret line="137" column="19" lean-forward="true" selection-start-line="137" selection-start-column="19" selection-end-line="137" selection-end-column="19" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

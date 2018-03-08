@@ -187,12 +187,11 @@ if __name__ == "__main__":
 
     import networkx as nx
 
-
     from matching.trimble_solver.interface import greedy
     from matching.environment.abo_environment import ABOKidneyExchange
 
-    for i in range(10):
-        env = ABOKidneyExchange(5, 0.1, 20, seed=i, fraction_ndd=0.1)
+    for i in range(1):
+        env = ABOKidneyExchange(5, 0.1, 10, seed=i, fraction_ndd=0.1)
 
         m = solve_with_time_constraints(env, 0, 2)
         xs = [eval(v.varName) for v in m.getVars() if v.x > 0]
