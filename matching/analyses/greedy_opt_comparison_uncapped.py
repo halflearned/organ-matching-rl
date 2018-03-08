@@ -39,9 +39,9 @@ env_params = dict(entry_rate=entry_rate,
                   fraction_ndd=frac_ndd)
 
 envname, env = choice([
-    ("OPTN", OPTNKidneyExchange(entry_rate,  death_rate, time_length)),
-    ("RSU",  SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
-    ("ABO",  ABOKidneyExchange(**env_params))])
+    ("OPTN", OPTNKidneyExchange(entry_rate, death_rate, time_length)),
+    ("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
+    ("ABO", ABOKidneyExchange(**env_params))])
 
 print("\tSolving optimal")
 opt = optimal(env, max_cycle=0, max_chain=None, formulation="uef")
@@ -60,7 +60,6 @@ res = [envname,
 print(res)
 
 if platform == "linux":
-
     with open("results/greedy_opt_comparison_results_uef.txt", "a") as f:
         f.write(",".join([str(s) for s in res]) + "\n")
 

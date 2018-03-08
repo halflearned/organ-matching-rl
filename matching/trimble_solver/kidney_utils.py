@@ -123,7 +123,8 @@ def get_optimal_chains(digraph, ndds, edge_success_prob=1):
                 for j in range(len(vtx_indices) - 1):
                     score += digraph.adj_mat[vtx_indices[j]][vtx_indices[j+1]].score * edge_success_prob**(j+2)
                 optimal_chains.append(kidney_ndds.Chain(i, vtx_indices, score))
-    
+
+
     return optimal_chains
 
 def selected_edges_to_cycles(digraph, cycle_start_vv, cycle_next_vv):

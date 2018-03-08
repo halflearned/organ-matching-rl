@@ -241,6 +241,7 @@ def optimise_uuef(cfg):
             if var.x > 0.1:
                 cycle_next_vv[e.src.id] = e.tgt.id
 
+
     return OptSolution(ip_model=m,
                        cycles=kidney_utils.selected_edges_to_cycles(
                            cfg.digraph, cycle_start_vv, cycle_next_vv),

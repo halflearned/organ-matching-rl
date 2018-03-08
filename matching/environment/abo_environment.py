@@ -143,11 +143,12 @@ if __name__ == "__main__":
 
     from matching.trimble_solver.interface import optimal
 
+    np.random.seed(1234)
     env = ABOKidneyExchange(entry_rate=5,
                             death_rate=0.1,
-                            time_length=100,
+                            time_length=1000,
                             fraction_ndd=0.2,
                             seed=12345)
 
     A, X = env.A(3), env.X(3)
-    opt = optimal(env, max_cycle=2, max_chain=3)
+    opt = optimal(env, max_cycle=2, max_chain=3, formulation="uef")

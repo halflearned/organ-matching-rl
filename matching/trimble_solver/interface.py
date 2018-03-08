@@ -101,11 +101,11 @@ def parse_trimble_solution(opt, g):
         vs = [g_ndds[head]]
         for v in rest:
             vs.append(g_pairs[v])
-        new_heads.append(vs[-1])
         matched.extend(vs)
         dates = get_chain_match_date(g, vs)
         for t, vs in dates.items():
-            timing[t].extend(vs)
+            timing[t].append(vs)
+        new_heads.append(vs[-1])
 
     return opt.ip_model.ObjVal, matched, timing, new_heads
 
@@ -166,18 +166,3 @@ def greedy(env, max_cycle, max_chain, t_begin=None, t_end=None, formulation="hpi
             "opt": opts}
 
 
-if __name__ == "__main__":
-    from matching.environment.abo_environment import ABOKidneyExchange
-
-    env = ABOKidneyExchange(entry_rate=5,
-                            death_rate=0.1,
-                            time_length=1000,
-                            fraction_ndd=0.1)
-
-    # Uncapped edge formulation
-    # g_uef = greedy(env, 0, None, formulation="uef")
-    # o_uef = optimal(env, 0, None, formulation="uef")
-
-    #
-    # g_uef = greedy(env, 2, 2, formulation="hpief_prime_full_red")
-    o_hpief = optimal(env, 4, 0, formulation="hpief_prime_full_red")
