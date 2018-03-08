@@ -21,14 +21,14 @@ if platform == "darwin":
     entry_rate = 5
     death_rate = 0.1
     max_chain = 3
-    time_length = 1000
+    time_length = 50
     fraction_ndd = 0.1
-    max_cycle = 0
+    max_cycle = 2
 else:
     entry_rate = choice([3, 5, 7])
     death_rate = choice([0.01, 0.05, 0.075, .1, .25, .5])
     max_chain = choice([2, 3, 4])
-    max_cycle = 0  # choice([0, 2, 3, 4]) # Cycles not implemented yet
+    max_cycle = choice([0, 2, 3])
     if max_chain > 0:
         fraction_ndd = choice([0.05, 0.1])
     else:
@@ -49,20 +49,20 @@ env_params = dict(entry_rate=entry_rate,
 
 
 envname, env = choice([
-    #("OPTN", OPTNKidneyExchange(entry_rate, death_rate, time_length)),
+    ("OPTN", OPTNKidneyExchange(entry_rate, death_rate, time_length)),
     ("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
-    #("ABO", ABOKidneyExchange(**env_params))
+    ("ABO", ABOKidneyExchange(**env_params))
 ])
 
 print("\tSolving optimal with time constraints")
 sol = solve_with_time_constraints(env,
-                                  max_cycle=0,
+                                  max_cycle=max_cycle,
                                   max_chain=max_chain)
 opt = {"obj": sol.ObjVal}
 
 print("\tSolving greedy")
 gre = greedy(env,
-           max_cycle=0,
+           max_cycle=max_cycle,
            max_chain=max_chain,
            formulation="hpief_prime_full_red")
 

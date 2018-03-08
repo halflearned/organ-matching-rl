@@ -108,8 +108,12 @@ class OPTNKidneyExchange(BaseKidneyExchange):
         entries = []
         for t in self.data["entry"]:
             entries.append({"entry": t})
-
         nx.set_node_attributes(self, dict(zip(self.data.index, entries)))
+
+        deaths = []
+        for t in self.data["death"]:
+            deaths.append({"death": t})
+        nx.set_node_attributes(self, dict(zip(self.data.index, deaths)))
 
 
     def draw_node_features(self, t_begin, t_end):
