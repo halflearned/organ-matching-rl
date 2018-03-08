@@ -7,8 +7,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e574e1e-19a4-4075-9c48-cd0cb79cf4f6" name="Default" comment="NDDs in OPTN (#7)">
-      <change beforePath="" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/hdf" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
       <change beforePath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" afterPath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
       <change beforePath="$PROJECT_DIR$/phd_thesis" afterPath="$PROJECT_DIR$/phd_thesis" />
     </list>
@@ -50,10 +50,12 @@
       <file leaf-file-name="kidney_solver3.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-44">
-              <caret line="137" column="19" lean-forward="true" selection-start-line="137" selection-start-column="19" selection-end-line="137" selection-end-column="19" />
+            <state relative-caret-position="375">
+              <caret line="256" column="49" lean-forward="true" selection-start-line="256" selection-start-column="49" selection-end-line="256" selection-end-column="49" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
+                <marker date="1520548138255" expanded="true" signature="3708:3823" ph="..." />
+                <marker date="1520548138255" expanded="true" signature="3860:4122" ph="..." />
+                <marker date="1520548138255" expanded="true" signature="5012:6404" ph="..." />
               </folding>
             </state>
           </provider>
@@ -62,11 +64,9 @@
       <file leaf-file-name="greedy_opt_comparison_capped.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-              <folding>
-                <element signature="e#114#135#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="282">
+              <caret line="24" column="20" lean-forward="false" selection-start-line="24" selection-start-column="20" selection-end-line="24" selection-end-column="20" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -118,6 +118,8 @@
       <find>env</find>
       <find>impo</find>
       <find>import pd</find>
+      <find>name=</find>
+      <find>short</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -177,8 +179,8 @@
         <option value="$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/interface.py" />
         <option value="$PROJECT_DIR$/matching/trimble_solver/kidney_utils.py" />
-        <option value="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
         <option value="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
+        <option value="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
       </list>
     </option>
   </component>
@@ -310,7 +312,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.greedy_opt_comparison_capped">
+  <component name="RunManager" selected="Python.kidney_solver3">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -434,8 +436,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.greedy_opt_comparison_capped" />
-        <item index="1" class="java.lang.String" itemvalue="Python.kidney_solver3" />
+        <item index="0" class="java.lang.String" itemvalue="Python.kidney_solver3" />
+        <item index="1" class="java.lang.String" itemvalue="Python.greedy_opt_comparison_capped" />
         <item index="2" class="java.lang.String" itemvalue="Python.abo_environment" />
         <item index="3" class="java.lang.String" itemvalue="Python.interface" />
         <item index="4" class="java.lang.String" itemvalue="Python.kidney_bandits" />
@@ -506,15 +508,16 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287483" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3280757" sideWeight="0.47475728" order="11" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
-      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24717286" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4305331" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4701131" sideWeight="0.9106204" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22374798" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2234375" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32956383" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32912722" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.7865405" sideWeight="0.5103448" order="12" side_tool="false" content_ui="tabs" x="164" y="229" width="945" height="474" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39821252" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -527,7 +530,6 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52129924" sideWeight="0.91161865" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32912722" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -545,12 +547,12 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3280757" sideWeight="0.47475728" order="11" side_tool="false" content_ui="tabs" x="0" y="0" width="270" height="600" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.319063" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.38045233" sideWeight="0.0893796" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38772213" sideWeight="0.9106204" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4701131" sideWeight="0.9106204" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52129924" sideWeight="0.91161865" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22455573" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2234375" sideWeight="0.4500526" order="0" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32912722" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="SciView" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.7865405" sideWeight="0.5103448" order="12" side_tool="false" content_ui="tabs" x="164" y="229" width="945" height="474" />
@@ -886,14 +888,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_results.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="30" column="19" lean-forward="false" selection-start-line="30" selection-start-column="19" selection-end-line="30" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -934,22 +928,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_results.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="494">
+          <caret line="30" column="19" lean-forward="false" selection-start-line="30" selection-start-column="19" selection-end-line="30" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-          <folding>
-            <element signature="e#114#135#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="282">
+          <caret line="24" column="20" lean-forward="false" selection-start-line="24" selection-start-column="20" selection-end-line="24" selection-end-column="20" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-44">
-          <caret line="137" column="19" lean-forward="true" selection-start-line="137" selection-start-column="19" selection-end-line="137" selection-end-column="19" />
+        <state relative-caret-position="375">
+          <caret line="256" column="49" lean-forward="true" selection-start-line="256" selection-start-column="49" selection-end-line="256" selection-end-column="49" />
           <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <marker date="1520548138255" expanded="true" signature="3708:3823" ph="..." />
+            <marker date="1520548138255" expanded="true" signature="3860:4122" ph="..." />
+            <marker date="1520548138255" expanded="true" signature="5012:6404" ph="..." />
           </folding>
         </state>
       </provider>

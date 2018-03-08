@@ -1,6 +1,5 @@
 import gurobipy as gb
 from collections import defaultdict
-from tqdm import trange
 
 
 def get_two_cycles(env, nodes=None):
@@ -55,6 +54,18 @@ def get_chain_positions(graph, max_chain_length, reduce=False):
                 variables.append((i, j, k))
 
     return variables
+
+
+def shortest_path_to_ndds(graph, i):
+    ndds = [n for n, d in graph.nodes(data=True) if d["ndd"]]
+    path_lengths = []
+    for ndd in ndds:
+        try:
+            l = nx.shortest_path_length(graph, i, ndd)
+            path_lengths.append(l)
+        except nx.exception.NetworkXNoPath:
+            pass
+    return min(path_lengths, default=0)
 
 
 def solve(graph, max_cycle=2, max_chain=2):
@@ -112,7 +123,7 @@ def solve(graph, max_cycle=2, max_chain=2):
 def sojourn(graph, i):
     i_entry = graph.node[i]["entry"]
     i_death = graph.node[i]["death"] + 1
-    return i_entry, i_death
+    return int(i_entry), int(i_death)
 
 
 def sojourn_overlap(graph, i, j):
@@ -123,7 +134,7 @@ def sojourn_overlap(graph, i, j):
 
     t_begin = max(i_entry, j_entry)
     t_end = min(i_death, j_death)
-    return t_begin, t_end
+    return int(t_begin), int(t_end)
 
 
 def solve_with_time_constraints(graph,
@@ -147,6 +158,8 @@ def solve_with_time_constraints(graph,
 
     # Add constraints
     # TODO: Refactor this once it's working
+    m.update()
+    f = open("m_old.txt", "w")
     for q in graph.nodes():
 
         print(q, " of ", graph.number_of_nodes())
@@ -158,6 +171,8 @@ def solve_with_time_constraints(graph,
         else:
             capacity = [x for (vp, wp, kp, tp), x in grb_vars.items() if wp == q]
             m.addConstr(gb.quicksum(capacity) <= 1)
+
+        print(capacity, file=f)
 
         # A vertex that is not NDD...
         if not graph.node[q]["ndd"]:
@@ -175,6 +190,76 @@ def solve_with_time_constraints(graph,
                     if len(prev) or len(cur):
                         m.addConstr(gb.quicksum(cur) <= gb.quicksum(prev))
 
+    f.close()
+    m.update()
+    m.setObjective(gb.quicksum(list(grb_vars.values())), gb.GRB.MAXIMIZE)
+    m.optimize()
+
+    return m
+
+
+def solve_with_time_constraints2(graph,
+                                 max_cycle,
+                                 max_chain):
+    m = gb.Model()
+    m.setParam("Threads", 2)
+    capacity = defaultdict(list)
+    flow_zero_cur = defaultdict(lambda: defaultdict(list))
+    flow_zero_prev = defaultdict(lambda: defaultdict(list))
+
+    flow_nonzero_cur = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    flow_nonzero_prev = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+
+    # Create all chain variables
+    grb_vars = {}
+    for edge in graph.edges():
+        v, w = edge
+        t_begin, t_end = sojourn_overlap(graph, v, w)
+        for t in range(t_begin, t_end):
+            if graph.node[v]["ndd"]:
+                edge_var = m.addVar(vtype=gb.GRB.BINARY, name=str((v, w, 0, t)))
+                grb_vars[(v, w, 0, t)] = edge_var
+                capacity[v].append(edge_var)
+                capacity[w].append(edge_var)
+            else:
+                d = shortest_path_to_ndds(graph, w)
+                for k in range(d, max_chain):
+                    edge_var = m.addVar(vtype=gb.GRB.BINARY, name=str((v, w, k, t)))
+                    grb_vars[(v, w, k, t)] = edge_var
+                    capacity[w].append(edge_var)
+
+    for (v, w, k, t), x in grb_vars.items():
+        if k == 0:
+            flow_zero_cur[v][t].append(x)
+        flow_nonzero_cur[v][t][k].append(x)
+        flow_nonzero_prev[w][t][k + 1].append(x)
+
+        t_begin, t_end = sojourn(graph, w)
+        for s in range(t, t_end + 1):
+            flow_zero_prev[w][s + 1].append(x)
+
+    m.update()
+
+    for q in graph.nodes():
+
+        m.addConstr(gb.quicksum(capacity[q]) <= 1)
+
+        # A vertex that is not NDD...
+        if not graph.node[q]["ndd"]:
+            for s in range(*sojourn(graph, q)):
+
+                # ...if at position 0, must have received in a previous time, any position
+                cur = flow_zero_cur[q][s]
+                prev = flow_zero_prev[q][s]
+                if len(prev) or len(cur):
+                    m.addConstr(gb.quicksum(cur) <= gb.quicksum(prev))
+
+                # If not at position 0, must have received from position k-1 at this time period
+                for k in range(max_chain):
+                    cur = flow_nonzero_cur[q][s][k]
+                    prev = flow_nonzero_prev[q][s][k]
+                    if len(prev) or len(cur):
+                        m.addConstr(gb.quicksum(cur) <= gb.quicksum(prev))
 
     m.update()
     m.setObjective(gb.quicksum(list(grb_vars.values())), gb.GRB.MAXIMIZE)
@@ -184,36 +269,40 @@ def solve_with_time_constraints(graph,
 
 
 if __name__ == "__main__":
-
     import networkx as nx
 
-    from matching.trimble_solver.interface import greedy
     from matching.environment.abo_environment import ABOKidneyExchange
 
-    for i in range(1):
-        env = ABOKidneyExchange(5, 0.1, 10, seed=i, fraction_ndd=0.1)
+    # for i in range(10):
+    env = ABOKidneyExchange(5, 0.1, 20, seed=0, fraction_ndd=0.2)
 
-        m = solve_with_time_constraints(env, 0, 2)
-        xs = [eval(v.varName) for v in m.getVars() if v.x > 0]
+    # m = solve_with_time_constraints2(env, 0, 3)
+    #    m_old = solve_with_time_constraints(env, 0, 3)
+    #    assert m.ObjVal == m_old.ObjVal
 
-        for k in sorted(xs, key=lambda x: x[3]):
-            print(k, end="")
-            if env.node[k[0]]["ndd"]:
-                print("*")
-            else:
-                print("")
-
-        received = {}
-        donated = {}
-        for v, w, k, t in xs:
-            received[w] = t
-            donated[v] = t
-        for v in received:
-            if v in donated:
-                assert received[v] <= donated[v]
-
-        gre = greedy(env, max_cycle=0, max_chain=2,
-                     formulation="hpief_prime_full_red")
-        assert gre["obj"] <= m.ObjVal
-
-
+    #
+    # xs = [eval(v.varName) for v in m.getVars() if v.x > 0]
+    # xs_old = [eval(v.varName) for v in m_old.getVars() if v.x > 0]
+    #
+    #
+    # for k in sorted(xs, key=lambda x: x[3]):
+    #     print(k, end="")
+    #     if env.node[k[0]]["ndd"]:
+    #         print("*")
+    #     else:
+    #         print("")
+    #
+    # received = {}
+    # donated = {}
+    # for v, w, k, t in xs:
+    #     received[w] = t
+    #     donated[v] = t
+    # for v in received:
+    #     if v in donated:
+    #         assert received[v] <= donated[v]
+    #
+    # gre = greedy(env,
+    #              max_cycle=0,
+    #              max_chain=2,
+    #              formulation="hpief_prime_full_red")
+    # assert gre["obj"] <= m.ObjVal

@@ -18,10 +18,10 @@ from matching.solver.kidney_solver3 import solve_with_time_constraints
 from matching.trimble_solver.interface import greedy
 
 if platform == "darwin":
-    entry_rate = 3
+    entry_rate = 5
     death_rate = 0.1
     max_chain = 3
-    time_length = 20
+    time_length = 1000
     fraction_ndd = 0.1
     max_cycle = 0
 else:
@@ -50,8 +50,9 @@ env_params = dict(entry_rate=entry_rate,
 
 envname, env = choice([
     #("OPTN", OPTNKidneyExchange(entry_rate, death_rate, time_length)),
-    #("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
-    ("ABO", ABOKidneyExchange(**env_params))])
+    ("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
+    #("ABO", ABOKidneyExchange(**env_params))
+])
 
 print("\tSolving optimal with time constraints")
 sol = solve_with_time_constraints(env,
@@ -70,7 +71,7 @@ res = [envname,
        env.entry_rate, env.death_rate, env.time_length, fraction_ndd,
        max_cycle, max_chain,
        opt["obj"], gre["obj"],
-       gre["obj"] / opt["obj"],
+       gre["obj"] / opt["obj"] if opt["obj"] > 0 else np.nan,
        t_diff]
 
 print(res)
