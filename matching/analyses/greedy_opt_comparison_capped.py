@@ -11,6 +11,8 @@ from random import choice
 from sys import platform
 from time import time
 
+import numpy as np
+
 from matching.environment.abo_environment import ABOKidneyExchange
 from matching.environment.optn_environment import OPTNKidneyExchange
 from matching.environment.saidman_environment import SaidmanKidneyExchange
@@ -20,19 +22,16 @@ from matching.trimble_solver.interface import greedy
 if platform == "darwin":
     entry_rate = 5
     death_rate = 0.1
-    max_chain = 3
+    max_chain = 2
     time_length = 50
     fraction_ndd = 0.1
-    max_cycle = 2
+    max_cycle = 0
 else:
     entry_rate = choice([3, 5, 7])
     death_rate = choice([0.01, 0.05, 0.075, .1, .25, .5])
     max_chain = choice([2, 3, 4])
     max_cycle = choice([0, 2, 3])
-    if max_chain > 0:
-        fraction_ndd = choice([0.05, 0.1])
-    else:
-        fraction_ndd = 0
+    fraction_ndd = choice([0.05, 0.1])
     time_length = 1000
 
 t = time()
@@ -47,10 +46,9 @@ env_params = dict(entry_rate=entry_rate,
                   time_length=time_length,
                   fraction_ndd=fraction_ndd)
 
-
 envname, env = choice([
-    ("OPTN", OPTNKidneyExchange(entry_rate, death_rate, time_length)),
-    ("RSU", SaidmanKidneyExchange(entry_rate, death_rate, time_length)),
+    ("OPTN", OPTNKidneyExchange(**env_params)),
+    ("RSU", SaidmanKidneyExchange(**env_params)),
     ("ABO", ABOKidneyExchange(**env_params))
 ])
 
@@ -62,9 +60,9 @@ opt = {"obj": sol.ObjVal}
 
 print("\tSolving greedy")
 gre = greedy(env,
-           max_cycle=max_cycle,
-           max_chain=max_chain,
-           formulation="hpief_prime_full_red")
+             max_cycle=max_cycle,
+             max_chain=max_chain,
+             formulation="hpief_prime_full_red")
 
 t_diff = time() - t
 res = [envname,

@@ -221,4 +221,4 @@ if __name__ == "__main__":
     # for i in range(10):
     env = OPTNKidneyExchange(5, 0.1, 10, seed=0, fraction_ndd=0.1)
 
-    m = solve_with_time_constraints(env, 2, 3)
+    m = solve_with_time_constraints(env, 0, 2)
