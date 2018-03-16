@@ -1,7 +1,6 @@
 import gurobipy as gb
-import networkx as nx
 from collections import defaultdict
-
+import networkx as nx
 
 
 def get_two_cycles(env, nodes=None):
@@ -61,6 +60,7 @@ def shortest_path_to_ndds(graph, i):
 def solve(graph, max_cycle=2, max_chain=2):
     m = gb.Model()
     m.setParam("Threads", 1)
+    m.setParam("OutputFlag", 0)
 
     ndd_capacity = defaultdict(list)
     incoming_capacity = defaultdict(list)
@@ -129,9 +129,11 @@ def sojourn_overlap(graph, i, j):
 
 def solve_with_time_constraints(graph,
                                 max_cycle,
-                                max_chain):
+                                max_chain,
+                                weights=None):
     m = gb.Model()
     m.setParam("Threads", 1)
+    m.setParam("OutputFlag", 0)
     obj = 0
 
     # Constraint holders
@@ -149,7 +151,12 @@ def solve_with_time_constraints(graph,
         for cyc, cyc_var in zip(cycles, cycle_vars):
             for v in cyc:
                 capacity[v].append(cyc_var)
-            obj += len(cyc) * cyc_var
+            if weights is None:
+                obj += len(cyc) * cyc_var
+            else:
+                for i in range(len(cyc)):
+                    j = (i+1) % len(cyc)
+                    obj += weights[(i, j)] * cyc_var
 
     # Chain variables
     chain_vars = {}
@@ -204,7 +211,11 @@ def solve_with_time_constraints(graph,
                         m.addConstr(gb.quicksum(cur) <= gb.quicksum(prev))
 
     m.update()
-    obj += gb.quicksum(list(chain_vars.values()))
+    if weights is None:
+        obj += gb.quicksum(list(chain_vars.values()))
+    else:
+        obj += gb.quicksum([weights[(i, j)] * v for (i, j, *_), v in chain_vars.items()])
+
     m.setObjective(obj, gb.GRB.MAXIMIZE)
     m.optimize()
 
@@ -214,8 +225,6 @@ def solve_with_time_constraints(graph,
 if __name__ == "__main__":
     import networkx as nx
 
-    from matching.environment.abo_environment import ABOKidneyExchange
-    from matching.environment.saidman_environment import SaidmanKidneyExchange
     from matching.environment.optn_environment import OPTNKidneyExchange
 
     # for i in range(10):

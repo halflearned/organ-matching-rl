@@ -10,7 +10,6 @@ from os import system
 from random import choice
 from sys import platform
 from time import time
-
 import numpy as np
 
 from matching.environment.abo_environment import ABOKidneyExchange
@@ -57,7 +56,6 @@ sol = solve_with_time_constraints(env,
                                   max_cycle=max_cycle,
                                   max_chain=max_chain)
 opt = {"obj": sol.ObjVal}
-
 print("\tSolving greedy")
 gre = greedy(env,
              max_cycle=max_cycle,
@@ -65,7 +63,7 @@ gre = greedy(env,
              formulation="hpief_prime_full_red")
 
 t_diff = time() - t
-res = [envname,
+res = [envname, env.seed,
        env.entry_rate, env.death_rate, env.time_length, fraction_ndd,
        max_cycle, max_chain,
        opt["obj"], gre["obj"],
