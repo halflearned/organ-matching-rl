@@ -1,36 +1,44 @@
 from collections import defaultdict
 from itertools import chain
 
-import numpy as np
-import pandas as pd
 import networkx as nx
+import numpy as np
 
-from matching.environment.abo_environment import ABOKidneyExchange
 from matching.solver import kidney_solver3 as ks
 from matching.utils.env_utils import snapshot
 
 
-def get_priors(graph,
+def get_priors(actions,
                mu: float = 0,
-               sigma: float = 1.0,
+               sigma: float = 1.001,
                rho: float = 0.5):
-    edges = list(graph.edges())
-    n_edges = graph.number_of_edges()
-    mu = mu * np.ones(n_edges)
-    cov = np.eye(n_edges) + np.ones((n_edges, n_edges))
+    n_actions = len(actions)
+    mu = mu * np.ones(n_actions)
+    cov = np.zeros((n_actions, n_actions))
+    for i, e1 in enumerate(actions):
+        for j, e2 in enumerate(actions):
+            intersection = np.intersect1d(e1, e2)
+            if len(intersection) == 2:
+                cov[i, j] = sigma ** 2
+            elif len(intersection) == 1:
+                cov[i, j] = rho * sigma ** 2
+            else:
+                cov[i, j] = rho / 2 * sigma ** 2
     return mu, cov
 
 
-def draw_weights(graph, mu, sigma):
+def draw_weights(actions, mu, sigma):
     values = np.random.multivariate_normal(mu, sigma)
     weights = defaultdict(lambda: 1)
-    for k, (i, j) in enumerate(graph.edges()):
-        weights[(i, j)] = values[k]
+    for k, v in enumerate(actions):
+        weights[v] = values[k]
     return weights
 
 
-def compare_solutions(env, t, nodes_to_be_removed, horizon,
-                      max_cycle, max_chain, weights):
+def compare_solutions(env, t,
+                      nodes_to_be_removed,
+                      horizon, max_cycle,
+                      max_chain, weights):
     # Unconstrained
     graph = snapshot(env, t)
     graph.populate(t + 1, t + horizon + 1)
@@ -51,46 +59,48 @@ def compare_solutions(env, t, nodes_to_be_removed, horizon,
 
 def static_solution(graph, max_cycle, max_chain):
     solution = ks.solve(graph, max_cycle=max_cycle, max_chain=max_chain)
-    selected = []
+    selected_actions = []
+    selected_nodes = []
     for v in solution.getVars():
         if v.x > 0:
-            tup = eval(v.varName)
-            # TODO: Redo this allowing for max_cycle = 4
-            if len(tup) < 4:
-                selected.append(tup[:2])
-            else:
-                selected.append(tup)
+            var_name = v.varName
+            cycle_or_t, vs = var_name.split("_")
+            vs = eval(vs)
+            if cycle_or_t == "t":
+                var_name = "t_" + str(vs[:2])
+            selected_actions.append(var_name)
+            selected_nodes.append(vs)
 
-    return selected, solution.ObjVal
+    return selected_actions, selected_nodes, solution.ObjVal
 
 
 def get_reward(env, t, horizon, max_cycle, max_chain, weights):
     current_graph = env.subgraph(env.get_living(t))
-    selected, cur_obj = static_solution(current_graph, max_cycle, max_chain)
-    static_solution_nodes = list(chain(*selected))
-    unconstr_reward, constr_reward = compare_solutions(env, t, horizon=horizon,
+    selected_actions, selected_nodes, cur_obj = static_solution(current_graph, max_cycle, max_chain)
+    static_solution_nodes = list(chain(*selected_nodes))
+    unconstr_reward, constr_reward = compare_solutions(env, t,
+                                                       horizon=horizon,
                                                        nodes_to_be_removed=static_solution_nodes,
                                                        max_cycle=max_cycle,
                                                        max_chain=max_chain,
                                                        weights=weights)
 
-    return selected, (constr_reward + cur_obj) / unconstr_reward
+    return selected_actions, (constr_reward + cur_obj) / unconstr_reward
 
 
-def thompson_step(current_graph, selected, r, mu, sigma):
-    edges = current_graph.edges
-    edge_idx = {edge: k for k, edge in enumerate(edges)}
+def thompson_step(actions, selected, r, mu, sigma):
+    action_idx = {action: k for k, action in enumerate(actions)}
 
     sigma_inv = np.linalg.inv(sigma)
 
-    C = np.zeros_like(sigma)
+    C = np.full_like(sigma, fill_value=0.2)
     z = np.zeros_like(mu)
-    for edge1 in selected:
-        i = edge_idx[edge1]
-        z[i] = r * (r > 0.5)
-        for edge2 in selected:
-            j = edge_idx[edge2]
-            C[i, j] = sigma_inv[i, j]
+    for a1 in selected:
+        i = action_idx[a1]
+        z[i] = r  # * (r > 0.5)
+        for a2 in selected:
+            j = action_idx[a2]
+            C[i, j] = 0.5  # sigma_inv[i, j]
 
     post_sigma_inv = sigma_inv + C
     post_sigma = np.linalg.inv(post_sigma_inv)
@@ -100,15 +110,55 @@ def thompson_step(current_graph, selected, r, mu, sigma):
 
 
 if __name__ == "__main__":
-    max_cycle = 0
-    max_chain = 2
-    env = ABOKidneyExchange(5, 0.1, 10, seed=1234, fraction_ndd=0.1)
-    t = 8
-    horizon = 20
-    current_graph = env.subgraph(env.get_living(t))
-    mu, sigma = get_priors(current_graph, sigma=1)
+    from matching.solver.kidney_solver2 import greedy, optimal
+    from matching.environment.optn_environment import OPTNKidneyExchange
 
-    for _ in range(10):
-        ws = draw_weights(current_graph, mu, sigma)
-        selected, r = get_reward(env, t, horizon, max_cycle, max_chain, ws)
-        mu, sigma = thompson_step(current_graph, selected, r, mu, sigma)
+    max_cycle = 2
+    max_chain = 2
+    horizon = 10
+    num_thompson_update = 5
+
+    env = OPTNKidneyExchange(5, 0.1, 100, seed=12345, fraction_ndd=0.05)
+    gre = greedy(env)
+    opt = optimal(env)
+
+    this_obj = 0
+    matching = dict()
+    for t in range(env.time_length):
+        print("\n\n\n\n", t, "\n\n\n\n")
+        current_graph = nx.subgraph(env, env.get_living(t))
+        actions = ks.get_actions(graph=current_graph,
+                                 max_cycle=max_cycle,
+                                 max_chain=max_chain)
+        if len(actions) == 0:
+            continue
+
+        mu, sigma = get_priors(actions)
+        sigma += 1e-6 * np.eye(sigma.shape[0])
+
+        for _ in range(num_thompson_update):
+            ws = draw_weights(actions, mu, sigma)
+            selected, r = get_reward(env, t,
+                                     horizon=horizon,
+                                     max_cycle=max_cycle,
+                                     max_chain=max_chain,
+                                     weights=ws)
+            mu, sigma = thompson_step(actions, selected, r, mu, sigma)
+
+        best_subset = []
+        for action_name in np.unique(np.array(actions)[mu > 0]):
+            ct, vs = action_name.split("_")
+            if ct == "c":
+                vs = eval(vs)
+            else:
+                vs = eval(vs)[:2]
+            best_subset.extend(vs)
+
+        restricted_graph = env.subgraph(best_subset)
+        chosen_actions, chosen_nodes, cur_obj = static_solution(restricted_graph, max_cycle, max_chain)
+        for s in chosen_nodes:
+            env.removed_container[t].update(s)
+
+        this_obj += cur_obj
+
+    print(this_obj, gre["obj"], opt["obj"])
