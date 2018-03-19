@@ -67,7 +67,8 @@ def static_solution(graph, max_cycle, max_chain):
             cycle_or_t, vs = var_name.split("_")
             vs = eval(vs)
             if cycle_or_t == "t":
-                var_name = "t_" + str(vs[:2])
+                vs = vs[:2]
+                var_name = "t_" + str(vs)
             selected_actions.append(var_name)
             selected_nodes.append(vs)
 
@@ -93,7 +94,7 @@ def thompson_step(actions, selected, r, mu, sigma):
 
     sigma_inv = np.linalg.inv(sigma)
 
-    C = np.full_like(sigma, fill_value=0.2)
+    C = np.full_like(sigma, fill_value=0.25)
     z = np.zeros_like(mu)
     for a1 in selected:
         i = action_idx[a1]
@@ -110,30 +111,42 @@ def thompson_step(actions, selected, r, mu, sigma):
 
 
 if __name__ == "__main__":
-    from matching.solver.kidney_solver2 import greedy, optimal
+
     from matching.environment.optn_environment import OPTNKidneyExchange
+    from matching.trimble_solver.interface import greedy
 
     max_cycle = 2
     max_chain = 2
-    horizon = 10
+    horizon = 20
     num_thompson_update = 5
+    np.random.seed(12345)
 
-    env = OPTNKidneyExchange(5, 0.1, 100, seed=12345, fraction_ndd=0.05)
-    gre = greedy(env)
-    opt = optimal(env)
+    env = OPTNKidneyExchange(5, 0.1, 100,
+                             seed=12345,
+                             fraction_ndd=0.05)
+    gre = greedy(env=env,
+                 max_cycle=max_cycle,
+                 max_chain=max_chain)
+
+    opt = ks.solve_with_time_constraints(env,
+                                         max_cycle=max_cycle,
+                                         max_chain=max_chain)
 
     this_obj = 0
     matching = dict()
+    pool_size = dict()
     for t in range(env.time_length):
         print("\n\n\n\n", t, "\n\n\n\n")
-        current_graph = nx.subgraph(env, env.get_living(t))
+        living = env.get_living(t)
+        pool_size[t] = len(living)
+        current_graph = nx.subgraph(env, living)
         actions = ks.get_actions(graph=current_graph,
                                  max_cycle=max_cycle,
                                  max_chain=max_chain)
         if len(actions) == 0:
             continue
 
-        mu, sigma = get_priors(actions)
+        mu, sigma = get_priors(actions, mu=0.5)
         sigma += 1e-6 * np.eye(sigma.shape[0])
 
         for _ in range(num_thompson_update):
@@ -145,8 +158,9 @@ if __name__ == "__main__":
                                      weights=ws)
             mu, sigma = thompson_step(actions, selected, r, mu, sigma)
 
+        print("MU:", mu)
         best_subset = []
-        for action_name in np.unique(np.array(actions)[mu > 0]):
+        for action_name in np.unique(np.array(actions)[mu > 0.2]):
             ct, vs = action_name.split("_")
             if ct == "c":
                 vs = eval(vs)
@@ -155,10 +169,12 @@ if __name__ == "__main__":
             best_subset.extend(vs)
 
         restricted_graph = env.subgraph(best_subset)
-        chosen_actions, chosen_nodes, cur_obj = static_solution(restricted_graph, max_cycle, max_chain)
+        chosen_actions, chosen_nodes, cur_obj = static_solution(restricted_graph,
+                                                                max_cycle,
+                                                                max_chain)
         for s in chosen_nodes:
             env.removed_container[t].update(s)
 
         this_obj += cur_obj
 
-    print(this_obj, gre["obj"], opt["obj"])
+    print(this_obj, gre["obj"], opt.ObjVal)

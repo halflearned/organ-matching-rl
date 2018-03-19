@@ -7,13 +7,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1e574e1e-19a4-4075-9c48-cd0cb79cf4f6" name="Default" comment="NDDs in OPTN (#7)">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/vitorhadad.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/vitorhadad.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/matching/analyses/greedy_capped_results.py" afterPath="$PROJECT_DIR$/matching/analyses/greedy_capped_results.py" />
-      <change beforePath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" afterPath="$PROJECT_DIR$/matching/analyses/greedy_opt_comparison_capped.py" />
-      <change beforePath="$PROJECT_DIR$/matching/analyses/qsub_missing.py" afterPath="$PROJECT_DIR$/matching/analyses/qsub_missing.py" />
-      <change beforePath="$PROJECT_DIR$/matching/bandits/.run_bandits.py.swp" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/matching/bandits/contextual_bandits.py" afterPath="" />
       <change beforePath="$PROJECT_DIR$/matching/bandits/full_thompson.py" afterPath="$PROJECT_DIR$/matching/bandits/full_thompson.py" />
       <change beforePath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" afterPath="$PROJECT_DIR$/matching/solver/kidney_solver3.py" />
       <change beforePath="$PROJECT_DIR$/phd_thesis" afterPath="$PROJECT_DIR$/phd_thesis" />
@@ -56,12 +49,24 @@
       <file leaf-file-name="kidney_solver3.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="8" column="21" lean-forward="false" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="21" />
+            <state relative-caret-position="217">
+              <caret line="89" column="0" lean-forward="false" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
-                <marker date="1521412065365" expanded="true" signature="4716:4831" ph="..." />
-                <marker date="1521412065365" expanded="true" signature="4868:5130" ph="..." />
+                <marker date="1521420339187" expanded="true" signature="4745:4860" ph="..." />
+                <marker date="1521420339187" expanded="true" signature="4897:5159" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="771">
+              <caret line="167" column="0" lean-forward="false" selection-start-line="129" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#35#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -70,8 +75,8 @@
       <file leaf-file-name="full_thompson.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/matching/bandits/full_thompson.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="87" column="56" lean-forward="true" selection-start-line="87" selection-start-column="56" selection-end-line="87" selection-end-column="56" />
+            <state relative-caret-position="229">
+              <caret line="119" column="16" lean-forward="false" selection-start-line="119" selection-start-column="16" selection-end-line="119" selection-end-column="16" />
               <folding>
                 <element signature="e#0#35#0" expanded="true" />
               </folding>
@@ -105,7 +110,6 @@
       <find>.data</find>
       <find>relabel</find>
       <find>blood</find>
-      <find>deep</find>
       <find>cycles_and</find>
       <find>Digraph</find>
       <find>chain</find>
@@ -120,6 +124,7 @@
       <find>Model</find>
       <find>import pdb</find>
       <find>nx.</find>
+      <find>deep</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -192,7 +197,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" fullScreen="true">
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="x" value="1280" />
     <option name="y" value="-224" />
     <option name="width" value="1280" />
@@ -282,6 +287,12 @@
               <item name="matching" type="462c0819:PsiDirectoryNode" />
               <item name="matching" type="462c0819:PsiDirectoryNode" />
               <item name="solver" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="matching" type="b2602c69:ProjectViewProjectNode" />
+              <item name="matching" type="462c0819:PsiDirectoryNode" />
+              <item name="matching" type="462c0819:PsiDirectoryNode" />
+              <item name="trimble_solver" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -550,7 +561,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1280" y="-224" width="1280" height="1024" extended-state="0" />
+    <frame x="1280" y="-224" width="1280" height="1024" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969216" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -801,13 +812,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="24" lean-forward="false" selection-start-line="0" selection-start-column="24" selection-end-line="0" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/matching/trimble_solver/kidney_ip.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
@@ -989,22 +993,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/matching/trimble_solver/interface.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="771">
+          <caret line="167" column="0" lean-forward="false" selection-start-line="129" selection-start-column="0" selection-end-line="167" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/matching/solver/kidney_solver3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="8" column="21" lean-forward="false" selection-start-line="8" selection-start-column="20" selection-end-line="8" selection-end-column="21" />
+        <state relative-caret-position="217">
+          <caret line="89" column="0" lean-forward="false" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <marker date="1521412065365" expanded="true" signature="4716:4831" ph="..." />
-            <marker date="1521412065365" expanded="true" signature="4868:5130" ph="..." />
+            <marker date="1521420339187" expanded="true" signature="4745:4860" ph="..." />
+            <marker date="1521420339187" expanded="true" signature="4897:5159" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/matching/bandits/full_thompson.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="87" column="56" lean-forward="true" selection-start-line="87" selection-start-column="56" selection-end-line="87" selection-end-column="56" />
+        <state relative-caret-position="229">
+          <caret line="119" column="16" lean-forward="false" selection-start-line="119" selection-start-column="16" selection-end-line="119" selection-end-column="16" />
           <folding>
             <element signature="e#0#35#0" expanded="true" />
           </folding>

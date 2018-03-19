@@ -1,9 +1,9 @@
 import gurobipy as gb
 from collections import defaultdict
 from random import shuffle
-
-from networkx.exception import NetworkXNoPath
+from copy import deepcopy
 from networkx import shortest_path_length
+from networkx.exception import NetworkXNoPath
 
 
 def get_two_cycles(env, nodes=None):
@@ -86,6 +86,10 @@ def get_actions(graph, max_cycle, max_chain, as_string=True):
         chain_positions = ["t_" + str(c) for c in chain_positions]
 
     return cycles + chain_positions
+
+
+
+
 
 
 def solve(graph, max_cycle, max_chain):
@@ -269,4 +273,3 @@ def solve_with_time_constraints(graph,
     m.optimize()
 
     return m
-
